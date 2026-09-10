@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-10T15:43:10.451632+00:00",
+  "generated": "2026-09-10T15:47:18.267195+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -516,9 +516,9 @@
       "id": "R8",
       "title": "统计、复现与论文落地",
       "state": "部分解决",
-      "evidence": "论文已到 v24：新增基准总览和基线分类，修正引用范围，正文保持 9 页。实验数字沿用 v23 冻结证据；最新 E19L 和 frozen 第五种子仍待单独审计纳入。面板区间仅重采样种子。",
-      "next": "写作 agent 负责版本化论文冻结；实验 / 面板侧提供新读数与混合主机敏感性结果。严格引用审计仍有未完成项。",
-      "source": "REMOTE_AGENTS v24 / revision_20260910 / multiscale readout"
+      "evidence": "论文已到 v25，纳入完整 E19 新结果、种子 × 生成簇联合区间及排除补跑种子的敏感性；正文保持 9 页。2800 个训练/验证 CNF 与 300 个评测 CNF 无哈希重叠，旧 PDF 与审计快照保留。首页数值表仍明确展示种子单独区间。",
+      "next": "原生方法的正式比较仍待完成；严格引用审计、独立诚信审计及更广泛泛化证据仍有缺口。",
+      "source": "REMOTE_AGENTS v25 / e19_followup_20260910_v1"
     },
     {
       "id": "R9",
@@ -530,11 +530,11 @@
     }
   ],
   "native": {
-    "observed": "2026-09-10T15:42:28Z",
+    "observed": "2026-09-10T15:46:28Z",
     "stage": "rlaf_verified_v2_running",
     "phase": "training",
     "progress": {
-      "completed_iterations": 54,
+      "completed_iterations": 55,
       "target_iterations": 100,
       "stage_wallclock_cap_hours": 12.0
     },

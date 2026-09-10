@@ -6,6 +6,6 @@
   {"id":"R5","title":"机制与求解器接口混杂","state":"部分解决","evidence":"E20 六臂 1800 个求解任务完成，表明原生 rephase / walk 行为与覆盖接口存在相互作用。不能声称 override 等同于关闭引擎。","next":"以六臂消融限定机制解释；避免简单归因百分比。","source":"E20"},
   {"id":"R6","title":"更难密码实例与跨求解器复现","state":"部分解决","evidence":"SIMON r9/p1 CaDiCaL 五种子 CAP 平均 8.4/300、stock 1/300；Kissat 的增益未显著。r10/p1、r8/p2 未获得增益。","next":"明确正向证据适用范围和失败边界。","source":"SIMON reach extension"},
   {"id":"R7","title":"置信度门控与定时释放修复","state":"负结果关闭","evidence":"E11 门控不及全向量；设计文档记录 E21 释放试验负结果，但 v23 审计未恢复其持久化行级输出，因此论文未使用 E21 数值。","next":"E21 仅作为历史探索记录；新的策略须独立设计、留存可审计结果。","source":"E11 / E21 / v23 audit notes"},
-  {"id":"R8","title":"统计、复现与论文落地","state":"部分解决","evidence":"论文已到 v24：新增基准总览和基线分类，修正引用范围，正文保持 9 页。实验数字沿用 v23 冻结证据；最新 E19L 和 frozen 第五种子仍待单独审计纳入。面板区间仅重采样种子。","next":"写作 agent 负责版本化论文冻结；实验 / 面板侧提供新读数与混合主机敏感性结果。严格引用审计仍有未完成项。","source":"REMOTE_AGENTS v24 / revision_20260910 / multiscale readout"},
+  {"id":"R8","title":"统计、复现与论文落地","state":"部分解决","evidence":"论文已到 v25，纳入完整 E19 新结果、种子 × 生成簇联合区间及排除补跑种子的敏感性；正文保持 9 页。2800 个训练/验证 CNF 与 300 个评测 CNF 无哈希重叠，旧 PDF 与审计快照保留。首页数值表仍明确展示种子单独区间。","next":"原生方法的正式比较仍待完成；严格引用审计、独立诚信审计及更广泛泛化证据仍有缺口。","source":"REMOTE_AGENTS v25 / e19_followup_20260910_v1"},
   {"id":"R9","title":"NeuroBack / RLAF 原生系统对比","state":"未解决","evidence":"写作 agent 已启动缩减预算原生训练：500 train / 100 validation，72 个求解器正确性单元通过；RLAF 训练中，NeuroBack 接续并提前准备 CPU 标签。训练进度不代表正式对比完成。","next":"由原任务 owner 监督训练、检查完整凭据并冻结全成本测试协议；面板只读取监督快照，避免重复启动。","source":"native_baselines_20260910 / SUPERVISION.json / PROTOCOL.md"}
 ]
