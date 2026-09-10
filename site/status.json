@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-10T16:28:37.147160+00:00",
+  "generated": "2026-09-10T16:43:46.221633+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -530,11 +530,11 @@
     }
   ],
   "native": {
-    "observed": "2026-09-10T16:28:29Z",
+    "observed": "2026-09-10T16:43:30Z",
     "stage": "rlaf_verified_v2_running",
     "phase": "training",
     "progress": {
-      "completed_iterations": 71,
+      "completed_iterations": 78,
       "target_iterations": 100,
       "stage_wallclock_cap_hours": 12.0
     },
