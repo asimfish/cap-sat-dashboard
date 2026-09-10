@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-10T15:30:11.419634+00:00",
+  "generated": "2026-09-10T15:36:06.567807+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -530,10 +530,11 @@
     }
   ],
   "native": {
-    "observed": "2026-09-10T15:29:42Z",
+    "observed": "2026-09-10T15:35:27Z",
     "stage": "rlaf_verified_v2_running",
+    "phase": "training",
     "progress": {
-      "completed_iterations": 50,
+      "completed_iterations": 52,
       "target_iterations": 100,
       "stage_wallclock_cap_hours": 12.0
     },
@@ -543,6 +544,10 @@
     "preparation": {
       "label_records": 300,
       "target_records": 300
+    },
+    "acceptance": {
+      "rlaf_verified_v2": "pending",
+      "neuroback_verified_v2": "pending"
     },
     "scope": "缩减预算原生训练；正式测试对比尚未完成"
   }

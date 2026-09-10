@@ -32,7 +32,10 @@ function render(){
  else{const age=(Date.now()-Date.parse(n.observed))/60000, stale=!Number.isFinite(age)||age>5||age< -1;
  const labels={completed_iterations:'已完成轮数',target_iterations:'目标轮数',completed_epochs:'已完成 epoch',target_epochs:'目标 epoch',label_records:'已准备标签',stage_wallclock_cap_hours:'总墙钟上限 / 小时'};
  const progress=Object.entries(n.progress).map(([k,v])=>`${esc(labels[k]||k)}: ${esc(v)}`).join(' · ') + (n.preparation&&n.preparation.target_records?`<br>NeuroBack CPU 标签：${n.preparation.label_records||0}/${n.preparation.target_records}`:'');
- panel.innerHTML=`<b>${esc(n.stage)}</b><p>${progress||'等待进度记录'}</p><p>${stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活'}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
+ const phases={training:'训练中',waiting_for_gpu:'等待 GPU',label_preparing:'准备标签',terminal:'阶段终止，需看验收结果',queued:'排队'};
+ const accepted={pending:'待验收',not_accepted_nonzero_exit:'未通过：非零退出',failed_acceptance:'验收未通过',training_artifacts_verified:'训练产物已核验'};
+ const acceptance=Object.entries(n.acceptance||{}).map(([k,v])=>`${k.startsWith('rlaf')?'RLAF':'NeuroBack'}：${esc(accepted[v]||v)}`).join(' · ');
+ panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活'}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
 }
 for(const id of ['filter','group','comparator'])document.getElementById(id).addEventListener('change',render);
 async function refresh(){try{const response=await fetch('status.json?t='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error();const incoming=await response.json();if(incoming.runs&&incoming.results&&incoming.source_sha256){data=incoming;render();}}catch{render();document.getElementById('freshness').textContent+=' · 离线 / 更新失败，显示已有快照';}}

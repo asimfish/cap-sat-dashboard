@@ -61,11 +61,13 @@ def native_progress(repo):
         preparation = raw.get('preparation') or {}
         keys = ['completed_iterations','target_iterations','completed_epochs','target_epochs','label_records','stage_wallclock_cap_hours']
         return {'observed':raw.get('time_utc'), 'stage':raw.get('stage'),
+                'phase':raw.get('phase') if raw.get('phase') in ['training','waiting_for_gpu','label_preparing','terminal','queued'] else None,
                 'progress':{k:progress[k] for k in keys if type(progress.get(k)) in (int,float) and math.isfinite(progress[k])},
                 'controller_alive':raw.get('controller_alive') is True,
                 'stage_alive':raw.get('stage_alive') is True,
                 'alerts':[x for x in raw.get('alerts',[]) if isinstance(x,str) and all(c.isupper() or c.isdigit() or c=='_' for c in x)],
                 'preparation':{k:preparation[k] for k in ['label_records','target_records'] if type(preparation.get(k)) is int},
+                'acceptance':{k:v.get('status') for k,v in (raw.get('acceptance') or {}).items() if k in ['rlaf_verified_v2','neuroback_verified_v2'] and isinstance(v,dict) and v.get('status') in ['pending','not_accepted_nonzero_exit','failed_acceptance','training_artifacts_verified']},
                 'scope':'缩减预算原生训练；正式测试对比尚未完成'}
     except (OSError,ValueError,TypeError,AttributeError):
         return None
