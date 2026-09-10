@@ -102,6 +102,27 @@ def native_progress(repo):
     except (OSError,ValueError,TypeError,AttributeError):
         return None
 
+def comparison_progress(repo):
+    root=repo/'experiments/native_comparison_20260911_v1'
+    try:
+        raw=json.loads((root/'SUPERVISION.json').read_text())
+        keys=['completed_paired_rows','target_paired_rows','completed_arm_cells','target_arm_cells']
+        result={k:raw[k] for k in keys if type(raw.get(k)) is int and raw[k]>=0}
+        result['observed']=dt.datetime.fromtimestamp(raw['time_unix'],dt.timezone.utc).isoformat()
+        phase=raw.get('state',{}).get('phase')
+        result['phase']=phase if phase in ['solving','aggregate','terminal','predict_capsat','predict_rlaf','predict_neuroback','waiting_for_gpu_resources'] else 'unknown'
+        result['alerts']=[x for x in raw.get('alerts',[]) if isinstance(x,str) and all(c.isupper() or c.isdigit() or c=='_' for c in x)]
+        result['summary_status']=None
+        if (root/'SUMMARY.json').exists():
+            summary=json.loads((root/'SUMMARY.json').read_text())
+            if summary.get('status') in ['complete_pending_owner_review','all_cells_recorded_with_evidence_gaps']:
+                result['summary_status']=summary['status']
+                result['failed_cells']=len(summary['failures'])
+                result['unverified_unsat_cells']=summary['unverified_unsat_cells']
+        return result
+    except (OSError,ValueError,KeyError,TypeError):
+        return None
+
 def collect(repo):
     runs, truth, identities = [], {}, {}
     digest = hashlib.sha256()
@@ -144,6 +165,7 @@ def main():
     parser.add_argument('--out', type=Path, default=HERE / 'site')
     args = parser.parse_args()
     data = collect(args.repo.resolve())
+    data['comparison']=comparison_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()
