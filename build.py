@@ -8,6 +8,7 @@ import json
 import math
 from pathlib import Path
 import random
+import re
 import statistics
 
 HERE = Path(__file__).resolve().parent
@@ -52,15 +53,44 @@ def interval(values):
     means = sorted(statistics.mean(rng.choices(values, k=len(values))) for _ in range(10000))
     return [round(statistics.mean(values), 2), round(means[250], 2), round(means[9749], 2)]
 
+def verify_terminal(root, raw):
+    """Recheck accepted immutable artifacts; a stopped monitor is not a stale run."""
+    if raw.get('terminal') is not True:
+        return 'not_terminal', {}
+    try:
+        for name in ['rlaf_verified_v2','neuroback_verified_v2']:
+            accepted = raw['acceptance'][name]
+            receipt = json.loads((root/(name+'_RECEIPT.json')).read_text())
+            if accepted['status'] != 'training_artifacts_verified' or receipt['returncode'] != 0 or accepted.get('errors'):
+                return 'not_verified', {}
+            hashes = accepted['hashes']
+            required = {'rlaf_verified_v2.log','rlaf_verified_v2/best.pt'} if name.startswith('rlaf') else {'neuroback_small/training.jsonl','neuroback_small/COMPLETE.json','neuroback_small/best.ptg'}
+            if not required.issubset(hashes):
+                return 'not_verified', {}
+            for relative, expected in hashes.items():
+                path = (root/relative).resolve()
+                if not path.is_relative_to(root.resolve()) or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+                    return 'not_verified', {}
+        iterations = len(re.findall(r'Optimized model for 50 steps', (root/'rlaf_verified_v2.log').read_text()))
+        epochs = [json.loads(line)['epoch'] for line in (root/'neuroback_small/training.jsonl').read_text().splitlines()]
+        if iterations != 100 or epochs != list(range(40)):
+            return 'not_verified', {}
+        return 'verified', {'completed_iterations':iterations,'target_iterations':100,'completed_epochs':len(epochs),'target_epochs':40}
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        return 'not_verified', {}
+
 def native_progress(repo):
     """Only public progress fields; omit process IDs, paths, commands and host data."""
     path = repo / 'experiments/native_baselines_20260910/SUPERVISION.json'
     try:
         raw = json.loads(path.read_text())
         progress = raw.get('progress', {})
+        terminal_integrity, completed = verify_terminal(path.parent, raw)
+        progress = dict(progress, **completed)
         preparation = raw.get('preparation') or {}
         keys = ['completed_iterations','target_iterations','completed_epochs','target_epochs','label_records','stage_wallclock_cap_hours']
         return {'observed':raw.get('time_utc'), 'stage':raw.get('stage'),
+                'terminal_integrity':terminal_integrity,
                 'phase':raw.get('phase') if raw.get('phase') in ['training','waiting_for_gpu','label_preparing','terminal','queued'] else None,
                 'progress':{k:progress[k] for k in keys if type(progress.get(k)) in (int,float) and math.isfinite(progress[k])},
                 'controller_alive':raw.get('controller_alive') is True,

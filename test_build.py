@@ -1,10 +1,11 @@
 import copy
+import hashlib
 import json
 from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress
+from build import read_run, interval, native_progress, verify_terminal
 
 class CollectorTests(unittest.TestCase):
     def read(self, records):
@@ -57,6 +58,24 @@ class CollectorTests(unittest.TestCase):
         self.assertEqual(result['progress']['completed_iterations'],49)
         self.assertEqual(result['preparation']['label_records'],200)
         self.assertEqual(result['alerts'],['VALID_ALERT'])
+
+    def test_terminal_hash_verification_and_corruption(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            files={'rlaf_verified_v2.log':'Optimized model for 50 steps\n'*100,
+                   'rlaf_verified_v2/best.pt':'fixture',
+                   'neuroback_small/training.jsonl':'\n'.join(json.dumps({'epoch':i}) for i in range(40)),
+                   'neuroback_small/COMPLETE.json':'{}','neuroback_small/best.ptg':'fixture'}
+            for name,content in files.items():
+                p=root/name;p.parent.mkdir(exist_ok=True,parents=True);p.write_text(content)
+            raw={'terminal':True,'acceptance':{}}
+            for name,prefix in [('rlaf_verified_v2','rlaf'),('neuroback_verified_v2','neuroback')]:
+                (root/(name+'_RECEIPT.json')).write_text('{"returncode":0}')
+                raw['acceptance'][name]={'status':'training_artifacts_verified','hashes':{k:hashlib.sha256(v.encode()).hexdigest() for k,v in files.items() if k.startswith(prefix)}}
+            status,counts=verify_terminal(root,raw)
+            self.assertEqual(status,'verified');self.assertEqual(counts['completed_epochs'],40)
+            (root/'rlaf_verified_v2/best.pt').write_text('changed')
+            self.assertEqual(verify_terminal(root,raw)[0],'not_verified')
 
 if __name__=='__main__':
     unittest.main()

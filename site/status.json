@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-10T18:44:41.948530+00:00",
+  "generated": "2026-09-10T19:45:06.593344+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -524,16 +524,22 @@
       "id": "R9",
       "title": "NeuroBack / RLAF 原生系统对比",
       "state": "未解决",
-      "evidence": "写作 agent 已启动缩减预算原生训练：500 train / 100 validation，72 个求解器正确性单元通过；RLAF 训练中，NeuroBack 接续并提前准备 CPU 标签。训练进度不代表正式对比完成。",
-      "next": "由原任务 owner 监督训练、检查完整凭据并冻结全成本测试协议；面板只读取监督快照，避免重复启动。",
+      "evidence": "缩减预算原生训练已完成并验收：RLAF 100/100 轮，NeuroBack 40/40 轮。写作 agent 正在准备正式全成本比较；完成训练不等于完成原生方法对比。",
+      "next": "由原任务 owner 冻结测试清单、验证训练测试隔离并运行全成本比较；面板侧只读跟进，避免重复启动。",
       "source": "native_baselines_20260910 / SUPERVISION.json / PROTOCOL.md"
     }
   ],
   "native": {
     "observed": "2026-09-10T17:37:33Z",
     "stage": "training_stages_terminal",
+    "terminal_integrity": "verified",
     "phase": "terminal",
-    "progress": {},
+    "progress": {
+      "completed_iterations": 100,
+      "target_iterations": 100,
+      "completed_epochs": 40,
+      "target_epochs": 40
+    },
     "controller_alive": false,
     "stage_alive": false,
     "alerts": [],

@@ -42,6 +42,9 @@ Native RLAF/NeuroBack progress reads an allowlist of fields from
 absolute paths and machine resource inventories are not exported. A heartbeat
 older than five minutes is shown as unknown runtime status. Training completion
 and formal comparative evaluation remain separate milestones.
+For terminal training, the exporter rechecks receipt exits, accepted artifact
+hashes and completed iteration/epoch coverage. Verified terminal records remain
+completed after the monitor exits; altered/missing artifacts fail verification.
 
 Only aggregate data and manually reviewed issue descriptions are published.
 No raw CNF, model, credential, hostname, or absolute experiment path is exported.
