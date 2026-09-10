@@ -31,7 +31,7 @@ def main():
         old = json.loads(previous.read_text())
         age = (dt.datetime.now(dt.timezone.utc)-dt.datetime.fromisoformat(old['generated'])).total_seconds()
         unchanged = old['source_sha256'] == current['source_sha256'] and old['issues'] == current['issues']
-        same_code = all((dest/n).exists() and (dest/n).read_bytes() == (source/n).read_bytes() for n in ['build.py','template.html','issues.json','README.md','publish.py','watch.py','test_build.py'])
+        same_code = all((dest/n).exists() and (dest/n).read_bytes() == (source/n).read_bytes() for n in ['build.py','template.html','issues.json','README.md','publish.py','watch.py','test_build.py','EVIDENCE.md','site/evidence.html','LICENSE','.github/workflows/pages.yml'])
         if unchanged and same_code and age < 3600:
             print('No change; next freshness export within one hour')
             return
