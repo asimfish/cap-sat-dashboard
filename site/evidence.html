@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAP-SAT rebuttal 证据快照</title>
+
+<meta name="generator" content="ARIS render-html (dashboard, v1)">
+<meta name="aris:source-path" content="dashboard/EVIDENCE.md">
+<meta name="aris:source-sha256" content="79cfb3d4df75d626f4b61d71b00d284caab959fea3f1aea443cdff7dcd7f679d">
+<meta name="aris:generated-at" content="2026-09-10 10:52 UTC">
+
+<!-- offline mode: MathJax + highlight.js skipped; math and code blocks render as plain text -->
+
+<style>
+:root {
+  --bg: #fdfcf7;
+  --bg-soft: #f4f1ea;
+  --bg-card: #ffffff;
+  --bg-code: #f8f5ec;
+  --ink: #1a1a1a;
+  --ink-soft: #4a4a4a;
+  --ink-muted: #6b6b6b;
+  --primary: #1a4a8c;
+  --primary-soft: #2d6cb8;
+  --accent: #b8390e;
+  --warn: #b45309;
+  --warn-bg: #fef3c7;
+  --info-bg: #dbeafe;
+  --good-bg: #d1fae5;
+  --good: #065f46;
+  --bad-bg: #fee2e2;
+  --bad: #991b1b;
+  --border: #d6d0c0;
+  --border-soft: #e8e3d5;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Source Serif Pro", "Source Serif 4", "Crimson Pro", "Georgia", "Songti SC", "STSong", serif;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--bg);
+  margin: 0;
+  padding: 0;
+  font-size: 15px;
+}
+
+.shell {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 32px 48px;
+}
+
+header.hero {
+  border-bottom: 3px double var(--primary);
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+}
+header.hero .eyebrow {
+  color: var(--accent);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+header.hero h1 {
+  font-size: 28px;
+  line-height: 1.2;
+  margin: 0 0 10px;
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+header.hero .subtitle {
+  font-size: 15px;
+  color: var(--ink-soft);
+  margin: 0 0 6px;
+  font-style: italic;
+}
+header.hero .byline {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 16px;
+}
+header.hero .byline strong { color: var(--ink); font-weight: 600; }
+header.hero .meta {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--ink-muted);
+  border-top: 1px solid var(--border-soft);
+  padding-top: 12px;
+}
+header.hero .meta span strong { color: var(--ink-soft); }
+header.hero .meta code {
+  font-family: "JetBrains Mono", "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 11px;
+  background: var(--bg-soft);
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--border-soft);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 16px 0 28px;
+}
+.grid.metrics { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+.card .card-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.card .card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1.1;
+  font-family: "JetBrains Mono", "SF Mono", "Menlo", monospace;
+  letter-spacing: -0.01em;
+}
+.card .card-sub {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-top: 6px;
+}
+.card.accent .card-value { color: var(--accent); }
+.card.good .card-value { color: var(--good); }
+.card.warn .card-value { color: var(--warn); }
+.card.bad .card-value { color: var(--bad); }
+
+h2 {
+  font-size: 20px;
+  margin: 32px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
+  font-weight: 700;
+}
+h3 { font-size: 16px; margin: 22px 0 8px; color: var(--primary); font-weight: 600; }
+h4 { font-size: 14px; margin: 16px 0 6px; color: var(--ink); font-weight: 600; }
+
+p { margin: 8px 0; }
+ul, ol { padding-left: 20px; margin: 8px 0; }
+ul li, ol li { margin: 3px 0; }
+ul li::marker { color: var(--primary); }
+
+strong { color: var(--accent); font-weight: 600; }
+em { color: var(--ink-soft); }
+
+a { color: var(--primary); }
+a:hover { color: var(--accent); }
+
+code:not(.hljs) {
+  font-family: "JetBrains Mono", "SF Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.86em;
+  background: var(--bg-code);
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--border-soft);
+  color: var(--accent);
+}
+
+pre {
+  background: #fafaf6;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  padding: 0;
+  overflow-x: auto;
+  border-radius: 4px;
+  margin: 12px 0;
+}
+pre code, pre code.hljs {
+  background: transparent !important;
+  display: block;
+  padding: 12px 16px !important;
+  font-size: 12.5px;
+  line-height: 1.5;
+  font-family: "JetBrains Mono", "SF Mono", "Menlo", monospace;
+  color: var(--ink);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+thead { background: var(--primary); color: white; }
+th, td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: top;
+}
+th { font-weight: 600; font-size: 12px; }
+tr:last-child td { border-bottom: none; }
+tbody tr:nth-child(even) { background: var(--bg-soft); }
+
+.badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: "JetBrains Mono", "SF Mono", monospace;
+  letter-spacing: 0.02em;
+}
+.badge-good { background: var(--good-bg); color: var(--good); }
+.badge-warn { background: var(--warn-bg); color: var(--warn); }
+.badge-bad { background: var(--bad-bg); color: var(--bad); }
+.badge-info { background: var(--info-bg); color: var(--primary); }
+
+.callout {
+  margin: 14px 0;
+  padding: 10px 14px;
+  border-radius: 4px;
+  border-left: 4px solid;
+  font-size: 14px;
+}
+.callout-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.callout-info { background: var(--info-bg); border-left-color: var(--primary); }
+.callout-info .callout-title { color: var(--primary); }
+.callout-warn { background: var(--warn-bg); border-left-color: var(--warn); }
+.callout-warn .callout-title { color: var(--warn); }
+.callout-good { background: var(--good-bg); border-left-color: var(--good); }
+.callout-good .callout-title { color: var(--good); }
+.callout-bad { background: var(--bad-bg); border-left-color: var(--bad); }
+.callout-bad .callout-title { color: var(--bad); }
+
+details {
+  background: white;
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  margin: 10px 0;
+}
+details summary {
+  cursor: pointer;
+  padding: 9px 13px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--primary);
+  list-style: none;
+  user-select: none;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::before {
+  content: "▸ ";
+  margin-right: 4px;
+  display: inline-block;
+  transition: transform 0.15s;
+}
+details[open] summary::before { transform: rotate(90deg); }
+details[open] summary { border-bottom: 1px solid var(--border-soft); }
+details > :not(summary) { padding: 8px 13px; }
+
+footer.aris-footer {
+  margin-top: 48px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--ink-muted);
+}
+footer.aris-footer a { color: var(--ink-muted); border-bottom: 1px dotted var(--border); }
+
+@media (max-width: 600px) {
+  .shell { padding: 20px 16px; }
+  header.hero h1 { font-size: 22px; }
+  .card .card-value { font-size: 24px; }
+}
+@media print {
+  .shell { padding: 0; }
+  body { background: white; }
+  .card { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header class="hero">
+  
+  <h1>CAP-SAT rebuttal 证据快照</h1>
+  
+  
+  <div class="meta">
+    <span><strong>Source:</strong> <code>dashboard/EVIDENCE.md</code></span>
+    <span><strong>SHA256:</strong> <code>79cfb3d4df75</code></span>
+    <span><strong>Rendered:</strong> 2026-09-10 10:52 UTC</span>
+    
+  </div>
+</header>
+
+<h1 id="cap-sat-rebuttal-证据快照--2026-09-10">CAP-SAT rebuttal 证据快照 · 2026-09-10</h1>
+<p>本文是人工核对的阶段记录。最新行数和数值见面板首页。</p>
+<h2 id="当前结论">当前结论</h2>
+<p>计时管道缺陷已有修复与重跑证据；随机 SAT 的 stock 性能差距和工业迁移尚未解决。完成更多实验没有自动消除这些负结果。</p>
+<table><thead><tr><th>实验</th><th>最新已核对状态</th><th>结论边界</th></tr></thead><tbody><tr><td>E17 n350</td><td>五种子，1500 行</td><td>第五种子包含跨主机补跑</td></tr><tr><td>E19S</td><td>五种子，1500 行</td><td>SAT 子集相对 stock 的 PAR-2 收益约 -63.7 秒</td></tr><tr><td>E19L</td><td>五种子，1500 行</td><td>SAT 子集相对 stock 的 PAR-2 收益约 -47.9 秒</td></tr><tr><td>E17 n400</td><td>seed 42，300 行</td><td>stock 141/141 SAT，CAP 83/141</td></tr><tr><td>E18</td><td>19 唯一应用实例</td><td>五个 CaDiCaL 检查点及 Kissat seed 789 完成，无正向迁移证据</td></tr><tr><td>E20</td><td>六臂，1800 求解任务</td><td>支持原生相位机制与覆盖接口相互作用；不支持简单等价归因</td></tr><tr><td>E21</td><td>设计文档记录负向探索</td><td>持久行级证据未恢复，v23 不引用数值</td></tr></tbody></table>
+<p>PAR-2 收益定义为对照减 CAP，正值有利于 CAP。E17/E19 共有 4500 个四臂实例行；不要与 4500 次单臂求解混淆。当前并集标签为 SAT 155、UNSAT 128、未决 17。</p>
+<h2 id="论文状态">论文状态</h2>
+<p>v23 的本地审计记录 E16–E20 冻结时完整单元已纳入，六个新表通过复算与字节核对，PDF 为 60 页、正文和完整结论在前 9 页。该审计冻结时只有四个完整 E17 CaDiCaL 种子，E19L 仍不完整；最新完成数据尚未纳入。</p>
+<p>这是一份本地一致性审计，不是独立复现实验或接收预测。NeuroBack 原生对比仍待跟进。作者、OpenReview 与 AI 声明需要负责人提供事实信息。</p>
+<h2 id="统计与来源限制">统计与来源限制</h2>
+<p>面板区间只重采样种子，并条件于固定 CNF 面板；不同运行的资源竞争和混合主机补跑限制因果解释。SAT 标签来自所有求解器确定性输出并集，不是所有实例的已知总体标签。</p>
+<p>证据来源：CAP-SAT 项目内的 EXPERIMENT_DESIGN_NEXTGEN_20260825、sprint_e19_multiscale_readout_v1、sprint_20260910/CLAIM_AUDIT、REMOTE_AGENTS v23 handoff。面板公开汇总，不发布原始 CNF、模型或内部运行信息。</p>
+
+<footer class="aris-footer">
+  Generated by <a href="https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep/blob/main/skills/render-html/SKILL.md">ARIS <code>/render-html</code></a> ·
+  source <code>dashboard/EVIDENCE.md</code> ·
+  SHA256 <code>79cfb3d4df75</code> ·
+  generated at 2026-09-10 10:52 UTC.
+  Edit the source Markdown / JSON, then re-render.
+</footer>
+
+</div>
+</body>
+</html>
