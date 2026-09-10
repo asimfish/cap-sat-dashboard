@@ -48,6 +48,10 @@ render-html skill; it is an archival snapshot, not the live exporter.
 rebuilds, synchronizes an explicit file allowlist, and pushes only when source
 content changes or the last exported snapshot is at least one hour old.
 It requires an authenticated Git checkout of this public dashboard repository.
+`watch.py` runs this check every 15 minutes with a single-instance file lock and
+a 180-second per-export deadline. It can run in tmux; it does not survive host
+reboots unless a host scheduler starts it again. Run collector regression checks
+with `python3 -m unittest discover -s . -p 'test_build.py'` in this directory.
 Use a scheduler with a non-overlap lock, for example:
 
 ```sh

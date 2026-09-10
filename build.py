@@ -17,12 +17,14 @@ ROOTS = {'frozen': 'e17_scale_ladder_v1', 'small': 'e19_indist_n350_v1', 'large'
 NAMES = {'frozen': 'E17 · Frozen', 'small': 'E19S · 500 train', 'large': 'E19L · 2,000 train'}
 
 def read_run(root, seed):
-    rows, errors, stamps, hosts = {}, [], [], set()
+    rows, errors, stamps = {}, [], []
     for path in sorted((root / 'solve_cadical').glob(f'n350_seed{seed}_cadical195_shard*.jsonl')):
         stamps.append(path.stat().st_mtime)
         for line in path.read_text().splitlines():
             try:
                 row = json.loads(line)
+                if not isinstance(row, dict):
+                    raise ValueError('record is not an object')
                 if row.get('record_type') != 'solve_row':
                     continue
                 i = row['row_index']
@@ -76,7 +78,7 @@ def collect(repo):
         for group in ['SAT', 'UNSAT', 'ALL']:
             indices = [i for i in range(300) if group == 'ALL' or truth.get(i) == group]
             for comparator in ARMS[1:]:
-                if not complete or not indices:
+                if len(complete) < 2 or not indices:
                     continue
                 values = [statistics.mean(r['rows'][i]['arms'][comparator]['full_pipeline_par2_s'] - r['rows'][i]['arms']['capsat']['full_pipeline_par2_s'] for i in indices) for r in complete]
                 results.append({'variant':variant, 'group':group, 'comparator':comparator, 'n':len(indices), 'seeds':len(complete), 'gain':interval(values)})
