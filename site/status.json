@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-10T20:08:24.085445+00:00",
+  "generated": "2026-09-10T20:12:22.850327+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -524,9 +524,9 @@
       "id": "R9",
       "title": "NeuroBack / RLAF 原生系统对比",
       "state": "未解决",
-      "evidence": "缩减预算原生训练已完成并验收：RLAF 100/100 轮，NeuroBack 40/40 轮。写作 agent 正在准备正式全成本比较；完成训练不等于完成原生方法对比。",
-      "next": "由原任务 owner 冻结测试清单、验证训练测试隔离并运行全成本比较；面板侧只读跟进，避免重复启动。",
-      "source": "native_baselines_20260910 / SUPERVISION.json / PROTOCOL.md"
+      "evidence": "训练已完成并验收：RLAF 100/100、NeuroBack 40/40。正式全成本比较已冻结并运行，共619个实例、2后端、6臂、7428单元；三种模型各619条预测已完成。全量评测和结果审阅尚未结束。",
+      "next": "原任务 owner 持续监督全量评测，分别核验失败、超时和未验证UNSAT，按问题族及SAT/UNSAT汇总；当前不提前判断优劣。",
+      "source": "native_comparison_20260911_v1 / SUPERVISION.json / FROZEN.json"
     }
   ],
   "native": {
@@ -554,11 +554,11 @@
     "scope": "缩减预算原生训练；正式测试对比尚未完成"
   },
   "comparison": {
-    "completed_paired_rows": 297,
+    "completed_paired_rows": 302,
     "target_paired_rows": 619,
-    "completed_arm_cells": 3564,
+    "completed_arm_cells": 3624,
     "target_arm_cells": 7428,
-    "observed": "2026-09-10T20:08:09.017491+00:00",
+    "observed": "2026-09-10T20:12:09.859087+00:00",
     "phase": "solving",
     "alerts": [],
     "summary_status": null

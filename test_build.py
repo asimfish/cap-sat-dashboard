@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress, verify_terminal
+from build import read_run, interval, native_progress, verify_terminal, comparison_progress
 
 class CollectorTests(unittest.TestCase):
     def read(self, records):
@@ -76,6 +76,18 @@ class CollectorTests(unittest.TestCase):
             self.assertEqual(status,'verified');self.assertEqual(counts['completed_epochs'],40)
             (root/'rlaf_verified_v2/best.pt').write_text('changed')
             self.assertEqual(verify_terminal(root,raw)[0],'not_verified')
+
+    def test_comparison_export_omits_runtime_identity(self):
+        raw={'time_unix':1789071033,'state':{'phase':'solving','controller_pid':12,'controller_command':['private']},
+             'completed_paired_rows':300,'target_paired_rows':619,'completed_arm_cells':3600,'target_arm_cells':7428,
+             'alerts':['PIPELINE_ERROR','/private/path']}
+        with patch.object(Path,'read_text',return_value=json.dumps(raw)),patch.object(Path,'exists',return_value=False):
+            result=comparison_progress(Path('/repo'))
+        self.assertEqual(result['completed_arm_cells'],3600)
+        self.assertEqual(result['phase'],'solving')
+        self.assertEqual(result['alerts'],['PIPELINE_ERROR'])
+        self.assertNotIn('private',json.dumps(result))
+        self.assertNotIn('pid',json.dumps(result))
 
 if __name__=='__main__':
     unittest.main()
