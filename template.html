@@ -30,7 +30,8 @@ function render(){
  const n=data.native, panel=document.getElementById('native-progress');
  if(!n){panel.textContent='监督数据暂不可用；不能判断任务是否运行。';}
  else{const age=(Date.now()-Date.parse(n.observed))/60000, stale=!Number.isFinite(age)||age>5||age< -1;
- const progress=Object.entries(n.progress).map(([k,v])=>`${esc(k)}: ${esc(v)}`).join(' · ');
+ const labels={completed_iterations:'已完成轮数',target_iterations:'目标轮数',completed_epochs:'已完成 epoch',target_epochs:'目标 epoch',label_records:'已准备标签',stage_wallclock_cap_hours:'总墙钟上限 / 小时'};
+ const progress=Object.entries(n.progress).map(([k,v])=>`${esc(labels[k]||k)}: ${esc(v)}`).join(' · ') + (n.preparation&&n.preparation.target_records?`<br>NeuroBack CPU 标签：${n.preparation.label_records||0}/${n.preparation.target_records}`:'');
  panel.innerHTML=`<b>${esc(n.stage)}</b><p>${progress||'等待进度记录'}</p><p>${stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活'}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
 }
 for(const id of ['filter','group','comparator'])document.getElementById(id).addEventListener('change',render);
