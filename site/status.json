@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-10T15:12:48.820419+00:00",
+  "generated": "2026-09-10T15:27:59.410192+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -516,17 +516,30 @@
       "id": "R8",
       "title": "统计、复现与论文落地",
       "state": "部分解决",
-      "evidence": "v23 已纳入 E16–E20 的冻结时完整单元，并通过本地数值与 PDF 审计；当时 E19L 和 frozen 第五种子未齐，最新完成结果尚未纳入。面板区间仅重采样种子，且 frozen seed 1024 包含跨主机补跑。",
-      "next": "将最新结果与 v23 冻结快照对齐；补做生成簇 / 种子联合不确定性和混合主机敏感性分析。",
-      "source": "v23 CLAIM_AUDIT / multiscale readout"
+      "evidence": "论文已到 v24：新增基准总览和基线分类，修正引用范围，正文保持 9 页。实验数字沿用 v23 冻结证据；最新 E19L 和 frozen 第五种子仍待单独审计纳入。面板区间仅重采样种子。",
+      "next": "写作 agent 负责版本化论文冻结；实验 / 面板侧提供新读数与混合主机敏感性结果。严格引用审计仍有未完成项。",
+      "source": "REMOTE_AGENTS v24 / revision_20260910 / multiscale readout"
     },
     {
       "id": "R9",
-      "title": "NeuroBack 原生系统对比",
+      "title": "NeuroBack / RLAF 原生系统对比",
       "state": "未解决",
-      "evidence": "最新论文协作记录仍将 NeuroBack native comparison 列为待跟进，现有审计没有将其标为完成。",
-      "next": "补齐可复现原生配置与公平预算协议，完成后再讨论系统优越性。",
-      "source": "REMOTE_AGENTS v23 handoff"
+      "evidence": "写作 agent 已启动缩减预算原生训练：500 train / 100 validation，72 个求解器正确性单元通过；RLAF 训练中，NeuroBack 接续并提前准备 CPU 标签。训练进度不代表正式对比完成。",
+      "next": "由原任务 owner 监督训练、检查完整凭据并冻结全成本测试协议；面板只读取监督快照，避免重复启动。",
+      "source": "native_baselines_20260910 / SUPERVISION.json / PROTOCOL.md"
     }
-  ]
+  ],
+  "native": {
+    "observed": "2026-09-10T15:27:42Z",
+    "stage": "rlaf_verified_v2_running",
+    "progress": {
+      "completed_iterations": 49,
+      "target_iterations": 100,
+      "stage_wallclock_cap_hours": 12.0
+    },
+    "controller_alive": true,
+    "stage_alive": true,
+    "alerts": [],
+    "scope": "缩减预算原生训练；正式测试对比尚未完成"
+  }
 }

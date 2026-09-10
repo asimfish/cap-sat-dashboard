@@ -52,6 +52,22 @@ def interval(values):
     means = sorted(statistics.mean(rng.choices(values, k=len(values))) for _ in range(10000))
     return [round(statistics.mean(values), 2), round(means[250], 2), round(means[9749], 2)]
 
+def native_progress(repo):
+    """Only public progress fields; omit process IDs, paths, commands and host data."""
+    path = repo / 'experiments/native_baselines_20260910/SUPERVISION.json'
+    try:
+        raw = json.loads(path.read_text())
+        progress = raw.get('progress', {})
+        keys = ['completed_iterations','target_iterations','completed_epochs','target_epochs','label_records','stage_wallclock_cap_hours']
+        return {'observed':raw.get('time_utc'), 'stage':raw.get('stage'),
+                'progress':{k:progress[k] for k in keys if type(progress.get(k)) in (int,float) and math.isfinite(progress[k])},
+                'controller_alive':raw.get('controller_alive') is True,
+                'stage_alive':raw.get('stage_alive') is True,
+                'alerts':[x for x in raw.get('alerts',[]) if isinstance(x,str) and all(c.isupper() or c.isdigit() or c=='_' for c in x)],
+                'scope':'缩减预算原生训练；正式测试对比尚未完成'}
+    except (OSError,ValueError,TypeError,AttributeError):
+        return None
+
 def collect(repo):
     runs, truth, identities = [], {}, {}
     digest = hashlib.sha256()
@@ -86,7 +102,7 @@ def collect(repo):
         r['count'] = len(r.pop('rows'))
         r['complete'] = r['count'] == 300 and r['errors'] == 0
         r['updated'] = dt.datetime.fromtimestamp(r['updated'], dt.timezone.utc).isoformat() if r['updated'] else None
-    return {'generated':dt.datetime.now(dt.timezone.utc).isoformat(), 'source_sha256':digest.hexdigest(), 'source':'E17/E19 n350 solve_row records', 'runs':runs, 'results':results, 'truth':{g:sum(truth.get(i,'UNKNOWN') == g for i in range(300)) for g in ['SAT','UNSAT','UNKNOWN']}, 'issues':json.loads((HERE / 'issues.json').read_text())}
+    return {'generated':dt.datetime.now(dt.timezone.utc).isoformat(), 'source_sha256':digest.hexdigest(), 'source':'E17/E19 n350 solve_row records', 'runs':runs, 'results':results, 'truth':{g:sum(truth.get(i,'UNKNOWN') == g for i in range(300)) for g in ['SAT','UNSAT','UNKNOWN']}, 'issues':json.loads((HERE / 'issues.json').read_text()), 'native':native_progress(repo)}
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)

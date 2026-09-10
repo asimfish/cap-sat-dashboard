@@ -37,6 +37,12 @@ is path-based here; this dashboard is not a substitute for the manuscript's
 checkpoint/manifest/CNF-byte provenance audit. Confidence intervals resample
 seeds only on the fixed test panel. Cross-host and contention effects remain.
 
+Native RLAF/NeuroBack progress reads an allowlist of fields from
+`experiments/native_baselines_20260910/SUPERVISION.json`. Process IDs, commands,
+absolute paths and machine resource inventories are not exported. A heartbeat
+older than five minutes is shown as unknown runtime status. Training completion
+and formal comparative evaluation remain separate milestones.
+
 Only aggregate data and manually reviewed issue descriptions are published.
 No raw CNF, model, credential, hostname, or absolute experiment path is exported.
 `evidence.html` is a dated, offline evidence summary generated using the
