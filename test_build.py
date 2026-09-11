@@ -5,9 +5,21 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress, verify_terminal, comparison_progress
+from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit
 
 class CollectorTests(unittest.TestCase):
+    def test_terminal_aggregate_allowlist(self):
+        cell={'n':300,'verified_solved':290,'unverified_unsat':10,'reported_par2_s':2,'verified_par2_s':3,'private_path':'/secret'}
+        backends={b:{a:cell for a in ['stock','native','capsat_standing_adapter','polarity_initial','polarity_standing','walksat_standing']} for b in ['glucose','kissat']}
+        raw={'complete_denominator':True,'completed_rows':619,'recorded_cells':7428,'observed_unix':1789091299,'issues':[],'failures':[],'unverified_unsat_cells':['private'], 'groups':{c:{'ALL':{'n':300,'backends':backends},'UNKNOWN':{'n':0,'backends':{}}} for c in ['fresh_n200','existing_n350','existing_industrial19']}}
+        with patch.object(Path,'read_bytes',return_value=json.dumps(raw).encode()):
+            result=comparison_audit(Path('/repo'))
+        self.assertEqual(len(result['rows']),36)
+        self.assertNotIn('private',json.dumps(result))
+        cell['verified_par2_s']=float('nan')
+        with patch.object(Path,'read_bytes',return_value=json.dumps(raw).encode()):
+            self.assertIsNone(comparison_audit(Path('/repo')))
+
     def read(self, records):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)

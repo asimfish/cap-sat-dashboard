@@ -98,7 +98,7 @@ def native_progress(repo):
                 'alerts':[x for x in raw.get('alerts',[]) if isinstance(x,str) and all(c.isupper() or c.isdigit() or c=='_' for c in x)],
                 'preparation':{k:preparation[k] for k in ['label_records','target_records'] if type(preparation.get(k)) is int},
                 'acceptance':{k:v.get('status') for k,v in (raw.get('acceptance') or {}).items() if k in ['rlaf_verified_v2','neuroback_verified_v2'] and isinstance(v,dict) and v.get('status') in ['pending','not_accepted_nonzero_exit','failed_acceptance','training_artifacts_verified']},
-                'scope':'缩减预算原生训练；正式测试对比尚未完成'}
+                'scope':'缩减预算原生训练；正式测试与验收状态见原生比较面板'}
     except (OSError,ValueError,TypeError,AttributeError):
         return None
 
@@ -119,7 +119,46 @@ def comparison_progress(repo):
                 result['summary_status']=summary['status']
                 result['failed_cells']=len(summary['failures'])
                 result['unverified_unsat_cells']=summary['unverified_unsat_cells']
+        result['audit']=comparison_audit(repo)
         return result
+    except (OSError,ValueError,KeyError,TypeError):
+        return None
+
+def comparison_audit(repo):
+    """Publish allowlisted aggregates only; keep the original verification policy."""
+    path=repo/'iclr_2027/audit/native_comparison_20260911_v1/TERMINAL_AUDIT.json'
+    def number(value):
+        if type(value) not in (int,float) or not math.isfinite(value):
+            raise ValueError('invalid audit number')
+        return value
+    try:
+        payload=path.read_bytes()
+        raw=json.loads(payload)
+        if raw['complete_denominator'] is not True or raw['completed_rows']!=619 or raw['recorded_cells']!=7428:
+            return None
+        rows=[]
+        for cohort in ['fresh_n200','existing_n350','existing_industrial19']:
+            for stratum,group in raw['groups'][cohort].items():
+                if stratum not in ['ALL','SAT','UNSAT','UNKNOWN']:
+                    continue
+                if group['n']==0:
+                    continue
+                for backend in ['glucose','kissat']:
+                    for arm in ['stock','native','capsat_standing_adapter','polarity_initial','polarity_standing','walksat_standing']:
+                        source=group['backends'][backend][arm]
+                        row=dict(cohort=cohort,stratum=stratum,backend=backend,arm=arm)
+                        for key in ['n','verified_solved','unverified_unsat','reported_par2_s','verified_par2_s']:
+                            row[key]=number(source[key])
+                        for policy in ['reported','verified']:
+                            contrast=source.get(policy+'_contrast')
+                            if contrast:
+                                ci=contrast['ci95']
+                                if len(ci)!=2: raise ValueError('invalid interval')
+                                row[policy+'_contrast']={ 'mean':number(contrast['mean']), 'ci95':[number(x) for x in ci] }
+                        rows.append(row)
+        return {'sha256':hashlib.sha256(payload).hexdigest(),'observed':dt.datetime.fromtimestamp(raw['observed_unix'],dt.timezone.utc).isoformat(),
+                'issues':len(raw['issues']),'failures':len(raw['failures']),
+                'unverified_unsat_cells':len(raw['unverified_unsat_cells']),'rows':rows}
     except (OSError,ValueError,KeyError,TypeError):
         return None
 
