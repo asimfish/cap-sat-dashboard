@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-11T00:17:32.690520+00:00",
+  "generated": "2026-09-11T00:32:40.414001+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -554,11 +554,11 @@
     "scope": "缩减预算原生训练；正式测试对比尚未完成"
   },
   "comparison": {
-    "completed_paired_rows": 535,
+    "completed_paired_rows": 552,
     "target_paired_rows": 619,
-    "completed_arm_cells": 6420,
+    "completed_arm_cells": 6624,
     "target_arm_cells": 7428,
-    "observed": "2026-09-11T00:17:10.900835+00:00",
+    "observed": "2026-09-11T00:32:21.369670+00:00",
     "phase": "solving",
     "alerts": [],
     "summary_status": null
