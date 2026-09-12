@@ -249,6 +249,7 @@ def hybrid_progress(repo):
             if not (folder/'STATUS.json').exists():continue
             frozen=(folder/'FROZEN.json').read_bytes();cfg=json.loads(frozen)
             status=json.loads((folder/'STATUS.json').read_text());arms=cfg['arms']
+            if stage=='test' and cfg['selection_sha256']!=hashlib.sha256((root/'SELECTION.json').read_bytes()).hexdigest():raise ValueError('selection identity drift')
             if not (arms==HYBRID_ARMS if stage=='dev' else arms[:3]==HYBRID_ARMS[:3] and len(arms) in [3,4] and set(arms)<=set(HYBRID_ARMS)):
                 raise ValueError('unexpected hybrid arms')
             if status['phase'] not in ['running','failed','terminal'] or status['target_rows']!=n or status['target_cells']!=n*len(arms):raise ValueError('unexpected hybrid stage')
@@ -274,10 +275,35 @@ def hybrid_progress(repo):
                     if type(r['engineering_pass']) is not bool or type(r['learning_pass']) is not bool:raise ValueError('bad gate type')
                     if r['engineering_pass'] and (r['errors'] or not contrasts.get('engineering_vs_stock',{}).get('gate')):raise ValueError('unjustified engineering pass')
                     if r['learning_pass'] and (r['errors'] or not all(contrasts.get('cap_vs_'+a,{}).get('gate') for a in HYBRID_ARMS[:3])):raise ValueError('unjustified learning pass')
+                    expected='development_complete' if stage=='dev' else 'local_learning_improvement' if r['learning_pass'] else 'local_engineering_improvement_only' if r['engineering_pass'] else 'no_confirmed_improvement'
+                    if r['status']!=expected or stage=='dev' and (r['learning_pass'] or r['engineering_pass']):raise ValueError('verdict/stage mismatch')
                     out['readout']={'status':r['status'],'engineering_pass':r['engineering_pass'],'learning_pass':r['learning_pass'],
                         'summaries':cells(r['summaries'],arms,n),'by_scale':{s:cells(r['by_scale'][s],arms,n//2) for s in ['325','500']},
                         'contrasts':contrasts,'errors':len(r['errors']),'unverified_unsat_cells':count(r['unverified_unsat_cells'],n*len(arms)),
                         'sha256':hashlib.sha256(payload).hexdigest()}
+                    if stage=='test':
+                        public=out['readout'];public['qualification']='awaiting_matched_guard'
+                        public['original_engineering_pass']=public['engineering_pass'];public['original_learning_pass']=public['learning_pass']
+                        public['engineering_pass']=False;public['learning_pass']=False
+                        if (root/'JOINT_RESULTS.json').exists():
+                            joint_payload=(root/'JOINT_RESULTS.json').read_bytes();j=json.loads(joint_payload)
+                            if j['main_results_sha256']!=public['sha256'] or j['matched_frozen_sha256']!=hashlib.sha256((root/'matched/FROZEN.json').read_bytes()).hexdigest():raise ValueError('joint identity mismatch')
+                            if j['matched_executed'] and j['matched_results_sha256']!=hashlib.sha256((root/'matched/RESULTS.json').read_bytes()).hexdigest():raise ValueError('matched readout drift')
+                            matches=['polarity_warm_match','random_warm_match'];controls=HYBRID_ARMS[:3]+matches
+                            jc={}
+                            for key,c in j['contrasts'].items():
+                                if key not in ['engineering_vs_stock',*['cap_vs_'+a for a in controls]] or c['arm'] not in arms or c['control'] not in [*arms,*matches] or type(c['gate']) is not bool:raise ValueError('invalid joint contrast')
+                                band=c['simultaneous95_band']
+                                if len(band)!=2 or band[0]>band[1]:raise ValueError('invalid joint interval')
+                                jc[key]={'arm':c['arm'],'control':c['control'],'mean_gain_s':num(c['mean_gain_s'],-20,20),'simultaneous95_band':[num(v,-20,20) for v in band],'gate':c['gate']}
+                            if type(j['learning_pass']) is not bool or type(j['engineering_pass']) is not bool:raise ValueError('invalid joint gate')
+                            if j['engineering_pass'] and not (public['original_engineering_pass'] and jc.get('engineering_vs_stock',{}).get('gate')):raise ValueError('invalid engineering promotion')
+                            if j['learning_pass'] and not (public['original_learning_pass'] and j['matched_executed'] and not j['errors'] and all(jc.get('cap_vs_'+a,{}).get('gate') for a in controls)):raise ValueError('missing exact matched controls')
+                            public.update(qualification='joint_guard_complete',engineering_pass=j['engineering_pass'],learning_pass=j['learning_pass'],contrasts=jc,joint_sha256=hashlib.sha256(joint_payload).hexdigest(),matched_executed=bool(j['matched_executed']))
+                            public['status']='local_learning_improvement' if j['learning_pass'] else 'local_engineering_improvement_only' if j['engineering_pass'] else 'no_confirmed_improvement'
+                            if j['matched_executed']:
+                                public['summaries'].update(cells(j['extra_summaries'],matches,n))
+                                for scale in ['325','500']:public['by_scale'][scale].update(cells(j['extra_by_scale'][scale],matches,n//2))
             result['stages'][stage]=out
         if (root/'SELECTION.json').exists():
             raw=(root/'SELECTION.json').read_bytes();s=json.loads(raw)

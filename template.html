@@ -75,12 +75,12 @@ function render(){
 function renderHybrid(){
  const h=data.hybrid,target=document.getElementById('hybrid-stages'),selection=document.getElementById('hybrid-selection');
  if(!h){target.textContent='暂无有效阶段记录；不推断正在运行。';selection.textContent='';return;}
- const labels={stock:'默认 CaDiCaL',random_repair:'随机修复 → 默认',polarity_repair:'极性引导修复 → 默认',cap_warm_repair:'CAP 热启动修复 → 默认',cap_soft_repair:'CAP 软引导修复 → 默认'};
+ const labels={stock:'默认 CaDiCaL',random_repair:'随机修复 → 默认',polarity_repair:'极性引导修复 → 默认',cap_warm_repair:'CAP 热启动修复 → 默认',cap_soft_repair:'CAP 软引导修复 → 默认',polarity_warm_match:'极性热启动 · 精确匹配解码',random_warm_match:'随机热启动 · 精确匹配解码'};
  const s=h.selection;selection.textContent=s?`开发集冻结选择：工程方案 ${s.engineering?labels[s.engineering]:'未过门'}；CAP 方案 ${s.cap?labels[s.cap]:'未过门，不进入确认'}。`:'开发尚未完成选择，不从先完成的实例判断优劣。';
  const scale=document.getElementById('hybrid-scale').value;
  target.innerHTML=Object.entries(h.stages).map(([stage,x])=>{
   const r=x.readout,age=(Date.now()-Date.parse(x.observed))/60000,stale=!Number.isFinite(age)||age>5||age< -1;
-  const state=r?(stage==='dev'?'开发统计完成 · 不作为确认性结果':r.learning_pass?'本地学习增益通过 · 保留范围限制':r.engineering_pass?'本地工程提速通过 · 不等于 CAP 学习增益':'独立确认未通过预设门槛'):x.phase==='failed'?'失败 · 待排查':x.phase==='awaiting_readout'?'求解完成 · 等待统计':stale?'进度记录陈旧 · 运行态未知':'近期有进度更新 · 无结论';
+  const state=r?(stage==='dev'?'开发统计完成 · 不作为确认性结果':r.qualification==='awaiting_matched_guard'?'原主比较完成 · 等待严格匹配对照 / 联合审阅':r.learning_pass?'本地学习增益通过 · 保留范围限制':r.engineering_pass?'本地工程提速通过 · 不等于 CAP 学习增益':'独立确认未通过预设门槛'):x.phase==='failed'?'失败 · 待排查':x.phase==='awaiting_readout'?'求解完成 · 等待统计':stale?'进度记录陈旧 · 运行态未知':'近期有进度更新 · 无结论';
   const sm=r?(scale==='ALL'?r.summaries:r.by_scale[scale]):null,n=scale==='ALL'?x.target_rows:x.target_rows/2;
   const table=sm?`<div class="table"><table><thead><tr><th>方法</th><th>已校验 / 佐证求解</th><th>PAR-2 秒 ↓</th><th>修复直接解出 / 默认回退解出</th></tr></thead><tbody>${Object.entries(sm).map(([a,v])=>`<tr><td>${esc(labels[a])}</td><td>${v.verified_solved}/${n}</td><td class="number">${v.verified_par2_s.toFixed(3)}</td><td>${v.sls_solved} / ${v.fallback_solved}</td></tr>`).join('')}</tbody></table></div>`:'<p>完整阶段统计前不展示性能排名。</p>';
   const comparisons=r?Object.values(r.contrasts).map(c=>`${labels[c.control]} − ${labels[c.arm]}：${c.mean_gain_s.toFixed(3)} 秒 [${c.simultaneous95_band.map(v=>v.toFixed(3)).join(', ')}]，${c.gate?'过门':'未过门'}`).join('；'):'';

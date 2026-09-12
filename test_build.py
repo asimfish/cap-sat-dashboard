@@ -88,6 +88,30 @@ class CollectorTests(unittest.TestCase):
             with patch.object(Path,'read_bytes',return_value=json.dumps(mutated).encode()):
                 with self.assertRaises(ValueError):load_performance_plan()
 
+    def test_hybrid_confirmation_verdict_and_selection_identity(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/performance_hybrid_20260912_e27';folder=root/'test';folder.mkdir(parents=True)
+            selected=json.dumps(dict(cap='cap_warm_repair',engineering='random_repair'));(root/'SELECTION.json').write_text(selected)
+            arms=HYBRID_ARMS[:4];frozen=json.dumps(dict(arms=arms,selection_sha256=hashlib.sha256(selected.encode()).hexdigest()))
+            (folder/'FROZEN.json').write_text(frozen);h=hashlib.sha256(frozen.encode()).hexdigest()
+            status=dict(phase='terminal',observed='2026-09-12T10:00:00+00:00',target_rows=48,target_cells=192,
+                completed_rows=48,completed_cells=192,frozen_sha256=h,prepared_sha256='prepared')
+            (folder/'STATUS.json').write_text(json.dumps(status))
+            def summaries(n):return {a:dict(verified_par2_s=10,reported_par2_s=10,verified_solved=n//2,sls_solved=n//4,fallback_solved=n//4) for a in arms}
+            c=dict(arm='random_repair',control='stock',mean_gain_s=2,simultaneous95_band=[.1,4],gate=True)
+            report=dict(frozen_sha256=h,prepared_sha256='prepared',rows=48,cells=192,status='local_engineering_improvement_only',engineering_pass=True,learning_pass=False,
+                        summaries=summaries(48),by_scale={s:summaries(24) for s in ['325','500']},errors=[],unverified_unsat_cells=0,contrasts={'engineering_vs_stock':c})
+            def save(): (folder/'RESULTS.json').write_text(json.dumps(report))
+            save();r=hybrid_progress(repo);self.assertFalse(r['stages']['test']['readout']['engineering_pass']);self.assertEqual(r['stages']['test']['readout']['qualification'],'awaiting_matched_guard')
+            matched=root/'matched';matched.mkdir();(matched/'FROZEN.json').write_text('{}')
+            joint=dict(main_results_sha256=hashlib.sha256((folder/'RESULTS.json').read_bytes()).hexdigest(),matched_frozen_sha256=hashlib.sha256(b'{}').hexdigest(),
+                       matched_executed=False,engineering_pass=True,learning_pass=False,errors=[],contrasts={'engineering_vs_stock':c})
+            (root/'JOINT_RESULTS.json').write_text(json.dumps(joint));r=hybrid_progress(repo)
+            self.assertTrue(r['stages']['test']['readout']['engineering_pass']);self.assertFalse(r['stages']['test']['readout']['learning_pass'])
+            report['status']='local_learning_improvement';save();self.assertIsNone(hybrid_progress(repo))
+            report['status']='local_engineering_improvement_only';save();(root/'SELECTION.json').write_text(selected+' ')
+            self.assertIsNone(hybrid_progress(repo))
+
     def test_terminal_aggregate_allowlist(self):
         cell={'n':300,'verified_solved':290,'unverified_unsat':10,'reported_par2_s':2,'verified_par2_s':3,'private_path':'/secret'}
         backends={b:{a:cell for a in ['stock','native','capsat_standing_adapter','polarity_initial','polarity_standing','walksat_standing']} for b in ['glucose','kissat']}

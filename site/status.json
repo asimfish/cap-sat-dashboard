@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-12T09:38:54.032828+00:00",
+  "generated": "2026-09-12T09:54:01.749783+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3040,7 +3040,7 @@
         "title": "端到端收益能否超过廉价基线",
         "state": "部分改善",
         "priority": "最高",
-        "progress": "历史 n250 全成本测试中，冲突数显著少于极性，但时间差区间跨零。九月原生比较的 n350 Glucose 对默认有收益，Kissat 不支持同样结论。",
+        "progress": "历史 n250 对极性的时间差区间跨零；九月 n350 Glucose 对默认有收益，Kissat 不支持同样结论。E27 独立 48 例中，随机修复 + 默认回退的全成本 PAR-2 比默认低 17.5%，解出 19 对 15；这是工程提速，CAP 仍未胜过廉价修复。",
         "remaining": "尚无跨后端、跨问题族稳定优于默认及廉价对照的部署优势；小实例的预测成本仍可能超过搜索节省。",
         "directions": [
           "A0",
@@ -3226,18 +3226,18 @@
         "id": "A6",
         "title": "短程见证搜索 + 无覆盖默认回退",
         "priority": "P1 · 实施验证",
-        "status": "E27 开发候选已冻结 · 进入独立确认",
-        "cost": "24 开发已结束 + 48 新确认，CPU 两并发、10 秒 / 臂",
+        "status": "E27 已完成 · 工程门通过，学习门未过",
+        "cost": "24 开发 + 48 新确认全部结束，共 312 单元，无重训",
         "depends_on": [
           "A3"
         ],
         "hypothesis": "快速局部搜索找到解就直接返回，失败后保持默认搜索，有望获得工程提速；CAP 是否比同成本廉价修复更好是另一个必须单独过门的问题。",
         "method": "C++ 维护子句真值与 break 数，0.25 秒总预处理预算包括神经推理；比较默认、随机修复、极性软引导、CAP 热启动、CAP 软引导。24 个新开发实例选至多一个 CAP 和一个工程方案，冻结后才生成 48 个新确认实例。未找到解不注入相位；每个 SAT 赋值检查原始公式。",
-        "gate": "工程门：独立确认比默认至少低 5% PAR-2，同时区间下界 >0，求解数不减少，两个规模点估计均不受损。学习门：CAP 对默认和两种廉价修复均满足上述条件。不能用工程门替代学习门。",
-        "stop": "开发无候选过门则停止；确认不过门不调测试阈值、不扩大训练。工业泛化及原始 one-shot 科学贡献不会因流水线提速自动变成已解决。"
+        "gate": "工程门：独立确认比默认至少低 5% PAR-2，同时区间下界 >0，求解数不减少，两个规模点估计均不受损。学习门另需胜过原廉价修复及两组精确匹配热启动/重启方式的随机和极性控制。补充条件在确认读出前冻结，联合采用六项比较校正；不能用工程门替代学习门。",
+        "stop": "终态：随机修复 19/48、PAR-2 12.109 秒；默认 15/48、14.676 秒。收益 2.567 秒，同时区间 [0.809,4.510]，两个规模均未损失求解数。CAP 17/48、13.107 秒，未胜过廉价对照；补充精确匹配控制按条件跳过，不补造结果。停止这批数据上的调参；工业泛化及原始学习贡献仍未解决。"
       }
     ],
-    "sha256": "a6aba4ed91174f3848fec35c85b5be3721d4fda0032c3a442c24d952ccb2d4f9"
+    "sha256": "741c576ce671d92516ce4674dd9340e0ecef80c713996d6e5c5404f7b9bc7697"
   },
   "pilot": {
     "id": "E26",
@@ -3471,14 +3471,160 @@
         }
       },
       "test": {
-        "phase": "running",
-        "observed": "2026-09-12T09:38:50.116111+00:00",
-        "completed_rows": 1,
-        "completed_cells": 6,
+        "phase": "terminal",
+        "observed": "2026-09-12T09:49:21.463578+00:00",
+        "completed_rows": 48,
+        "completed_cells": 192,
         "target_rows": 48,
         "target_cells": 192,
         "frozen_sha256": "3f7a3d1b76f4e4a30a57ac2b66c209d745188ff8c2a736180f663f5830446ea1",
-        "readout": null
+        "readout": {
+          "status": "local_engineering_improvement_only",
+          "engineering_pass": true,
+          "learning_pass": false,
+          "summaries": {
+            "stock": {
+              "verified_par2_s": 14.676405995987201,
+              "reported_par2_s": 14.676405995987201,
+              "verified_solved": 15,
+              "sls_solved": 0,
+              "fallback_solved": 15
+            },
+            "random_repair": {
+              "verified_par2_s": 12.109048057774393,
+              "reported_par2_s": 12.109048057774393,
+              "verified_solved": 19,
+              "sls_solved": 19,
+              "fallback_solved": 0
+            },
+            "polarity_repair": {
+              "verified_par2_s": 12.21012318081921,
+              "reported_par2_s": 12.21012318081921,
+              "verified_solved": 19,
+              "sls_solved": 18,
+              "fallback_solved": 1
+            },
+            "cap_warm_repair": {
+              "verified_par2_s": 13.1065950319559,
+              "reported_par2_s": 13.1065950319559,
+              "verified_solved": 17,
+              "sls_solved": 16,
+              "fallback_solved": 1
+            }
+          },
+          "by_scale": {
+            "325": {
+              "stock": {
+                "verified_par2_s": 13.12821883855698,
+                "reported_par2_s": 13.12821883855698,
+                "verified_solved": 9,
+                "sls_solved": 0,
+                "fallback_solved": 9
+              },
+              "random_repair": {
+                "verified_par2_s": 11.678912849204304,
+                "reported_par2_s": 11.678912849204304,
+                "verified_solved": 10,
+                "sls_solved": 10,
+                "fallback_solved": 0
+              },
+              "polarity_repair": {
+                "verified_par2_s": 12.5078336809529,
+                "reported_par2_s": 12.5078336809529,
+                "verified_solved": 9,
+                "sls_solved": 9,
+                "fallback_solved": 0
+              },
+              "cap_warm_repair": {
+                "verified_par2_s": 12.529199918576827,
+                "reported_par2_s": 12.529199918576827,
+                "verified_solved": 9,
+                "sls_solved": 9,
+                "fallback_solved": 0
+              }
+            },
+            "500": {
+              "stock": {
+                "verified_par2_s": 16.22459315341742,
+                "reported_par2_s": 16.22459315341742,
+                "verified_solved": 6,
+                "sls_solved": 0,
+                "fallback_solved": 6
+              },
+              "random_repair": {
+                "verified_par2_s": 12.53918326634448,
+                "reported_par2_s": 12.53918326634448,
+                "verified_solved": 9,
+                "sls_solved": 9,
+                "fallback_solved": 0
+              },
+              "polarity_repair": {
+                "verified_par2_s": 11.91241268068552,
+                "reported_par2_s": 11.91241268068552,
+                "verified_solved": 10,
+                "sls_solved": 9,
+                "fallback_solved": 1
+              },
+              "cap_warm_repair": {
+                "verified_par2_s": 13.683990145334974,
+                "reported_par2_s": 13.683990145334974,
+                "verified_solved": 8,
+                "sls_solved": 7,
+                "fallback_solved": 1
+              }
+            }
+          },
+          "contrasts": {
+            "engineering_vs_stock": {
+              "arm": "random_repair",
+              "control": "stock",
+              "mean_gain_s": 2.567357938212808,
+              "simultaneous95_band": [
+                0.8093781335822617,
+                4.51014278109263
+              ],
+              "gate": true
+            },
+            "cap_vs_stock": {
+              "arm": "cap_warm_repair",
+              "control": "stock",
+              "mean_gain_s": 1.5698109640313003,
+              "simultaneous95_band": [
+                0.38422782653166604,
+                3.2431533271058774
+              ],
+              "gate": true
+            },
+            "cap_vs_random_repair": {
+              "arm": "cap_warm_repair",
+              "control": "random_repair",
+              "mean_gain_s": -0.9975469741815081,
+              "simultaneous95_band": [
+                -3.0544301937916316,
+                1.0726868802836786
+              ],
+              "gate": false
+            },
+            "cap_vs_polarity_repair": {
+              "arm": "cap_warm_repair",
+              "control": "polarity_repair",
+              "mean_gain_s": -0.8964718511366906,
+              "simultaneous95_band": [
+                -2.5152817408476644,
+                0.2976214158697985
+              ],
+              "gate": false
+            }
+          },
+          "errors": 0,
+          "unverified_unsat_cells": 0,
+          "sha256": "4d382c0499007eb01d8b5c2bac8355c9d9c5be91f2a88bbfa150e8ccb9d90965",
+          "qualification": "joint_guard_complete",
+          "original_engineering_pass": true,
+          "original_learning_pass": false,
+          "joint_sha256": "35dfbb6aaa6f3177b4eb63d8413d986dfeb39f643248b291c79c9432171eceec",
+          "matched_executed": false
+        }
       }
     },
     "selection": {
