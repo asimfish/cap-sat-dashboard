@@ -34,7 +34,7 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Six actions have dependencies, costs, acceptance and stopping rules. Their
+Seven actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
@@ -54,6 +54,14 @@ still alive. SAT witnesses are checked and UNSAT outcomes independently
 corroborated, not proof-certified. Single-checkpoint, small-sample, shared-host
 pilot results cannot by themselves establish an advantage or justify rewriting
 the paper. Raw vectors, local paths, host details and logs are never exported.
+
+E27 is displayed separately as24 development instances and (only after frozen
+selection)48 fresh confirmation instances at n325/n500. It distinguishes a cheap
+witness-first repair/CDCL fallback engineering benefit from CAP's incremental
+learning benefit over matched cheap repairs. Passing one is not passing the
+other. Per-scale tables retain all denominators; displayed simultaneous contrast
+intervals always refer to the overall prespecified comparison, not the selected
+scale. Only complete stage readouts are ranked; all published fields are allowlisted.
 
 Only complete, error-free 300-row seeds enter metrics. Invalid indices,
 non-finite times, arm errors, conflicting duplicate rows, differing CNF paths,

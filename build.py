@@ -225,6 +225,67 @@ def pilot_progress(repo):
     except (OSError,ValueError,KeyError,TypeError):
         return None
 
+HYBRID_ARMS=['stock','random_repair','polarity_repair','cap_warm_repair','cap_soft_repair']
+
+def hybrid_progress(repo):
+    root=repo/'experiments/performance_hybrid_20260912_e27'
+    def num(v,lo=0,hi=20):
+        if type(v) not in [int,float] or not math.isfinite(v) or not lo<=v<=hi:raise ValueError('invalid hybrid metric')
+        return v
+    def count(v,maximum):
+        if type(v) is not int:raise ValueError('invalid count type')
+        return num(v,0,maximum)
+    def cells(raw,arms,n):
+        out={}
+        for a in arms:
+            s=raw[a];out[a]={k:num(s[k]) for k in ['verified_par2_s','reported_par2_s']}
+            out[a].update({k:count(s[k],n) for k in ['verified_solved','sls_solved','fallback_solved']})
+            if out[a]['sls_solved']+out[a]['fallback_solved']!=out[a]['verified_solved']:raise ValueError('solve-source mismatch')
+        return out
+    try:
+        result={'id':'E27','stages':{},'selection':None}
+        for stage,n in [('dev',24),('test',48)]:
+            folder=root/stage
+            if not (folder/'STATUS.json').exists():continue
+            frozen=(folder/'FROZEN.json').read_bytes();cfg=json.loads(frozen)
+            status=json.loads((folder/'STATUS.json').read_text());arms=cfg['arms']
+            if not (arms==HYBRID_ARMS if stage=='dev' else arms[:3]==HYBRID_ARMS[:3] and len(arms) in [3,4] and set(arms)<=set(HYBRID_ARMS)):
+                raise ValueError('unexpected hybrid arms')
+            if status['phase'] not in ['running','failed','terminal'] or status['target_rows']!=n or status['target_cells']!=n*len(arms):raise ValueError('unexpected hybrid stage')
+            h=hashlib.sha256(frozen).hexdigest()
+            if status['frozen_sha256']!=h:raise ValueError('frozen identity drift')
+            out={'phase':status['phase'],'observed':status['observed'],'completed_rows':count(status['completed_rows'],n),
+                 'completed_cells':count(status['completed_cells'],n*len(arms)),'target_rows':n,'target_cells':n*len(arms),'frozen_sha256':h,'readout':None}
+            dt.datetime.fromisoformat(out['observed'])
+            if out['phase']=='terminal':
+                if out['completed_rows']!=n or out['completed_cells']!=n*len(arms):raise ValueError('incomplete terminal stage')
+                if not (folder/'RESULTS.json').exists():out['phase']='awaiting_readout'
+                else:
+                    payload=(folder/'RESULTS.json').read_bytes();r=json.loads(payload)
+                    if r['frozen_sha256']!=h or r['prepared_sha256']!=status['prepared_sha256'] or r['rows']!=n or r['cells']!=n*len(arms):raise ValueError('hybrid readout identity mismatch')
+                    if r['status'] not in ['development_complete','no_confirmed_improvement','local_engineering_improvement_only','local_learning_improvement']:raise ValueError('unknown hybrid verdict')
+                    contrasts={}
+                    for key,c in r['contrasts'].items():
+                        if key not in ['engineering_vs_stock','cap_vs_stock','cap_vs_random_repair','cap_vs_polarity_repair']:raise ValueError('unknown contrast')
+                        if c['arm'] not in arms or c['control'] not in arms or type(c['gate']) is not bool:raise ValueError('bad contrast arms')
+                        band=c['simultaneous95_band']
+                        if len(band)!=2 or band[0]>band[1]:raise ValueError('bad interval')
+                        contrasts[key]={'arm':c['arm'],'control':c['control'],'mean_gain_s':num(c['mean_gain_s'],-20,20),'simultaneous95_band':[num(v,-20,20) for v in band],'gate':c['gate']}
+                    if type(r['engineering_pass']) is not bool or type(r['learning_pass']) is not bool:raise ValueError('bad gate type')
+                    if r['engineering_pass'] and (r['errors'] or not contrasts.get('engineering_vs_stock',{}).get('gate')):raise ValueError('unjustified engineering pass')
+                    if r['learning_pass'] and (r['errors'] or not all(contrasts.get('cap_vs_'+a,{}).get('gate') for a in HYBRID_ARMS[:3])):raise ValueError('unjustified learning pass')
+                    out['readout']={'status':r['status'],'engineering_pass':r['engineering_pass'],'learning_pass':r['learning_pass'],
+                        'summaries':cells(r['summaries'],arms,n),'by_scale':{s:cells(r['by_scale'][s],arms,n//2) for s in ['325','500']},
+                        'contrasts':contrasts,'errors':len(r['errors']),'unverified_unsat_cells':count(r['unverified_unsat_cells'],n*len(arms)),
+                        'sha256':hashlib.sha256(payload).hexdigest()}
+            result['stages'][stage]=out
+        if (root/'SELECTION.json').exists():
+            raw=(root/'SELECTION.json').read_bytes();s=json.loads(raw)
+            if s['engineering'] not in [None,*HYBRID_ARMS[1:3]] or s['cap'] not in [None,*HYBRID_ARMS[3:]]:raise ValueError('unknown selected arm')
+            result['selection']={'engineering':s['engineering'],'cap':s['cap'],'sha256':hashlib.sha256(raw).hexdigest()}
+        return result if result['stages'] else None
+    except (OSError,ValueError,TypeError,KeyError):return None
+
 def load_performance_plan():
     raw=(HERE/'performance_plan.json').read_bytes()
     plan=json.loads(raw)
@@ -295,6 +356,7 @@ def main():
     data['comparison']=comparison_progress(args.repo.resolve())
     data['performance_plan']=load_performance_plan()
     data['pilot']=pilot_progress(args.repo.resolve())
+    data['hybrid']=hybrid_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

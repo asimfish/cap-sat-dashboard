@@ -5,17 +5,18 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS
+from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS
 
 class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),6)
+        self.assertEqual(len(plan['actions']),7)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
         self.assertIn('E26',actions['A3']['status'])
+        self.assertIn('E27',actions['A6']['status'])
         self.assertTrue(all(actions[a]['status']=='计划中 · 未启动' for a in ['A1','A2','A4','A5']))
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
@@ -50,6 +51,27 @@ class CollectorTests(unittest.TestCase):
             self.assertEqual(result['readout']['errors'],1);self.assertNotIn('private',json.dumps(result))
             report['status']='promising_requires_independent_confirmation'
             (root/'RESULTS.json').write_text(json.dumps(report));self.assertIsNone(pilot_progress(repo))
+
+    def test_hybrid_separates_stages_and_omits_private_fields(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/performance_hybrid_20260912_e27';folder=root/'dev';folder.mkdir(parents=True)
+            frozen=json.dumps({'arms':HYBRID_ARMS,'private_path':'/private/model'});h=hashlib.sha256(frozen.encode()).hexdigest()
+            (folder/'FROZEN.json').write_text(frozen)
+            status=dict(phase='running',observed='2026-09-12T10:00:00+00:00',target_rows=24,target_cells=120,
+                completed_rows=2,completed_cells=10,frozen_sha256=h,prepared_sha256='prepared',resources={'private':'host'})
+            def save_status(): (folder/'STATUS.json').write_text(json.dumps(status))
+            save_status();r=hybrid_progress(repo)
+            self.assertEqual(r['stages']['dev']['completed_cells'],10);self.assertNotIn('test',r['stages']);self.assertNotIn('private',json.dumps(r))
+            status['phase']='terminal';save_status();self.assertIsNone(hybrid_progress(repo))
+            status.update(completed_rows=24,completed_cells=120);save_status();self.assertEqual(hybrid_progress(repo)['stages']['dev']['phase'],'awaiting_readout')
+            def summaries(n):return {a:dict(verified_par2_s=12,reported_par2_s=12,verified_solved=n//2,sls_solved=n//4,fallback_solved=n//4) for a in HYBRID_ARMS}
+            report=dict(frozen_sha256=h,prepared_sha256='prepared',rows=24,cells=120,status='development_complete',engineering_pass=False,learning_pass=False,
+                        summaries=summaries(24),by_scale={s:summaries(12) for s in ['325','500']},errors=['private failure'],unverified_unsat_cells=0,contrasts={})
+            def save_report(): (folder/'RESULTS.json').write_text(json.dumps(report))
+            save_report();r=hybrid_progress(repo)
+            self.assertEqual(r['stages']['dev']['readout']['errors'],1);self.assertNotIn('private',json.dumps(r))
+            report['engineering_pass']=True;save_report();self.assertIsNone(hybrid_progress(repo))
+            report['engineering_pass']=False;report['summaries']['stock']['sls_solved']=999;save_report();self.assertIsNone(hybrid_progress(repo))
             report['status']='no_confirmed_positive_effect'
             report['summaries']['stock']['verified_par2_s']=float('nan')
             (root/'RESULTS.json').write_text(json.dumps(report));self.assertIsNone(pilot_progress(repo))
