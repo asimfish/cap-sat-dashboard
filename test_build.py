@@ -5,9 +5,23 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress
+from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_conservative_training_privacy_and_counts(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/conservative_search_20260913_e29';(root/'train').mkdir(parents=True)
+            (root/'train/FROZEN.json').write_text('{}');h=hashlib.sha256(b'{}').hexdigest()
+            state=dict(phase='running',observed='2026-09-13T00:00:00Z',completed_cells=1024,target_cells=18432,workers=32,frozen_sha256=h,private_host='secret')
+            (root/'TRAIN_STATUS.json').write_text(json.dumps(state));out=conservative_progress(repo)
+            self.assertEqual(out['training']['completed_cells'],1024);self.assertNotIn('secret',json.dumps(out));self.assertFalse(out['stages'])
+            state['phase']='terminal';(root/'TRAIN_STATUS.json').write_text(json.dumps(state));self.assertIsNone(conservative_progress(repo))
+            state['completed_cells']=18432;(root/'TRAIN_STATUS.json').write_text(json.dumps(state))
+            trained=dict(training_cells=18432,train_frozen_sha256=h,selected={a:dict(fitness=200000,solved=96,trials=192,weights=[1,2,3,0]) for a in ['cheap','cap']})
+            (root/'TRAINED.json').write_text(json.dumps(trained));out=conservative_progress(repo)
+            self.assertEqual(out['training']['readout']['summaries']['cheap']['solved'],96);self.assertNotIn('weights',json.dumps(out))
+            trained['selected']['cap']['fitness']=float('nan');(root/'TRAINED.json').write_text(json.dumps(trained));self.assertIsNone(conservative_progress(repo))
+
     def test_utility_allowlist_and_terminal_identity(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/utility_ranker_20260913_e28';folder=root/'dev';folder.mkdir(parents=True)
@@ -31,13 +45,14 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),7)
+        self.assertEqual(len(plan['actions']),8)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
         self.assertIn('E26',actions['A3']['status'])
         self.assertIn('E27',actions['A6']['status'])
         self.assertIn('E28',actions['A4']['status'])
+        self.assertIn('E29',actions['A7']['status'])
         self.assertTrue(all(actions[a]['status']=='计划中 · 未启动' for a in ['A1','A2','A5']))
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)

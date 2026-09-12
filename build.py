@@ -364,6 +364,57 @@ def utility_progress(repo):
         return result
     except (OSError,ValueError,TypeError,KeyError):return None
 
+def conservative_progress(repo):
+    """E29 aggregate contract: search trials are not independent instances."""
+    root=repo/'experiments/conservative_search_20260913_e29'
+    def num(x,lo=0,hi=10,integer=False):
+        if type(x) not in (int,float) or not math.isfinite(x) or not lo<=x<=hi or (integer and type(x) is not int):raise ValueError('E29 metric')
+        return x
+    def sm(value,arms,n):
+        if set(value)!=set(arms):raise ValueError('E29 arms')
+        return {a:{'solved':num(value[a]['solved'],0,n,True),'par2_s':num(value[a]['par2_s']),
+            'sls_solved':num(value[a]['sls_solved'],0,value[a]['solved'],True)} for a in arms}
+    try:
+        if not (root/'TRAIN_STATUS.json').exists():return None
+        raw=(root/'train/FROZEN.json').read_bytes();h=hashlib.sha256(raw).hexdigest();state=json.loads((root/'TRAIN_STATUS.json').read_text())
+        if state['frozen_sha256']!=h or state['phase'] not in ['running','failed','terminal'] or state['target_cells']!=18432:raise ValueError('E29 train identity')
+        train={'phase':state['phase'],'observed':state['observed'],'completed_cells':num(state['completed_cells'],0,18432,True),'target_cells':18432,
+            'workers':num(state['workers'],1,32,True),'frozen_sha256':h,'readout':None}
+        if state['phase']=='terminal':
+            if state['completed_cells']!=18432:raise ValueError('partial training terminal')
+            raw=(root/'TRAINED.json').read_bytes();trained=json.loads(raw)
+            if trained['train_frozen_sha256']!=h or trained['training_cells']!=18432:raise ValueError('trained identity')
+            train['readout']={'sha256':hashlib.sha256(raw).hexdigest(),'summaries':{a:{'fitness_flips':num(trained['selected'][a]['fitness'],0,400000),
+                'solved':num(trained['selected'][a]['solved'],0,192,True),'trials':num(trained['selected'][a]['trials'],192,192,True)} for a in ['cheap','cap']}}
+        result={'training':train,'stages':{},'selection':None}
+        for stage,instances in [('dev',96),('test',192)]:
+            folder=root/stage
+            if not (folder/'STATUS.json').exists():continue
+            raw=(folder/'FROZEN.json').read_bytes();cfg=json.loads(raw);h=hashlib.sha256(raw).hexdigest();s=json.loads((folder/'STATUS.json').read_text());arms=cfg['arms'];n=instances*3
+            allowed=['stock','random','hand','learned_cheap','learned_cap']
+            if (stage=='dev' and arms!=allowed) or (stage=='test' and arms not in [allowed,allowed[:-1]]):raise ValueError('E29 stage arms')
+            if s['frozen_sha256']!=h or s['phase'] not in ['running','failed','terminal'] or s['instances']!=instances or s['target_rows']!=n or s['target_cells']!=n*len(arms):raise ValueError('E29 stage identity')
+            x={'phase':s['phase'],'observed':s['observed'],'instances':instances,'target_rows':n,'target_cells':n*len(arms),
+                'completed_rows':num(s['completed_rows'],0,n,True),'completed_cells':num(s['completed_cells'],0,n*len(arms),True),'frozen_sha256':h,'readout':None}
+            if s['phase']=='terminal':
+                if s['completed_rows']!=n or s['completed_cells']!=n*len(arms):raise ValueError('partial E29 terminal')
+                x['phase']='awaiting_readout'
+                if (folder/'RESULTS.json').exists():
+                    raw=(folder/'RESULTS.json').read_bytes();r=json.loads(raw)
+                    if r['frozen_sha256']!=h or r['prepared_sha256']!=s['prepared_sha256'] or r['instances']!=instances or r['trials']!=n or r['cells']!=n*len(arms):raise ValueError('E29 readout identity')
+                    if type(r['confirmed']) is not bool or (stage=='dev' and r['confirmed']):raise ValueError('E29 false confirmation')
+                    if stage=='test' and cfg['selection_sha256']!=hashlib.sha256((root/'SELECTION.json').read_bytes()).hexdigest():raise ValueError('E29 selection drift')
+                    if r['confirmed'] and (r['errors'] or not r['contrasts'] or not all(c['gate'] for c in r['contrasts'].values())):raise ValueError('unsupported E29 gate')
+                    x.update(phase='terminal',readout={'sha256':hashlib.sha256(raw).hexdigest(),'errors':len(r['errors']),'confirmed':r['confirmed'],
+                        'summaries':sm(r['summaries'],arms,n),'by_scale':{z:sm(r['by_scale'][z],arms,n//2) for z in ['325','500']}})
+            result['stages'][stage]=x
+        if (root/'SELECTION.json').exists():
+            s=json.loads((root/'SELECTION.json').read_text())
+            if s['selected'] not in [None,'learned_cheap','learned_cap'] or s['development_sha256']!=hashlib.sha256((root/'dev/RESULTS.json').read_bytes()).hexdigest():raise ValueError('E29 selection')
+            result['selection']={'selected':s['selected'],'stopped':s['selected'] is None}
+        return result
+    except (OSError,ValueError,KeyError,TypeError):return None
+
 def load_performance_plan():
     raw=(HERE/'performance_plan.json').read_bytes()
     plan=json.loads(raw)
@@ -436,6 +487,7 @@ def main():
     data['pilot']=pilot_progress(args.repo.resolve())
     data['hybrid']=hybrid_progress(args.repo.resolve())
     data['utility']=utility_progress(args.repo.resolve())
+    data['conservative']=conservative_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

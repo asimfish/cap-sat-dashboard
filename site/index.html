@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-12T20:59:47.157961+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-12T21:25:52.901601+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -17,8 +17,9 @@
 <section id="comparison"><h2>正式原生比较 · 当前进度</h2><div id="comparison-progress" class="panel"></div><p class="muted">619 个实例 × 2 后端 × 6 臂。300 个新随机 n200、300 个复用 n350、19 个复用工业实例；复用数据不算新的独立覆盖。每臂 60 秒墙钟预算；单个训练检查点、训练预算不同。完成行数不代表验收或方法获胜。</p></section>
 <section id="native-results"><h2>原生比较 · 全量结果</h2><div class="toolbar"><label for="cohort">问题族</label><select id="cohort"><option value="fresh_n200">新随机 n200 · 300</option><option value="existing_n350">复用 n350 · 300</option><option value="existing_industrial19">复用工业 · 19</option></select><label for="backend">后端</label><select id="backend"><option value="glucose">Glucose / RLAF</option><option value="kissat">Kissat / NeuroBack</option></select><label for="stratum">子集</label><select id="stratum"><option>ALL</option><option>SAT</option><option>UNSAT</option><option>UNKNOWN</option></select><label for="policy">计分口径</label><select id="policy"><option value="verified">独立核验 · 保守计分</option><option value="reported">求解器原始报告</option></select></div><div class="table"><table><thead><tr><th>方法</th><th>实例</th><th>已核验求解</th><th>未核验 UNSAT</th><th>PAR-2 / 秒 ↓</th><th>相对 CAP 收益 / 秒</th><th>95% 簇区间</th></tr></thead><tbody id="native-result-list"></tbody></table></div><p class="muted">保守计分：未验证 UNSAT 与超时均按 120 秒；原始报告计分保留求解器报告耗时，不等于证明验证通过。收益 = 该方法 − CAP，正值有利于 CAP。区间按生成簇 / 工业家族重采样，单检查点、未做多重比较校正；分层标签条件于原始审计。补充验证不回写原始计分。</p><p id="native-audit-source" class="foot"></p></section>
 <section id="utility"><h2>E28 · 直接学习翻转收益</h2><p class="alert">短程预测变好，不等于求解性能变好。只用廉价特征的学习模型与额外使用 CAP 的同构模型分开验收。</p><p class="muted">48 训练 + 16 验证，三个小模型种子组成固定集成，不是三次独立性能复现。24 新开发实例；过门才生成 48 新确认。每臂 5 秒全成本、0.25 秒预处理含 CAP 推理，不能与 E27 的 10 秒 PAR-2 横向混算；只覆盖随机 3-SAT n325 / n500。</p><div id="utility-progress"></div></section>
+<section id="conservative"><h2>E29 · 用完整求解轨迹训练保守策略</h2><p class="alert">固定 min-break 规则，保留随机探索；学习器只调整平局动作权重。训练适应度不是端到端加速，CAP 必须额外胜过同预算廉价模型。</p><p class="muted">96 个新训练公式，两个策略类各 3 轮 × 16 候选 × 2 搜索种子，共 18,432 单元，最多 32 路 CPU。开发 96 新公式 × 3 搜索种子 × 5 臂，8 路固定 CPU、每臂 5 秒全成本；过门才生成 192 新确认公式。训练与正式计时分开运行，不抢占已有 GPU 任务。搜索种子重复不算新增独立实例。</p><div class="toolbar"><a href="#action-A7">计划与验收规则 ↗</a><label for="conservative-scale">表格规模</label><select id="conservative-scale"><option value="ALL">全部规模</option><option value="325">n325</option><option value="500">n500</option></select></div><div id="conservative-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-12T20:59:47.157961+00:00",
+  "generated": "2026-09-12T21:25:52.901601+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3096,7 +3097,8 @@
         "directions": [
           "A3",
           "A4",
-          "A6"
+          "A6",
+          "A7"
         ],
         "source": "rebuttal 等成本比较与多解参考准确率限制",
         "evidence_level": "问题已实测；收益对齐训练为未验证假设"
@@ -3254,9 +3256,24 @@
         "method": "C++ 维护子句真值与 break 数，0.25 秒总预处理预算包括神经推理；比较默认、随机修复、极性软引导、CAP 热启动、CAP 软引导。24 个新开发实例选至多一个 CAP 和一个工程方案，冻结后才生成 48 个新确认实例。未找到解不注入相位；每个 SAT 赋值检查原始公式。",
         "gate": "工程门：独立确认比默认至少低 5% PAR-2，同时区间下界 >0，求解数不减少，两个规模点估计均不受损。学习门另需胜过原廉价修复及两组精确匹配热启动/重启方式的随机和极性控制。补充条件在确认读出前冻结，联合采用六项比较校正；不能用工程门替代学习门。",
         "stop": "终态：随机修复 19/48、PAR-2 12.109 秒；默认 15/48、14.676 秒。收益 2.567 秒，同时区间 [0.809,4.510]，两个规模均未损失求解数。CAP 17/48、13.107 秒，未胜过廉价对照；补充精确匹配控制按条件跳过，不补造结果。停止这批数据上的调参；工业泛化及原始学习贡献仍未解决。"
+      },
+      {
+        "id": "A7",
+        "title": "直接用求解轨迹训练保守随机策略",
+        "priority": "P1 · 当前试验",
+        "status": "E29 已启动 · 日志进度见独立面板",
+        "cost": "最多 32 路 CPU 训练，8 路固定 CPU 完整评测；无 GPU 抢占",
+        "depends_on": [
+          "A4",
+          "A6"
+        ],
+        "hypothesis": "短程代理收益与求解脱节、学习评分过慢；保留 min-break 和随机探索，用完整有界求解轨迹优化四个标量参数，可能获得真正的净收益。",
+        "method": "两个匹配策略类各 3 轮 × 16 候选，在 96 个新训练公式 × 2 搜索种子上直接优化成功率与翻转成本，共 18,432 单元。非噪声分支只在最小 break 平局中随机加权，权重限制为 0.5–2；结构得分缓存，不逐步调用网络。冻结后在 96 个新开发公式 × 3 种子比较默认、随机、固定 recency 规则和两个学习策略，共 1,440 单元。",
+        "gate": "开发完整 PAR-2 必须同时超过默认、随机和固定廉价规则至少 3%，每个规模和搜索种子都不受损；过门才生成 192 个新确认公式，采用联合区间及 5% 实际收益门槛。CAP 必须额外胜过相同训练预算的廉价模型；三搜索种子不冒充三训练种子。",
+        "stop": "训练成本以翻转计，性能验收以 5 秒完整墙钟 PAR-2 计，不混为一谈；开发无候选就停止，不能在这批数据上继续挑参数。GPU 已有任务，本轮计算负载适合 CPU；不为提高利用率而干扰其他进程或污染正式计时。"
       }
     ],
-    "sha256": "1a41498cb914a6c3a0727c6deaee9f30d968ed615da63e4947aeeec7032f1416"
+    "sha256": "2a39cfd8b6734049dc103a05d9f2c2334c79a1db414419cc0d60f046b47e970f"
   },
   "pilot": {
     "id": "E26",
@@ -3711,6 +3728,45 @@
       "selected": null,
       "stopped": true
     }
+  },
+  "conservative": {
+    "training": {
+      "phase": "terminal",
+      "observed": "2026-09-12T21:20:12.881626+00:00",
+      "completed_cells": 18432,
+      "target_cells": 18432,
+      "workers": 32,
+      "frozen_sha256": "678e052d5abff8ebeadba3bbfbcd64654a5f1c51511e12e79fb17d2f78bde729",
+      "readout": {
+        "sha256": "0067ed639efe2331ea5ea883731a6e1444b3169b7dc33d7966245cb47709a549",
+        "summaries": {
+          "cheap": {
+            "fitness_flips": 280187.21875,
+            "solved": 65,
+            "trials": 192
+          },
+          "cap": {
+            "fitness_flips": 285768.9322916667,
+            "solved": 61,
+            "trials": 192
+          }
+        }
+      }
+    },
+    "stages": {
+      "dev": {
+        "phase": "running",
+        "observed": "2026-09-12T21:25:53.089459+00:00",
+        "instances": 96,
+        "target_rows": 288,
+        "target_cells": 1440,
+        "completed_rows": 98,
+        "completed_cells": 504,
+        "frozen_sha256": "10a6d66abf4e9f51def9eb6b6d4e300726462530078adf367b278a5a0bd47a57",
+        "readout": null
+      }
+    },
+    "selection": null
   }
 }</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
@@ -3719,6 +3775,7 @@ const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 function render(){
  renderHybrid();
  renderUtility();
+ renderConservative();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -3769,6 +3826,22 @@ function render(){
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
 }
+function renderConservative(){
+ const u=data.conservative,target=document.getElementById('conservative-progress');
+ if(!u){target.textContent='暂无有效 E29 记录；不推断正在运行。';return;}
+ const stale=x=>{const a=(Date.now()-Date.parse(x.observed))/60000;return !Number.isFinite(a)||a>5||a< -1;};
+ const t=u.training,s=u.selection,labels={stock:'默认 CaDiCaL',random:'随机修复',hand:'固定廉价 recency 规则',learned_cheap:'学习策略 · 廉价特征',learned_cap:'学习策略 · 加入 CAP'};
+ const trainState=t.phase==='terminal'?'策略训练完成 · 尚不代表优势':t.phase==='failed'?'训练失败 · 待排查':stale(t)?'训练记录陈旧 · 运行态未知':'训练近期有进度';
+ const trained=t.readout?`<p>训练集最终适应度（惩罚翻转次数，越低越好）：${Object.entries(t.readout.summaries).map(([a,v])=>`${a==='cheap'?'廉价':'CAP'} ${v.fitness_flips.toFixed(0)}，解出 ${v.solved}/${v.trials} 次轨迹`).join('；')}。此处不是秒，也不是独立测试。</p>`:'';
+ const choice=s?`<p class="alert">${s.stopped?'开发门未通过 · 不生成确认集。':'冻结开发选择：'+esc(labels[s.selected])+'；仍需独立确认。'}</p>`:'';
+ const scale=document.getElementById('conservative-scale').value;
+ target.innerHTML=`<article class="panel"><h3>${esc(trainState)}</h3><p><progress max="18432" value="${t.completed_cells}"></progress> ${t.completed_cells}/18432 训练单元 · 最大 ${t.workers} 路</p>${trained}</article>`+choice+Object.entries(u.stages).map(([stage,x])=>{
+  const r=x.readout,sm=r?(scale==='ALL'?r.summaries:r.by_scale[scale]):null,n=scale==='ALL'?x.target_rows:x.target_rows/2;
+  const state=r?(stage==='dev'?'开发统计完成':r.confirmed?'局部确认通过 · 保留边界':'确认门未通过'):x.phase==='failed'?'失败 · 待排查':x.phase==='awaiting_readout'?'求解结束 · 等待统计':stale(x)?'进度陈旧 · 运行态未知':'近期有进度 · 尚无结论';
+  const table=sm?`<div class="table"><table><thead><tr><th>方法</th><th>已校验 SAT / 种子重复次数</th><th>全成本 PAR-2 秒 ↓</th><th>修复直接解出</th></tr></thead><tbody>${Object.entries(sm).map(([a,v])=>`<tr><td>${esc(labels[a])}</td><td>${v.solved}/${n}</td><td class="number">${v.par2_s.toFixed(3)}</td><td>${v.sls_solved}</td></tr>`).join('')}</tbody></table></div>`:'<p>完整阶段统计前不展示排名。</p>';
+  return `<article class="panel" data-stage="${stage}"><h3>${stage==='dev'?'开发集':'独立确认集'} · ${esc(state)}</h3><p><progress max="${x.target_cells}" value="${x.completed_cells}"></progress> ${x.completed_cells}/${x.target_cells} 单元 · ${x.completed_rows}/${x.target_rows} 种子重复 · ${x.instances} 个独立公式</p>${table}${r?`<p>错误 ${r.errors}；超时、未知、未佐证 UNSAT 均不计成功。</p>`:''}<p class="foot">冻结 ${esc(x.frozen_sha256)}${r?' · 读出 '+esc(r.sha256):''}</p></article>`;
+ }).join('');
+}
 function renderUtility(){
  const u=data.utility,target=document.getElementById('utility-progress');
  if(!u){target.textContent='暂无有效 E28 记录；不推断正在运行。';return;}
@@ -3798,7 +3871,7 @@ function renderHybrid(){
   return `<article class="panel" style="margin-bottom:16px" data-stage="${stage}"><h3>${stage==='dev'?'开发集':'独立确认集'} · ${esc(state)}</h3><p><progress max="${x.target_cells}" value="${x.completed_cells}"></progress> ${x.completed_cells}/${x.target_cells} 单元 · ${x.completed_rows}/${x.target_rows} 完整实例</p><p class="muted">最后进度记录 ${esc(x.observed)}</p>${table}${r?`<p>错误 ${r.errors} · 未佐证 UNSAT ${r.unverified_unsat_cells}；未解实例保持未知。</p>`:''}${comparisons?`<p class="muted">总体主比较同时区间，不随上方规模筛选变化；正值有利于候选。${esc(comparisons)}</p>`:''}<p class="foot">冻结 SHA256 ${esc(x.frozen_sha256)}${r?' · 读出 '+esc(r.sha256):''}</p></article>`;
  }).join('');
 }
-for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale'])document.getElementById(id).addEventListener('change',render);
+for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale','conservative-scale'])document.getElementById(id).addEventListener('change',render);
 async function refresh(){try{const response=await fetch('status.json?t='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error();const incoming=await response.json();if(incoming.runs&&incoming.results&&incoming.source_sha256){data=incoming;render();}}catch{render();document.getElementById('freshness').textContent+=' · 离线 / 更新失败，显示已有快照';}}
 render();if(location.protocol!=='file:'){refresh();setInterval(refresh,60000);}
 </script></body></html>
