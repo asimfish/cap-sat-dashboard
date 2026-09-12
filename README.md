@@ -34,7 +34,7 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Seven actions have dependencies, costs, acceptance and stopping rules. Their
+Eight actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
@@ -62,6 +62,15 @@ learning benefit over matched cheap repairs. Passing one is not passing the
 other. Per-scale tables retain all denominators; displayed simultaneous contrast
 intervals always refer to the overall prespecified comparison, not the selected
 scale. Only complete stage readouts are ranked; all published fields are allowlisted.
+
+E28 records a rejected short-rollout utility model, with no confirmation panel.
+E29 separately records direct capped-solve policy optimization:18432 training
+cells,96 development formulas x3 search-seed repetitions, and conditional192
+fresh confirmation formulas. Training fitness is penalized flips, not seconds.
+Full-cost tables show repeated search trials, not inflated independent-instance
+counts. Published E29 data exclude policy coefficients and private CPU affinity.
+New functionality remains linked to A7; neither a completed run nor a lower
+training fitness automatically upgrades a scientific gap to solved.
 
 Only complete, error-free 300-row seeds enter metrics. Invalid indices,
 non-finite times, arm errors, conflicting duplicate rows, differing CNF paths,

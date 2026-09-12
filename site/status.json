@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-12T21:25:52.901601+00:00",
+  "generated": "2026-09-12T21:30:01.666781+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3736,12 +3736,12 @@
     "stages": {
       "dev": {
         "phase": "running",
-        "observed": "2026-09-12T21:25:53.089459+00:00",
+        "observed": "2026-09-12T21:30:02.272946+00:00",
         "instances": 96,
         "target_rows": 288,
         "target_cells": 1440,
-        "completed_rows": 98,
-        "completed_cells": 504,
+        "completed_rows": 216,
+        "completed_cells": 1100,
         "frozen_sha256": "10a6d66abf4e9f51def9eb6b6d4e300726462530078adf367b278a5a0bd47a57",
         "readout": null
       }

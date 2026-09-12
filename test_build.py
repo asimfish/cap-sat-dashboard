@@ -8,6 +8,21 @@ from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_conservative_dev_trial_denominator_and_confirmation_guard(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/conservative_search_20260913_e29';(root/'train').mkdir(parents=True);folder=root/'dev';folder.mkdir()
+            (root/'train/FROZEN.json').write_text('{}');th=hashlib.sha256(b'{}').hexdigest()
+            (root/'TRAIN_STATUS.json').write_text(json.dumps(dict(phase='running',observed='2026-09-13T00:00:00Z',completed_cells=0,target_cells=18432,workers=32,frozen_sha256=th)))
+            arms=['stock','random','hand','learned_cheap','learned_cap'];frozen=json.dumps(dict(arms=arms));h=hashlib.sha256(frozen.encode()).hexdigest();(folder/'FROZEN.json').write_text(frozen)
+            s=dict(phase='terminal',observed='2026-09-13T00:00:00Z',instances=96,completed_rows=288,target_rows=288,completed_cells=1440,target_cells=1440,frozen_sha256=h,prepared_sha256='prep')
+            (folder/'STATUS.json').write_text(json.dumps(s))
+            def sm(n):return {a:dict(solved=n//2,par2_s=5,sls_solved=n//3) for a in arms}
+            r=dict(instances=96,trials=288,cells=1440,frozen_sha256=h,prepared_sha256='prep',confirmed=False,errors=[],summaries=sm(288),by_scale={z:sm(144) for z in ['325','500']})
+            (folder/'RESULTS.json').write_text(json.dumps(r));out=conservative_progress(repo)['stages']['dev']
+            self.assertEqual(out['instances'],96);self.assertEqual(out['target_rows'],288);self.assertEqual(out['readout']['summaries']['random']['solved'],144)
+            r['confirmed']=True;(folder/'RESULTS.json').write_text(json.dumps(r));self.assertIsNone(conservative_progress(repo))
+            r['confirmed']=False;r['summaries']['random']['solved']=144.5;(folder/'RESULTS.json').write_text(json.dumps(r));self.assertIsNone(conservative_progress(repo))
+
     def test_conservative_training_privacy_and_counts(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/conservative_search_20260913_e29';(root/'train').mkdir(parents=True)
