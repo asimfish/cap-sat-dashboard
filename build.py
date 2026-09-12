@@ -162,6 +162,31 @@ def comparison_audit(repo):
     except (OSError,ValueError,KeyError,TypeError):
         return None
 
+def load_performance_plan():
+    raw=(HERE/'performance_plan.json').read_bytes()
+    plan=json.loads(raw)
+    if {g['id'] for g in plan['gaps']}!={f'P{i}' for i in range(1,8)} or len(plan['gaps'])!=7:
+        raise ValueError('expected seven unique performance gaps')
+    actions={a['id'] for a in plan['actions']}
+    if len(actions)!=len(plan['actions']):
+        raise ValueError('duplicate action ID')
+    for gap in plan['gaps']:
+        if gap['state'] not in ['部分改善','未解决','已解决'] or not set(gap['directions'])<=actions:
+            raise ValueError('invalid gap state or action reference')
+        for key in ['title','progress','remaining','source','evidence_level']:
+            if not isinstance(gap[key],str) or not gap[key].strip():
+                raise ValueError('missing gap description')
+    seen=set()
+    for action in plan['actions']:
+        if not set(action['depends_on'])<=seen:
+            raise ValueError('actions must be acyclic and dependency ordered')
+        seen.add(action['id'])
+        for key in ['title','priority','status','cost','hypothesis','method','gate','stop']:
+            if not isinstance(action[key],str) or not action[key].strip():
+                raise ValueError('missing action description')
+    plan['sha256']=hashlib.sha256(raw).hexdigest()
+    return plan
+
 def collect(repo):
     runs, truth, identities = [], {}, {}
     digest = hashlib.sha256()
@@ -205,6 +230,7 @@ def main():
     args = parser.parse_args()
     data = collect(args.repo.resolve())
     data['comparison']=comparison_progress(args.repo.resolve())
+    data['performance_plan']=load_performance_plan()
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

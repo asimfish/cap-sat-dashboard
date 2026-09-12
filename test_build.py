@@ -5,9 +5,38 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit
+from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan
 
 class CollectorTests(unittest.TestCase):
+    def test_performance_plan_coverage_and_no_false_running(self):
+        plan=load_performance_plan()
+        self.assertEqual(len(plan['gaps']),7)
+        self.assertEqual(len(plan['actions']),6)
+        self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
+        self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
+        self.assertTrue(all(a['status']=='计划中 · 未启动' for a in plan['actions']))
+        self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
+        payload=json.dumps(plan,ensure_ascii=False)
+        for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:
+            self.assertNotIn(private,payload)
+
+    def test_plan_rejects_missing_gap_and_unknown_action(self):
+        plan=load_performance_plan()
+        for mutated in [dict(plan,gaps=plan['gaps'][:-1]),copy.deepcopy(plan)]:
+            if len(mutated['gaps'])==7:
+                mutated['gaps'][0]['directions']=['unknown']
+            with patch.object(Path,'read_bytes',return_value=json.dumps(mutated).encode()):
+                with self.assertRaises(ValueError):load_performance_plan()
+
+    def test_plan_rejects_cycles_and_missing_gate(self):
+        plan=load_performance_plan()
+        for mode in ['cycle','gate']:
+            mutated=copy.deepcopy(plan)
+            if mode=='cycle':mutated['actions'][0]['depends_on']=['A5']
+            else:mutated['actions'][0]['gate']=''
+            with patch.object(Path,'read_bytes',return_value=json.dumps(mutated).encode()):
+                with self.assertRaises(ValueError):load_performance_plan()
+
     def test_terminal_aggregate_allowlist(self):
         cell={'n':300,'verified_solved':290,'unverified_unsat':10,'reported_par2_s':2,'verified_par2_s':3,'private_path':'/secret'}
         backends={b:{a:cell for a in ['stock','native','capsat_standing_adapter','polarity_initial','polarity_standing','walksat_standing']} for b in ['glucose','kissat']}

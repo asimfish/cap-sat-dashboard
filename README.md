@@ -30,6 +30,19 @@ an exporter must separately regenerate and publish it. Browser refresh alone
 cannot read private experiment files. The displayed export freshness is not a
 process heartbeat; last log timestamps are shown independently.
 
+## Performance roadmap
+
+`performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
+Each gap separates observed progress, remaining limitations and source maturity.
+Six proposed actions have dependencies, costs, acceptance and stopping rules.
+All new actions currently say planned, not running; historical K%-phase results
+require row-level reconciliation before promotion to confirmed performance gains.
+The roadmap's review date and SHA256 are separate from live export freshness.
+Edit this JSON, rebuild and publish; the browser filters partial progress versus
+unresolved gaps and links each gap to its proposed experiments. The private
+discussion attachment, reviewer identities and confidential correspondence are
+not published. Publishing a plan does not authorize or launch an experiment.
+
 Only complete, error-free 300-row seeds enter metrics. Invalid indices,
 non-finite times, arm errors, conflicting duplicate rows, differing CNF paths,
 and contradictory SAT/UNSAT outcomes are rejected or excluded. Identity checking

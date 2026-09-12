@@ -1,20 +1,21 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-12T07:52:57.262694+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-12T08:25:59.600335+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
-</style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#next">05 · 下一步</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
+</style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#performance-plan">05 · 性能改进计划</a><a href="#next">06 · 论文与审计</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
 <section id="issues"><h2>缺点解决情况</h2><div class="toolbar"><label for="filter">筛选</label><select id="filter"><option value="all">所有问题</option><option value="open">仍待解决</option><option value="closed">已修复 / 负结果关闭</option></select></div><div id="issue-list" class="issues"></div></section>
 <section id="runs"><h2>实验完成度 <span class="muted">E17 / E19 · n = 350</span></h2><div class="table"><table><thead><tr><th>实验</th><th>种子</th><th>有效实例行</th><th>状态</th><th>最近日志更新 UTC</th></tr></thead><tbody id="run-list"></tbody></table></div><p class="muted">每实例行包含 4 个求解器臂；每组计划 5 × 300 行。表中仅覆盖 E17/E19 n350；其他实验见缺点卡片。局部或校验失败的种子不进入结果汇总。</p></section>
 <section id="results"><h2>结果与边界</h2><div class="toolbar"><label for="group">实例子集</label><select id="group"><option>SAT</option><option>UNSAT</option><option>ALL</option></select><label for="comparator">对照</label><select id="comparator"><option value="default">原生 CaDiCaL</option><option value="polarity">Polarity</option><option value="walksat_equal">等成本 WalkSAT</option></select></div><div class="table"><table><thead><tr><th>模型</th><th>完整种子</th><th>实例 / 种子</th><th>PAR-2 收益 / 秒</th><th>95% 种子区间</th></tr></thead><tbody id="result-list"></tbody></table></div><p class="muted">收益 = 对照 PAR-2 − CAP-SAT PAR-2；正值有利于 CAP。超时按 2 × 600 秒惩罚。区间仅对种子重采样，条件于固定实例面板；不代表生成簇不确定性。SAT / UNSAT 标签取所有读取结果的确定性结论并集，未决实例仍保留在 ALL。</p><div class="panel"><b>解释时必须保留的限制</b><p>跨运行资源竞争影响 CPU 时间；frozen seed 1024 包含跨主机补跑，重新准备初始化成本。不同训练规模的时间差不能直接解释为训练的因果收益。工业与更大规模随机 SAT 的负结果仍成立。</p><p id="truth" class="muted"></p></div></section>
-<section id="next"><h2>下一步</h2><div class="panel"><p>① 原生训练已完成并验收；全成本比较及19例补充一致性佐证已完成；下一步由写作侧审阅E22–E25接口实验。</p><p>② 继续补严格引用审计、独立复核和更广泛泛化证据。</p><p>③ 后续新结果按版本化快照纳入论文；v28已纳入原生比较，账本记录排版更新至v30；E22–E25论文落地仍待审阅。</p><p class="muted">评测跑完不等于验证通过或方法获胜。工业 19 实例的负向结论仍保留。</p></div><p><a href="evidence.html">查看 2026-09-10 证据快照 ↗</a></p></section><div class="foot">来源：E17/E19 n350 solve_row records · <span id="sha"></span><br>开源面板 · MIT · 页面自含快照，联网每 60 秒检查聚合 JSON。数据导出停止时将显示陈旧提示。<br>结构参考 <a href="https://asimfish.github.io/psibot-dashboard/">PsiBot 进度看板</a>；未复制其代码或数据。</div>
+<section id="performance-plan"><h2>性能改进计划 · 七个缺口</h2><p id="plan-summary"></p><p id="plan-scope" class="muted"></p><div class="toolbar"><label for="plan-filter">性能状态</label><select id="plan-filter"><option value="all">全部七项</option><option value="部分改善">已有局部改善</option><option value="未解决">仍未解决</option></select></div><div id="performance-gaps" class="issues"></div><h2>下一步实验 · 先验收再扩展</h2><p class="alert" id="plan-success"></p><div id="performance-actions" class="issues"></div><details class="panel"><summary>共同约束与不重复劳动原则</summary><ul id="plan-constraints"></ul></details><p id="plan-source" class="foot"></p></section>
+<section id="next"><h2>论文与审计待办</h2><div class="panel"><p>① 原生训练已完成并验收；全成本比较及19例补充一致性佐证已完成；下一步由写作侧审阅E22–E25接口实验。</p><p>② 继续补严格引用审计、独立复核和更广泛泛化证据。</p><p>③ 后续新结果按版本化快照纳入论文；v28已纳入原生比较，账本记录排版更新至v30；E22–E25论文落地仍待审阅。</p><p class="muted">评测跑完不等于验证通过或方法获胜。工业 19 实例的负向结论仍保留。</p></div><p><a href="evidence.html">查看 2026-09-10 证据快照 ↗</a></p></section><div class="foot">来源：E17/E19 n350 solve_row records · <span id="sha"></span><br>开源面板 · MIT · 页面自含快照，联网每 60 秒检查聚合 JSON。数据导出停止时将显示陈旧提示。<br>结构参考 <a href="https://asimfish.github.io/psibot-dashboard/">PsiBot 进度看板</a>；未复制其代码或数据。</div>
 <section id="native"><h2>协作任务 · 原生基线训练</h2><div class="panel" id="native-progress"></div><p class="muted">写作 agent 负责训练与交接；面板只读核验。运行中记录超过 5 分钟未更新时显示未知；已核验的终态无需持续心跳。正式比较和补充一致性佐证已完成，原始计分保持不变。</p></section>
 <section id="comparison"><h2>正式原生比较 · 当前进度</h2><div id="comparison-progress" class="panel"></div><p class="muted">619 个实例 × 2 后端 × 6 臂。300 个新随机 n200、300 个复用 n350、19 个复用工业实例；复用数据不算新的独立覆盖。每臂 60 秒墙钟预算；单个训练检查点、训练预算不同。完成行数不代表验收或方法获胜。</p></section>
 <section id="native-results"><h2>原生比较 · 全量结果</h2><div class="toolbar"><label for="cohort">问题族</label><select id="cohort"><option value="fresh_n200">新随机 n200 · 300</option><option value="existing_n350">复用 n350 · 300</option><option value="existing_industrial19">复用工业 · 19</option></select><label for="backend">后端</label><select id="backend"><option value="glucose">Glucose / RLAF</option><option value="kissat">Kissat / NeuroBack</option></select><label for="stratum">子集</label><select id="stratum"><option>ALL</option><option>SAT</option><option>UNSAT</option><option>UNKNOWN</option></select><label for="policy">计分口径</label><select id="policy"><option value="verified">独立核验 · 保守计分</option><option value="reported">求解器原始报告</option></select></div><div class="table"><table><thead><tr><th>方法</th><th>实例</th><th>已核验求解</th><th>未核验 UNSAT</th><th>PAR-2 / 秒 ↓</th><th>相对 CAP 收益 / 秒</th><th>95% 簇区间</th></tr></thead><tbody id="native-result-list"></tbody></table></div><p class="muted">保守计分：未验证 UNSAT 与超时均按 120 秒；原始报告计分保留求解器报告耗时，不等于证明验证通过。收益 = 该方法 − CAP，正值有利于 CAP。区间按生成簇 / 工业家族重采样，单检查点、未做多重比较校正；分层标签条件于原始审计。补充验证不回写原始计分。</p><p id="native-audit-source" class="foot"></p></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-12T07:52:57.262694+00:00",
+  "generated": "2026-09-12T08:25:59.600335+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3036,12 +3037,220 @@
         }
       ]
     }
+  },
+  "performance_plan": {
+    "version": 1,
+    "reviewed": "2026-09-12",
+    "scope": "人工审读的性能计划：rebuttal 历史报告与九月后续实验分开陈列，不汇总不同样本、接口和预算。未启动新实验。",
+    "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
+    "constraints": [
+      "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
+      "开发集选择策略，冻结后才看独立测试集；已反复使用的 n350 与工业切片只能作回归，不能冒充新的确认性证据。",
+      "不得用最终 SAT/UNSAT 标签、参考赋值或测试结果决定是否调用模型、注入密度及触发阈值。",
+      "先锁定预算、主比较、成功与停止条件；多策略比较须控制选择偏差。新重型实验等待存储余量与独占计时资源核验。",
+      "门控、定时释放、稀疏注入与锚定均有历史尝试；只有明确不同的机制假设才进入新 pilot。"
+    ],
+    "gaps": [
+      {
+        "id": "P1",
+        "title": "端到端收益能否超过廉价基线",
+        "state": "部分改善",
+        "priority": "最高",
+        "progress": "历史 n250 全成本测试中，冲突数显著少于极性，但时间差区间跨零。九月原生比较的 n350 Glucose 对默认有收益，Kissat 不支持同样结论。",
+        "remaining": "尚无跨后端、跨问题族稳定优于默认及廉价对照的部署优势；小实例的预测成本仍可能超过搜索节省。",
+        "directions": [
+          "A0",
+          "A1",
+          "A2"
+        ],
+        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计",
+        "evidence_level": "历史报告 + 后续局部审计；不是普遍加速"
+      },
+      {
+        "id": "P2",
+        "title": "模型能否替代等成本测试时 WalkSAT",
+        "state": "部分改善",
+        "priority": "最高",
+        "progress": "历史随机 n250 测试胜过等成本 WalkSAT；SIMON 全向量在 CaDiCaL 上反而更差。后期 K% 测试报告过正向窗口，但口径须先复核。",
+        "remaining": "训练得到的先验能否稳定节省测试时计算，仍依赖分布和接口；不能用相位准确率代替完整成本比较。",
+        "directions": [
+          "A0",
+          "A1",
+          "A4"
+        ],
+        "source": "rebuttal 等成本 WalkSAT 与 K% 补充实验",
+        "evidence_level": "历史正负报告并存；K% 待行级复核"
+      },
+      {
+        "id": "P3",
+        "title": "相位质量与最终求解收益脱节",
+        "state": "未解决",
+        "priority": "高",
+        "progress": "已识别指标错位：SIMON 参考准确率更高仍可求解更慢；随机 3-SAT 初始未满足子句更少也不保证更快。",
+        "remaining": "还没有经独立测试证明的训练目标或置信度，能可靠预测何种相位会减少求解成本。识别问题不等于修复性能。",
+        "directions": [
+          "A3",
+          "A4"
+        ],
+        "source": "rebuttal 等成本比较与多解参考准确率限制",
+        "evidence_level": "问题已实测；收益对齐训练为未验证假设"
+      },
+      {
+        "id": "P4",
+        "title": "后端与注入密度敏感",
+        "state": "部分改善",
+        "priority": "最高",
+        "progress": "K% 稀疏注入已有历史正向点估计；E22/E24 锚定在所测 Kissat SAT 行缓解损害。但 E25 锚定未保留 crypto 的覆盖收益。",
+        "remaining": "不存在已验证的统一接口或求解前密度选择规则；不能把稀疏 saved-phase 与常驻覆盖、锚定的结果直接互换。",
+        "directions": [
+          "A0",
+          "A1",
+          "A3"
+        ],
+        "source": "rebuttal Kissat/K% 测试；E22–E25 READOUT",
+        "evidence_level": "局部缓解；单 seed 与接口适用范围保留"
+      },
+      {
+        "id": "P5",
+        "title": "工业及自然问题族迁移",
+        "state": "未解决",
+        "priority": "高",
+        "progress": "历史 43 例、10 家族测试出现负迁移；九月独立台账中的 19 例切片也未改变缺少正向迁移证据的结论。两套实例不合并。",
+        "remaining": "还没有可信的现实任务加速能力。共同监督的编码器对照也不能支持仅靠换大网络即可修复。",
+        "directions": [
+          "A5"
+        ],
+        "source": "rebuttal 工业/OOD 对照；E18；native_comparison_20260911_v1",
+        "evidence_level": "实测负结果；新问题族适配尚未开展"
+      },
+      {
+        "id": "P6",
+        "title": "规模及长搜索下的优势保持",
+        "state": "部分改善",
+        "priority": "高",
+        "progress": "E19 增加同分布训练规模后仍未普遍超过默认。E24 Kissat n400 锚定解出全部 141 个 SAT 实例，接近默认，但未建立学习增益；CaDiCaL 仍落后。",
+        "remaining": "缓解损害不等于超过廉价基线；更大规模、长程搜索与更难密码设置仍缺少稳定优势。",
+        "directions": [
+          "A1",
+          "A3",
+          "A5"
+        ],
+        "source": "rebuttal 规模与长程限制；E19；E24；密码难度扩展",
+        "evidence_level": "局部无损；规模与难度泛化未解决"
+      },
+      {
+        "id": "P7",
+        "title": "能否事先判断何时使用模型",
+        "state": "未解决",
+        "priority": "高",
+        "progress": "H_pol 已明确为描述性指标，不是收益保证。E25 探索的未满足子句比无法干净区分工业负例；未提出可部署阈值。",
+        "remaining": "尚无可靠的调用/弃用或密度选择规则；不能按最终 SAT/UNSAT 结果或已看过的测试集选接口。",
+        "directions": [
+          "A1",
+          "A3",
+          "A4"
+        ],
+        "source": "rebuttal 独立自然家族诊断；E25 门控读出",
+        "evidence_level": "选择规则缺口；尚无解决证据"
+      }
+    ],
+    "actions": [
+      {
+        "id": "A0",
+        "title": "复核历史 K% 的证据与口径",
+        "priority": "P0 · 先做",
+        "status": "计划中 · 未启动",
+        "cost": "只读审计，不重跑求解器",
+        "depends_on": [],
+        "hypothesis": "历史稀疏注入可能已有可复现优势，应先确认，避免重复发明或沿错误数字继续投入。",
+        "method": "追溯实例分母、种子/检查点映射、差值方向和百分比；核对真实注入语义、同密度对照、时间边界及簇区间。保留原始报告，另出更正对照。",
+        "gate": "每个保留的结果均能还原到完整配对行及来源哈希；不能核对的数字标为历史报告，不能作为确认性结论。",
+        "stop": "缺失原始记录或发现选择偏差时，不宣称突破；设计新的冻结复现，不能补造旧证据。"
+      },
+      {
+        "id": "A1",
+        "title": "冻结稀疏注入策略，做独立确认",
+        "priority": "P1 · 优先",
+        "status": "计划中 · 未启动",
+        "cost": "先小型开发集，过门后独立测试",
+        "depends_on": [
+          "A0"
+        ],
+        "hypothesis": "少量高置信相位可能比全向量更有用，但必须胜过同密度廉价对照，不能只靠少注入获益。",
+        "method": "开发集预先限定少数 K，包含 K=0 弃用；CAP、极性、随机及等成本 WalkSAT 使用匹配接口/密度。冻结一个主策略，在新实例与多种子上确认；分别保留各后端及问题族结论。",
+        "gate": "主目标群上全成本 PAR-2 对默认及预定廉价对照的收益区间均支持正向，且达到预先声明的实际改善门槛；求解数不得出现超过预定容忍度的损失。",
+        "stop": "若同密度廉价先验同样有效而 CAP 无残差，则归为接口收益，不声称学习成功；不按测试结果继续挑 K。"
+      },
+      {
+        "id": "A2",
+        "title": "测量并降低单实例预测开销",
+        "priority": "P1 · 可独立准备",
+        "status": "计划中 · 未启动",
+        "cost": "性能剖析；模型压缩需另定预算",
+        "depends_on": [],
+        "hypothesis": "部分搜索节省被构图、传输和推理吞掉；降低这些成本可能改善实际收益，但不会自动修复搜索退化。",
+        "method": "分别测冷启动与驻留模型的构图/传输/推理/求解成本；先排查重复处理，再评估小模型或 CPU 推理。禁止把批处理吞吐量冒充单实例加速。",
+        "gate": "语义及求解验证保持一致；端到端节省须超过测量不确定性，并同时报告廉价基线与所有开销。",
+        "stop": "若主要损失在求解阶段而非预测，不继续以工程降本代替方法修复。"
+      },
+      {
+        "id": "A3",
+        "title": "搜索停滞时短暂介入的诊断",
+        "priority": "P2 · 条件探索",
+        "status": "计划中 · 未启动",
+        "cost": "限额 pilot；尚无性能承诺",
+        "depends_on": [
+          "A0"
+        ],
+        "hypothesis": "基于在线搜索状态的一次有限介入，可能利用静态初始化错过的窗口；也可能仍不如默认继续搜索。",
+        "method": "先与 E11/E21 及既有稀疏/释放/锚定策略逐项去重。只用开发集选择停滞触发与介入长度；同一触发策略分别注入 CAP 和廉价先验，再归还控制，计入全部监测与推理成本。",
+        "gate": "CAP 同时超过默认继续搜索和同触发廉价先验，才进入独立确认。方法应明确标为动态指导变体，不回写原始 one-shot 主张。",
+        "stop": "若提升来自触发调度而非 CAP 内容，或只是重复既有失败方案，则停止学习收益主张。"
+      },
+      {
+        "id": "A4",
+        "title": "让训练目标对齐求解器收益",
+        "priority": "P2 · 后置",
+        "status": "计划中 · 未启动",
+        "cost": "较高，先有窗口证据再训练",
+        "depends_on": [
+          "A3"
+        ],
+        "hypothesis": "参考相位准确率与实际收益错位；训练集短程配对搜索信号可能比复制参考赋值更适合学习调用或相位策略。",
+        "method": "仅在训练集构造收益监督，独立验证集选模型；最终用完整求解成本验证，不能只优化短程冲突。增加极性、短程启发式及不使用神经模型的同信号控制。",
+        "gate": "冻结模型在未见实例上的完整成本超过原训练目标和廉价控制，跨训练种子复现；如使用求解器生成的收益信号，明确改变监督与方法定义。",
+        "stop": "若 A3 未发现可利用的内容增益窗口，先不扩大训练；短程目标提升但全程退化则判失败。"
+      },
+      {
+        "id": "A5",
+        "title": "先守住明确问题族，再验证规模与迁移",
+        "priority": "P3 · 确认后扩展",
+        "status": "计划中 · 未启动",
+        "cost": "需新的独立实例及资源预算",
+        "depends_on": [
+          "A1"
+        ],
+        "hypothesis": "特定密码结构的局部优势可能可重复；这不意味着工业通用加速，需要分别检验。",
+        "method": "在未用于策略选择的密码实例、不同难度和规模上确认；另按自然家族冻结工业测试，不用已看过的 19/43 例调参。若做领域适配，必须隔离训练/测试家族并单列监督成本。",
+        "gate": "报告每个预定问题族的全成本、求解数及簇区间；至少在明确主目标域达到预定优势门槛，其他域失败如实保留。",
+        "stop": "更难规模或新家族不复现时收窄适用范围，不混合容易样本掩盖失败，不升级为通用求解器优势。"
+      }
+    ],
+    "sha256": "4a7729aa9f562e441b7200caec39a7130d00cd2f98f5007eccdfe6fec7c43a36"
   }
 }</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
 const names={frozen:'E17 · Frozen',small:'E19S · 500 train',large:'E19L · 2,000 train'};
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function render(){
+ const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
+ document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。局部改善不等于已有普遍优势；下列新行动均为计划。`:'当前快照尚无性能计划';
+ document.getElementById('plan-scope').textContent=plan?plan.scope:'';
+ document.getElementById('plan-success').textContent=plan?plan.success_rule:'';
+ document.getElementById('performance-gaps').innerHTML=plan?plan.gaps.filter(g=>pf==='all'||g.state===pf).map(g=>`<article class="issue"><span class="badge ${g.state==='未解决'?'bad':'partial'}">${esc(g.state)}</span><h3>${esc(g.id)} · ${esc(g.title)}</h3><p>已有进展：${esc(g.progress)}</p><p>仍然欠缺：${esc(g.remaining)}</p><p>${g.directions.map(id=>`<a href="#action-${esc(id)}">${esc(id)} ↗</a>`).join(' · ')}</p><details><summary>证据成熟度与来源</summary><p>${esc(g.evidence_level)}</p><p class="muted">${esc(g.source)}</p></details></article>`).join(''):'';
+ document.getElementById('performance-actions').innerHTML=plan?plan.actions.map(a=>`<article class="issue" id="action-${esc(a.id)}"><span class="badge">${esc(a.priority)} · ${esc(a.status)}</span><h3>${esc(a.id)} · ${esc(a.title)}</h3><p>${esc(a.hypothesis)}</p><p class="muted">资源：${esc(a.cost)}<br>依赖：${a.depends_on.length?a.depends_on.map(esc).join('、'):'可独立准备'}</p><details><summary>做法、验收与停止条件</summary><p>做法：${esc(a.method)}</p><p>验收：${esc(a.gate)}</p><p>停止：${esc(a.stop)}</p></details></article>`).join(''):'';
+ document.getElementById('plan-constraints').innerHTML=plan?plan.constraints.map(x=>`<li>${esc(x)}</li>`).join(''):'';
+ document.getElementById('plan-source').textContent=plan?`计划审读日期：${plan.reviewed} · 人工维护，不随日志自动判定解决 · SHA256 ${plan.sha256}`:'';
  const completed=data.runs.filter(r=>r.complete).length, count=data.runs.reduce((s,r)=>s+r.count,0), open=data.issues.filter(i=>!['已修复','负结果关闭'].includes(i.state)).length;
  document.getElementById('cards').innerHTML=[[completed+'/15','完整种子 · E17/E19'],[count.toLocaleString()+'/4,500','有效实例行 · 四臂'],[open+' 项','仍未完全解决的缺点']].map(([n,t])=>`<div class="card"><span>${t}</span><b>${n}</b></div>`).join('');
  let age=(Date.now()-Date.parse(data.generated))/3600000;
@@ -3074,7 +3283,7 @@ function render(){
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
 }
-for(const id of ['filter','group','comparator','cohort','backend','stratum','policy'])document.getElementById(id).addEventListener('change',render);
+for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter'])document.getElementById(id).addEventListener('change',render);
 async function refresh(){try{const response=await fetch('status.json?t='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error();const incoming=await response.json();if(incoming.runs&&incoming.results&&incoming.source_sha256){data=incoming;render();}}catch{render();document.getElementById('freshness').textContent+=' · 离线 / 更新失败，显示已有快照';}}
 render();if(location.protocol!=='file:'){refresh();setInterval(refresh,60000);}
 </script></body></html>
