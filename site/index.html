@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-12T19:44:06.672582+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-12T19:50:45.387730+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -18,7 +18,7 @@
 <section id="native-results"><h2>原生比较 · 全量结果</h2><div class="toolbar"><label for="cohort">问题族</label><select id="cohort"><option value="fresh_n200">新随机 n200 · 300</option><option value="existing_n350">复用 n350 · 300</option><option value="existing_industrial19">复用工业 · 19</option></select><label for="backend">后端</label><select id="backend"><option value="glucose">Glucose / RLAF</option><option value="kissat">Kissat / NeuroBack</option></select><label for="stratum">子集</label><select id="stratum"><option>ALL</option><option>SAT</option><option>UNSAT</option><option>UNKNOWN</option></select><label for="policy">计分口径</label><select id="policy"><option value="verified">独立核验 · 保守计分</option><option value="reported">求解器原始报告</option></select></div><div class="table"><table><thead><tr><th>方法</th><th>实例</th><th>已核验求解</th><th>未核验 UNSAT</th><th>PAR-2 / 秒 ↓</th><th>相对 CAP 收益 / 秒</th><th>95% 簇区间</th></tr></thead><tbody id="native-result-list"></tbody></table></div><p class="muted">保守计分：未验证 UNSAT 与超时均按 120 秒；原始报告计分保留求解器报告耗时，不等于证明验证通过。收益 = 该方法 − CAP，正值有利于 CAP。区间按生成簇 / 工业家族重采样，单检查点、未做多重比较校正；分层标签条件于原始审计。补充验证不回写原始计分。</p><p id="native-audit-source" class="foot"></p></section>
 <section id="utility"><h2>E28 · 直接学习翻转收益</h2><p class="alert">短程预测变好，不等于求解性能变好。只用廉价特征的学习模型与额外使用 CAP 的同构模型分开验收。</p><p class="muted">48 训练 + 16 验证，三个小模型种子组成固定集成，不是三次独立性能复现。24 新开发实例；过门才生成 48 新确认。每臂 5 秒全成本、0.25 秒预处理含 CAP 推理，不能与 E27 的 10 秒 PAR-2 横向混算；只覆盖随机 3-SAT n325 / n500。</p><div id="utility-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-12T19:44:06.672582+00:00",
+  "generated": "2026-09-12T19:50:45.387730+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3044,7 +3044,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-13",
-    "scope": "人工审读的性能计划：历史与后续实验分开，不混合样本、接口和预算。E26 未达正向门槛；E27 新增短程修复 + 默认回退，先开发筛选、再独立确认，工程提速与 CAP 学习增益分别验收。论文保持不变。",
+    "scope": "人工审读的性能计划：历史与后续实验分开，不混合样本、接口和预算。E27 有独立的局部工程提速，CAP 额外贡献仍未通过。E28 已实际训练收益模型并完成开发比较，但未胜过廉价修复，按预设条件停止；短程指标改善不能冒充性能解决。本轮不改论文。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3091,7 +3091,7 @@
         "title": "相位质量与最终求解收益脱节",
         "state": "未解决",
         "priority": "高",
-        "progress": "已识别指标错位：SIMON 参考准确率更高仍可求解更慢；随机 3-SAT 初始未满足子句更少也不保证更快。",
+        "progress": "已识别指标错位：SIMON 参考准确率更高仍可求解更慢。E28 已训练短程翻转收益模型：验证预测略好，但新开发集仅解出 5/24，廉价随机修复 14/24；未修复该缺口。等翻转预算训练集诊断也落后，损失不只来自推理开销。",
         "remaining": "还没有经独立测试证明的训练目标或置信度，能可靠预测何种相位会减少求解成本。识别问题不等于修复性能。",
         "directions": [
           "A3",
@@ -3216,16 +3216,16 @@
       {
         "id": "A4",
         "title": "让训练目标对齐求解器收益",
-        "priority": "P1 · 实施验证",
-        "status": "E28 已启动 · 收益监督训练与新开发集验收",
-        "cost": "48 训练 + 16 验证；CPU 小模型，24 新开发，过门才做 48 新确认",
+        "priority": "P1 · 机制重设计",
+        "status": "E28 已完成 · 开发门失败，未生成确认集",
+        "cost": "48 训练 + 16 验证、6 个微型模型、24 新开发 × 4 臂；无 GPU",
         "depends_on": [
           "A3"
         ],
         "hypothesis": "参考相位准确率与实际收益错位；训练集短程配对搜索信号可能比复制参考赋值更适合学习调用或相位策略。",
         "method": "E28 在新训练公式的同一状态比较候选翻转，各做两次 64 步短程试跑；训练三个种子的微型动作评分器并平均。比较原生默认、随机修复、只用廉价搜索状态特征的收益模型、另加 CAP 信息的同构模型。统一随机起点、重启、零 break 优先和噪声。每臂 5 秒全成本、0.25 秒预处理含 CAP 成本；不与 E27 的 10 秒数字混算。这是新动态策略试验，不是原始 CAP 已获验证。",
         "gate": "冻结模型在未见实例上的完整成本超过原训练目标和廉价控制，跨训练种子复现；如使用求解器生成的收益信号，明确改变监督与方法定义。",
-        "stop": "E26 脉冲未通过；E27 廉价预处理已有独立窗口，故仅启动预算受限的 E28 新机制，而非扩大原相位训练。开发全成本须比默认和随机修复至少改善 3%，两个规模不受损；无候选则停止，不生成确认集。短程指标变好不等于缺口解决；CAP 额外贡献必须另外超过同构廉价特征模型。"
+        "stop": "E28 终态：随机修复 14/24、PAR-2 4.199 秒；默认 6/24、7.917 秒；廉价收益模型 5/24、8.193 秒；CAP 收益模型 5/24、8.210 秒，无错误。均未过开发门，不生成确认集。事后训练集等 10 万翻转预算诊断为 16/48、2/48、6/48，表明动作策略本身也退化；不是独立性能证据。下一候选先考虑守住 min-break、随机化有界残差和低开销评分，再用新的开发数据验证；不据此宣称这些方向已解决问题。"
       },
       {
         "id": "A5",
@@ -3256,7 +3256,7 @@
         "stop": "终态：随机修复 19/48、PAR-2 12.109 秒；默认 15/48、14.676 秒。收益 2.567 秒，同时区间 [0.809,4.510]，两个规模均未损失求解数。CAP 17/48、13.107 秒，未胜过廉价对照；补充精确匹配控制按条件跳过，不补造结果。停止这批数据上的调参；工业泛化及原始学习贡献仍未解决。"
       }
     ],
-    "sha256": "21baa99b1537fc5b69d0979f2d54a7344c6bf72a85e10f8b7e08a2602fccf174"
+    "sha256": "1a41498cb914a6c3a0727c6deaee9f30d968ed615da63e4947aeeec7032f1416"
   },
   "pilot": {
     "id": "E26",
