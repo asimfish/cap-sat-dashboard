@@ -34,14 +34,26 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Six proposed actions have dependencies, costs, acceptance and stopping rules.
-All new actions currently say planned, not running; historical K%-phase results
-require row-level reconciliation before promotion to confirmed performance gains.
+Six actions have dependencies, costs, acceptance and stopping rules. Their
+reviewed status is distinct from automated experiment progress. E26 is the first
+bounded new pilot; historical K%-phase results still require complete row-level
+reconciliation before promotion to confirmed performance gains.
 The roadmap's review date and SHA256 are separate from live export freshness.
 Edit this JSON, rebuild and publish; the browser filters partial progress versus
 unresolved gaps and links each gap to its proposed experiments. The private
 discussion attachment, reviewer identities and confidential correspondence are
 not published. Publishing a plan does not authorize or launch an experiment.
+
+The E26 card reads allowlisted counts from its frozen design and progress file;
+it shows no partial-result ranking. Only a complete 24-row / 144-cell readout
+with the matching frozen-file hash supplies the six-arm results and four
+simultaneous contrast intervals. The exporter checks aggregate shape, ranges
+and identity, not every raw solver record; terminal scientific interpretation
+remains a separate review. A recent progress update is not proof a process is
+still alive. SAT witnesses are checked and UNSAT outcomes independently
+corroborated, not proof-certified. Single-checkpoint, small-sample, shared-host
+pilot results cannot by themselves establish an advantage or justify rewriting
+the paper. Raw vectors, local paths, host details and logs are never exported.
 
 Only complete, error-free 300-row seeds enter metrics. Invalid indices,
 non-finite times, arm errors, conflicting duplicate rows, differing CNF paths,

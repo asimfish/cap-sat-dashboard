@@ -162,6 +162,65 @@ def comparison_audit(repo):
     except (OSError,ValueError,KeyError,TypeError):
         return None
 
+PILOT_ARMS=['stock','segmented','cap_continuous','cap_pulse','pol_pulse','ws_pulse']
+
+def pilot_progress(repo):
+    """Public aggregate only: never export paths, phases, host identity or logs."""
+    root=repo/'experiments/performance_pilot_20260912_e26'
+    try:
+        raw=(root/'STATUS.json').read_bytes();status=json.loads(raw)
+        frozen=(root/'FROZEN.json').read_bytes();cfg=json.loads(frozen)
+        if status['phase'] not in ['running','terminal','failed']:
+            raise ValueError('unknown pilot phase')
+        def count(value,maximum):
+            if type(value) is not int or not 0<=value<=maximum:
+                raise ValueError('invalid pilot count')
+            return value
+        def number(value):
+            if type(value) not in [int,float] or not math.isfinite(value) or value<0:
+                raise ValueError('invalid nonnegative pilot metric')
+            return value
+        if status['target_rows']!=24 or status['target_cells']!=144 or cfg['arms']!=PILOT_ARMS:
+            raise ValueError('unexpected pilot design')
+        result={'id':'E26','phase':status['phase'],'observed':status.get('observed',status['started']),
+                'completed_rows':count(status['completed_rows'],24),'target_rows':24,
+                'completed_cells':count(status['completed_cells'],144),'target_cells':144,
+                'cutoff_wall_s':number(cfg['cutoff_wall_s']),
+                'frozen_sha256':hashlib.sha256(frozen).hexdigest(),
+                'status_sha256':hashlib.sha256(raw).hexdigest(),'readout':None}
+        dt.datetime.fromisoformat(result['observed'])
+        if status['phase']=='terminal':
+            if result['completed_rows']!=24 or result['completed_cells']!=144:
+                raise ValueError('incomplete terminal pilot')
+            if not (root/'RESULTS.json').exists():
+                result['phase']='awaiting_readout';return result
+            payload=(root/'RESULTS.json').read_bytes();report=json.loads(payload)
+            if report['frozen_sha256']!=result['frozen_sha256'] or report['rows']!=24 or report['cells']!=144:
+                raise ValueError('pilot readout identity mismatch')
+            if report['status'] not in ['promising_requires_independent_confirmation','no_confirmed_positive_effect']:
+                raise ValueError('unknown pilot verdict')
+            summaries={}
+            for arm in PILOT_ARMS:
+                s=report['summaries'][arm]
+                summaries[arm]={k:number(s[k]) for k in ['verified_par2_s','reported_par2_s']}
+                summaries[arm].update({k:count(s[k],24) for k in ['verified_solved','entered','released']})
+            contrasts={}
+            for arm in ['stock','segmented','pol_pulse','ws_pulse']:
+                c=report['contrasts'][arm];band=c['simultaneous95_band']
+                if len(band)!=2 or type(c['gate']) is not bool:raise ValueError('invalid pilot contrast')
+                # Gains/intervals are signed; number() intentionally rejects negatives.
+                signed=[c['mean_gain_s'],*band]
+                if any(type(v) not in [int,float] or not math.isfinite(v) for v in signed):raise ValueError('invalid signed metric')
+                if band[0]>band[1]:raise ValueError('reversed interval')
+                contrasts[arm]={'mean_gain_s':signed[0],'simultaneous95_band':band,'gate':c['gate']}
+            result['readout']={'status':report['status'],'summaries':summaries,'contrasts':contrasts,
+                'errors':len(report['errors']),'walksat_budget_failures':len(report['walksat_budget_failures']),
+                'unverified_unsat_cells':count(report['unverified_unsat_cells'],144),
+                'sha256':hashlib.sha256(payload).hexdigest()}
+        return result
+    except (OSError,ValueError,KeyError,TypeError):
+        return None
+
 def load_performance_plan():
     raw=(HERE/'performance_plan.json').read_bytes()
     plan=json.loads(raw)
@@ -231,6 +290,7 @@ def main():
     data = collect(args.repo.resolve())
     data['comparison']=comparison_progress(args.repo.resolve())
     data['performance_plan']=load_performance_plan()
+    data['pilot']=pilot_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

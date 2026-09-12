@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan
+from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS
 
 class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
@@ -14,7 +14,9 @@ class CollectorTests(unittest.TestCase):
         self.assertEqual(len(plan['actions']),6)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
-        self.assertTrue(all(a['status']=='计划中 · 未启动' for a in plan['actions']))
+        actions={a['id']:a for a in plan['actions']}
+        self.assertIn('E26',actions['A3']['status'])
+        self.assertTrue(all(actions[a]['status']=='计划中 · 未启动' for a in ['A1','A2','A4','A5']))
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:
@@ -27,6 +29,27 @@ class CollectorTests(unittest.TestCase):
                 mutated['gaps'][0]['directions']=['unknown']
             with patch.object(Path,'read_bytes',return_value=json.dumps(mutated).encode()):
                 with self.assertRaises(ValueError):load_performance_plan()
+
+    def test_pilot_allowlist_and_terminal_guard(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/performance_pilot_20260912_e26';root.mkdir(parents=True)
+            frozen=json.dumps({'arms':PILOT_ARMS,'cutoff_wall_s':10,'private':'/private/checkpoint'})
+            (root/'FROZEN.json').write_text(frozen)
+            status=dict(phase='running',started='2026-09-12T08:00:00+00:00',target_rows=24,target_cells=144,completed_rows=1,completed_cells=6,resources={'host':'private'},pid=123)
+            def save_status(): (root/'STATUS.json').write_text(json.dumps(status))
+            save_status();result=pilot_progress(repo)
+            self.assertEqual(result['completed_cells'],6)
+            self.assertNotIn('private',json.dumps(result));self.assertNotIn('pid',json.dumps(result))
+            status['phase']='terminal';save_status();self.assertIsNone(pilot_progress(repo))
+            status.update(completed_rows=24,completed_cells=144);save_status()
+            self.assertEqual(pilot_progress(repo)['phase'],'awaiting_readout')
+            report=dict(frozen_sha256=hashlib.sha256(frozen.encode()).hexdigest(),rows=24,cells=144,status='no_confirmed_positive_effect',errors=['private error'],walksat_budget_failures=[],unverified_unsat_cells=0,
+                summaries={a:dict(verified_par2_s=12,reported_par2_s=11,verified_solved=10,entered=20,released=18) for a in PILOT_ARMS},
+                contrasts={a:dict(mean_gain_s=-2,simultaneous95_band=[-5,1],gate=False) for a in ['stock','segmented','pol_pulse','ws_pulse']})
+            (root/'RESULTS.json').write_text(json.dumps(report));result=pilot_progress(repo)
+            self.assertEqual(result['readout']['errors'],1);self.assertNotIn('private',json.dumps(result))
+            report['summaries']['stock']['verified_par2_s']=float('nan')
+            (root/'RESULTS.json').write_text(json.dumps(report));self.assertIsNone(pilot_progress(repo))
 
     def test_plan_rejects_cycles_and_missing_gate(self):
         plan=load_performance_plan()
