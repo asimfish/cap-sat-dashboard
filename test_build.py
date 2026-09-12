@@ -60,7 +60,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),8)
+        self.assertEqual(len(plan['actions']),9)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -68,6 +68,7 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('E27',actions['A6']['status'])
         self.assertIn('E28',actions['A4']['status'])
         self.assertIn('E29',actions['A7']['status'])
+        self.assertEqual(actions['A8']['status'],'计划中 · 未启动')
         self.assertTrue(all(actions[a]['status']=='计划中 · 未启动' for a in ['A1','A2','A5']))
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
