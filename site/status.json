@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-12T09:33:32.666268+00:00",
+  "generated": "2026-09-12T09:38:46.265438+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3226,8 +3226,8 @@
         "id": "A6",
         "title": "短程见证搜索 + 无覆盖默认回退",
         "priority": "P1 · 实施验证",
-        "status": "E27 开发已启动 · 实测卡片见下方",
-        "cost": "24 开发 + 最多 48 独立确认，CPU 两并发、10 秒 / 臂",
+        "status": "E27 开发候选已冻结 · 进入独立确认",
+        "cost": "24 开发已结束 + 48 新确认，CPU 两并发、10 秒 / 臂",
         "depends_on": [
           "A3"
         ],
@@ -3237,7 +3237,7 @@
         "stop": "开发无候选过门则停止；确认不过门不调测试阈值、不扩大训练。工业泛化及原始 one-shot 科学贡献不会因流水线提速自动变成已解决。"
       }
     ],
-    "sha256": "319d9851344bbfbbc2947d08d5695a5f65d12ac590a587c5b4cfc405be0c3301"
+    "sha256": "a6aba4ed91174f3848fec35c85b5be3721d4fda0032c3a442c24d952ccb2d4f9"
   },
   "pilot": {
     "id": "E26",
@@ -3340,16 +3340,151 @@
     "id": "E27",
     "stages": {
       "dev": {
-        "phase": "running",
-        "observed": "2026-09-12T09:33:28.267575+00:00",
-        "completed_rows": 14,
-        "completed_cells": 71,
+        "phase": "terminal",
+        "observed": "2026-09-12T09:36:42.174321+00:00",
+        "completed_rows": 24,
+        "completed_cells": 120,
         "target_rows": 24,
         "target_cells": 120,
         "frozen_sha256": "80e9ba3d85c6a609a0caa3b92303663f27e37c8e305813a2675e45e29d7be20b",
+        "readout": {
+          "status": "development_complete",
+          "engineering_pass": false,
+          "learning_pass": false,
+          "summaries": {
+            "stock": {
+              "verified_par2_s": 15.299752940190956,
+              "reported_par2_s": 15.299752940190956,
+              "verified_solved": 7,
+              "sls_solved": 0,
+              "fallback_solved": 7
+            },
+            "random_repair": {
+              "verified_par2_s": 13.706280382233672,
+              "reported_par2_s": 13.706280382233672,
+              "verified_solved": 8,
+              "sls_solved": 7,
+              "fallback_solved": 1
+            },
+            "polarity_repair": {
+              "verified_par2_s": 13.732940852292813,
+              "reported_par2_s": 13.732940852292813,
+              "verified_solved": 8,
+              "sls_solved": 7,
+              "fallback_solved": 1
+            },
+            "cap_warm_repair": {
+              "verified_par2_s": 11.72075531759765,
+              "reported_par2_s": 11.72075531759765,
+              "verified_solved": 10,
+              "sls_solved": 10,
+              "fallback_solved": 0
+            },
+            "cap_soft_repair": {
+              "verified_par2_s": 14.970939661298567,
+              "reported_par2_s": 14.970939661298567,
+              "verified_solved": 7,
+              "sls_solved": 4,
+              "fallback_solved": 3
+            }
+          },
+          "by_scale": {
+            "325": {
+              "stock": {
+                "verified_par2_s": 14.091045113280416,
+                "reported_par2_s": 14.091045113280416,
+                "verified_solved": 4,
+                "sls_solved": 0,
+                "fallback_solved": 4
+              },
+              "random_repair": {
+                "verified_par2_s": 12.391436270050084,
+                "reported_par2_s": 12.391436270050084,
+                "verified_solved": 5,
+                "sls_solved": 4,
+                "fallback_solved": 1
+              },
+              "polarity_repair": {
+                "verified_par2_s": 14.083014369864637,
+                "reported_par2_s": 14.083014369864637,
+                "verified_solved": 4,
+                "sls_solved": 3,
+                "fallback_solved": 1
+              },
+              "cap_warm_repair": {
+                "verified_par2_s": 11.707839488284662,
+                "reported_par2_s": 11.707839488284662,
+                "verified_solved": 5,
+                "sls_solved": 5,
+                "fallback_solved": 0
+              },
+              "cap_soft_repair": {
+                "verified_par2_s": 14.057319650116066,
+                "reported_par2_s": 14.057319650116066,
+                "verified_solved": 4,
+                "sls_solved": 3,
+                "fallback_solved": 1
+              }
+            },
+            "500": {
+              "stock": {
+                "verified_par2_s": 16.508460767101496,
+                "reported_par2_s": 16.508460767101496,
+                "verified_solved": 3,
+                "sls_solved": 0,
+                "fallback_solved": 3
+              },
+              "random_repair": {
+                "verified_par2_s": 15.02112449441726,
+                "reported_par2_s": 15.02112449441726,
+                "verified_solved": 3,
+                "sls_solved": 3,
+                "fallback_solved": 0
+              },
+              "polarity_repair": {
+                "verified_par2_s": 13.38286733472099,
+                "reported_par2_s": 13.38286733472099,
+                "verified_solved": 4,
+                "sls_solved": 4,
+                "fallback_solved": 0
+              },
+              "cap_warm_repair": {
+                "verified_par2_s": 11.733671146910638,
+                "reported_par2_s": 11.733671146910638,
+                "verified_solved": 5,
+                "sls_solved": 5,
+                "fallback_solved": 0
+              },
+              "cap_soft_repair": {
+                "verified_par2_s": 15.88455967248107,
+                "reported_par2_s": 15.88455967248107,
+                "verified_solved": 3,
+                "sls_solved": 1,
+                "fallback_solved": 2
+              }
+            }
+          },
+          "contrasts": {},
+          "errors": 0,
+          "unverified_unsat_cells": 0,
+          "sha256": "50ff178e1e2e49fce8175b678122f370a3a3435ae45e34bc43290edebe89cc32"
+        }
+      },
+      "test": {
+        "phase": "running",
+        "observed": "2026-09-12T09:38:40.104461+00:00",
+        "completed_rows": 1,
+        "completed_cells": 4,
+        "target_rows": 48,
+        "target_cells": 192,
+        "frozen_sha256": "3f7a3d1b76f4e4a30a57ac2b66c209d745188ff8c2a736180f663f5830446ea1",
         "readout": null
       }
     },
-    "selection": null
+    "selection": {
+      "engineering": "random_repair",
+      "cap": "cap_warm_repair",
+      "sha256": "8d8a149a067313d60c130a7e6e5772dd68e894b8c4085e26648763367c68e93e"
+    }
   }
 }

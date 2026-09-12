@@ -51,6 +51,9 @@ class CollectorTests(unittest.TestCase):
             self.assertEqual(result['readout']['errors'],1);self.assertNotIn('private',json.dumps(result))
             report['status']='promising_requires_independent_confirmation'
             (root/'RESULTS.json').write_text(json.dumps(report));self.assertIsNone(pilot_progress(repo))
+            report['status']='no_confirmed_positive_effect'
+            report['summaries']['stock']['verified_par2_s']=float('nan')
+            (root/'RESULTS.json').write_text(json.dumps(report));self.assertIsNone(pilot_progress(repo))
 
     def test_hybrid_separates_stages_and_omits_private_fields(self):
         with tempfile.TemporaryDirectory() as d:
@@ -72,9 +75,9 @@ class CollectorTests(unittest.TestCase):
             self.assertEqual(r['stages']['dev']['readout']['errors'],1);self.assertNotIn('private',json.dumps(r))
             report['engineering_pass']=True;save_report();self.assertIsNone(hybrid_progress(repo))
             report['engineering_pass']=False;report['summaries']['stock']['sls_solved']=999;save_report();self.assertIsNone(hybrid_progress(repo))
-            report['status']='no_confirmed_positive_effect'
+            report['summaries']['stock']['sls_solved']=6
             report['summaries']['stock']['verified_par2_s']=float('nan')
-            (root/'RESULTS.json').write_text(json.dumps(report));self.assertIsNone(pilot_progress(repo))
+            save_report();self.assertIsNone(hybrid_progress(repo))
 
     def test_plan_rejects_cycles_and_missing_gate(self):
         plan=load_performance_plan()
