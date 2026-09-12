@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-12T09:01:05.252554+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-12T09:08:38.328644+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -16,7 +16,7 @@
 <section id="comparison"><h2>正式原生比较 · 当前进度</h2><div id="comparison-progress" class="panel"></div><p class="muted">619 个实例 × 2 后端 × 6 臂。300 个新随机 n200、300 个复用 n350、19 个复用工业实例；复用数据不算新的独立覆盖。每臂 60 秒墙钟预算；单个训练检查点、训练预算不同。完成行数不代表验收或方法获胜。</p></section>
 <section id="native-results"><h2>原生比较 · 全量结果</h2><div class="toolbar"><label for="cohort">问题族</label><select id="cohort"><option value="fresh_n200">新随机 n200 · 300</option><option value="existing_n350">复用 n350 · 300</option><option value="existing_industrial19">复用工业 · 19</option></select><label for="backend">后端</label><select id="backend"><option value="glucose">Glucose / RLAF</option><option value="kissat">Kissat / NeuroBack</option></select><label for="stratum">子集</label><select id="stratum"><option>ALL</option><option>SAT</option><option>UNSAT</option><option>UNKNOWN</option></select><label for="policy">计分口径</label><select id="policy"><option value="verified">独立核验 · 保守计分</option><option value="reported">求解器原始报告</option></select></div><div class="table"><table><thead><tr><th>方法</th><th>实例</th><th>已核验求解</th><th>未核验 UNSAT</th><th>PAR-2 / 秒 ↓</th><th>相对 CAP 收益 / 秒</th><th>95% 簇区间</th></tr></thead><tbody id="native-result-list"></tbody></table></div><p class="muted">保守计分：未验证 UNSAT 与超时均按 120 秒；原始报告计分保留求解器报告耗时，不等于证明验证通过。收益 = 该方法 − CAP，正值有利于 CAP。区间按生成簇 / 工业家族重采样，单检查点、未做多重比较校正；分层标签条件于原始审计。补充验证不回写原始计分。</p><p id="native-audit-source" class="foot"></p></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-12T09:01:05.252554+00:00",
+  "generated": "2026-09-12T09:08:38.328644+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3042,7 +3042,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-12",
-    "scope": "人工审读的性能计划：rebuttal 历史报告与九月后续实验分开陈列，不汇总不同样本、接口和预算。E26 延迟脉冲限额试验已启动，实测进度见下方卡片；论文保持不变。",
+    "scope": "人工审读的性能计划：rebuttal 历史报告与九月后续实验分开陈列，不汇总不同样本、接口和预算。E26 已完成 24 新实例 / 144 单元，未达到预设正向门槛；完整结果见下方卡片，论文保持不变。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3101,7 +3101,7 @@
         "title": "后端与注入密度敏感",
         "state": "部分改善",
         "priority": "最高",
-        "progress": "K% 稀疏注入已有历史正向点估计；E22/E24 锚定在所测 Kissat SAT 行缓解损害。但 E25 锚定未保留 crypto 的覆盖收益。",
+        "progress": "K% 稀疏注入已有历史正向点估计；E22/E24 锚定在所测 Kissat SAT 行缓解损害，但 E25 锚定未保留 crypto 的覆盖收益。E26 延迟脉冲相对持续 CAP 减轻损害，仍未超过默认或廉价对照。",
         "remaining": "不存在已验证的统一接口或求解前密度选择规则；不能把稀疏 saved-phase 与常驻覆盖、锚定的结果直接互换。",
         "directions": [
           "A0",
@@ -3198,15 +3198,15 @@
         "id": "A3",
         "title": "先测固定延迟脉冲，再考虑停滞介入",
         "priority": "P2 · 条件探索",
-        "status": "E26 已启动 · 运行态见实测卡片",
-        "cost": "24 新实例 × 6 臂，CPU-only、两并发、10 秒 / 臂",
+        "status": "E26 已完成 · 未达正向门槛",
+        "cost": "24 新实例 × 6 臂，CPU-only、两并发、10 秒 / 臂，已结束",
         "depends_on": [
           "A0"
         ],
         "hypothesis": "基于在线搜索状态的一次有限介入，可能利用静态初始化错过的窗口；也可能仍不如默认继续搜索。",
         "method": "E26 冻结 1000 冲突默认前缀 + 2000 冲突脉冲 + 释放，区别于 E21 从头覆盖后释放。包含默认、同样分段的默认、持续 CAP、CAP / 极性 / 等成本 WS 脉冲；所有参数在新面板结果前固定。不是学得的停滞触发器，不依据这批结果继续挑阈值；A0 完整历史追溯仍单列待办。",
         "gate": "CAP 同时超过默认继续搜索和同触发廉价先验，才进入独立确认。方法应明确标为动态指导变体，不回写原始 one-shot 主张。",
-        "stop": "若提升来自触发调度而非 CAP 内容，或只是重复既有失败方案，则停止学习收益主张。"
+        "stop": "E26 四项主比较均未过门：CAP 脉冲 9/24、PAR-2 13.338 秒；默认 10/24、12.427 秒，极性脉冲 11/24、12.208 秒。停止扩展该固定策略，不在这批实例上挑新阈值；新搜索状态 / 收益监督诊断需另列预算和开发数据，不自动扩大训练。"
       },
       {
         "id": "A4",
@@ -3237,20 +3237,104 @@
         "stop": "更难规模或新家族不复现时收窄适用范围，不混合容易样本掩盖失败，不升级为通用求解器优势。"
       }
     ],
-    "sha256": "8cac7981f6254aed4d0de442d47ca41e11e09b7cb69d6e061b523ca6669a2b8e"
+    "sha256": "d9194bcd6779fed8324286c5c57e2bad4a2a12dc46295f1d67399ed686556707"
   },
   "pilot": {
     "id": "E26",
-    "phase": "running",
-    "observed": "2026-09-12T09:01:04.291752+00:00",
-    "completed_rows": 14,
+    "phase": "terminal",
+    "observed": "2026-09-12T09:05:16.635783+00:00",
+    "completed_rows": 24,
     "target_rows": 24,
-    "completed_cells": 89,
+    "completed_cells": 144,
     "target_cells": 144,
     "cutoff_wall_s": 10,
     "frozen_sha256": "940d7504a7eda23521ffb4e644447a6f0de657466ca533dd4cd9c94d42804581",
-    "status_sha256": "06b7156f7edbbf51d889cdcc3eb289918b7db3ca4744e7b0a66eb4d79b85007f",
-    "readout": null
+    "status_sha256": "20a59aca9d94e18d37e53b6fcff5ff8681e29374898fd91a673e81601ab2e5f0",
+    "readout": {
+      "status": "no_confirmed_positive_effect",
+      "summaries": {
+        "stock": {
+          "verified_par2_s": 12.427440761045242,
+          "reported_par2_s": 12.427440761045242,
+          "verified_solved": 10,
+          "entered": 0,
+          "released": 0
+        },
+        "segmented": {
+          "verified_par2_s": 12.763254178377489,
+          "reported_par2_s": 12.763254178377489,
+          "verified_solved": 10,
+          "entered": 0,
+          "released": 0
+        },
+        "cap_continuous": {
+          "verified_par2_s": 16.545274720643647,
+          "reported_par2_s": 16.545274720643647,
+          "verified_solved": 5,
+          "entered": 5,
+          "released": 0
+        },
+        "cap_pulse": {
+          "verified_par2_s": 13.337748079677112,
+          "reported_par2_s": 13.337748079677112,
+          "verified_solved": 9,
+          "entered": 9,
+          "released": 9
+        },
+        "pol_pulse": {
+          "verified_par2_s": 12.208264890165688,
+          "reported_par2_s": 12.208264890165688,
+          "verified_solved": 11,
+          "entered": 11,
+          "released": 11
+        },
+        "ws_pulse": {
+          "verified_par2_s": 12.82976549398154,
+          "reported_par2_s": 12.82976549398154,
+          "verified_solved": 10,
+          "entered": 10,
+          "released": 10
+        }
+      },
+      "contrasts": {
+        "stock": {
+          "mean_gain_s": -0.9103073186318701,
+          "simultaneous95_band": [
+            -3.7763198603255055,
+            1.9356354024494067
+          ],
+          "gate": false
+        },
+        "segmented": {
+          "mean_gain_s": -0.5744939012996232,
+          "simultaneous95_band": [
+            -3.9735239929674813,
+            2.542927092018848
+          ],
+          "gate": false
+        },
+        "pol_pulse": {
+          "mean_gain_s": -1.1294831895114232,
+          "simultaneous95_band": [
+            -4.1776715012189625,
+            2.6415326696587726
+          ],
+          "gate": false
+        },
+        "ws_pulse": {
+          "mean_gain_s": -0.5079825856955722,
+          "simultaneous95_band": [
+            -4.019599303447952,
+            2.928674357593991
+          ],
+          "gate": false
+        }
+      },
+      "errors": 0,
+      "walksat_budget_failures": 0,
+      "unverified_unsat_cells": 0,
+      "sha256": "cdac9f30782ddae2c7a3c4dd4afe020f309f2838a6225834cf30e9bf9a67ca75"
+    }
   }
 }</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);

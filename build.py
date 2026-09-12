@@ -180,7 +180,7 @@ def pilot_progress(repo):
             if type(value) not in [int,float] or not math.isfinite(value) or value<0:
                 raise ValueError('invalid nonnegative pilot metric')
             return value
-        if status['target_rows']!=24 or status['target_cells']!=144 or cfg['arms']!=PILOT_ARMS:
+        if status['target_rows']!=24 or status['target_cells']!=144 or cfg['arms']!=PILOT_ARMS or cfg['cutoff_wall_s']!=10:
             raise ValueError('unexpected pilot design')
         result={'id':'E26','phase':status['phase'],'observed':status.get('observed',status['started']),
                 'completed_rows':count(status['completed_rows'],24),'target_rows':24,
@@ -203,6 +203,7 @@ def pilot_progress(repo):
             for arm in PILOT_ARMS:
                 s=report['summaries'][arm]
                 summaries[arm]={k:number(s[k]) for k in ['verified_par2_s','reported_par2_s']}
+                if any(v>20 for v in summaries[arm].values()):raise ValueError('pilot metric beyond PAR2 bound')
                 summaries[arm].update({k:count(s[k],24) for k in ['verified_solved','entered','released']})
             contrasts={}
             for arm in ['stock','segmented','pol_pulse','ws_pulse']:
@@ -213,6 +214,9 @@ def pilot_progress(repo):
                 if any(type(v) not in [int,float] or not math.isfinite(v) for v in signed):raise ValueError('invalid signed metric')
                 if band[0]>band[1]:raise ValueError('reversed interval')
                 contrasts[arm]={'mean_gain_s':signed[0],'simultaneous95_band':band,'gate':c['gate']}
+            if report['status']=='promising_requires_independent_confirmation' and (
+                    report['errors'] or report['walksat_budget_failures'] or not all(c['gate'] for c in contrasts.values())):
+                raise ValueError('positive verdict contradicts gates')
             result['readout']={'status':report['status'],'summaries':summaries,'contrasts':contrasts,
                 'errors':len(report['errors']),'walksat_budget_failures':len(report['walksat_budget_failures']),
                 'unverified_unsat_cells':count(report['unverified_unsat_cells'],144),

@@ -48,6 +48,9 @@ class CollectorTests(unittest.TestCase):
                 contrasts={a:dict(mean_gain_s=-2,simultaneous95_band=[-5,1],gate=False) for a in ['stock','segmented','pol_pulse','ws_pulse']})
             (root/'RESULTS.json').write_text(json.dumps(report));result=pilot_progress(repo)
             self.assertEqual(result['readout']['errors'],1);self.assertNotIn('private',json.dumps(result))
+            report['status']='promising_requires_independent_confirmation'
+            (root/'RESULTS.json').write_text(json.dumps(report));self.assertIsNone(pilot_progress(repo))
+            report['status']='no_confirmed_positive_effect'
             report['summaries']['stock']['verified_par2_s']=float('nan')
             (root/'RESULTS.json').write_text(json.dumps(report));self.assertIsNone(pilot_progress(repo))
 
