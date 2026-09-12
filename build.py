@@ -312,6 +312,58 @@ def hybrid_progress(repo):
         return result if result['stages'] else None
     except (OSError,ValueError,TypeError,KeyError):return None
 
+def utility_progress(repo):
+    """E28 allowlist: no raw trajectories, weights, probabilities or host metadata."""
+    root=repo/'experiments/utility_ranker_20260913_e28'
+    def metric(value, low=0, high=10):
+        if type(value) not in (int,float) or not math.isfinite(value) or not low<=value<=high:
+            raise ValueError('invalid utility metric')
+        return value
+    try:
+        if not (root/'DATA_FROZEN.json').exists():return None
+        result={'data_frozen_sha256':hashlib.sha256((root/'DATA_FROZEN.json').read_bytes()).hexdigest(),'training':None,'stages':{},'selection':None}
+        if (root/'TRAINED.json').exists():
+            raw=(root/'TRAINED.json').read_bytes();trained=json.loads(raw)
+            if trained['data_frozen_sha256']!=result['data_frozen_sha256']:raise ValueError('training identity')
+            result['training']={'train_groups':metric(trained['train_groups'],0,4608),'validation_groups':metric(trained['validation_groups'],0,1536),
+                'models':{name:{'proxy_gain':metric(trained['models'][name]['validation_gain_vs_minbreak'],-1000,1000),
+                          'parameters':metric(trained['models'][name]['parameters'],723,723)} for name in ['utility_cheap','utility_cap']},
+                'sha256':hashlib.sha256(raw).hexdigest()}
+        for stage,n in [('dev',24),('test',48)]:
+            folder=root/stage
+            if not (folder/'STATUS.json').exists():continue
+            frozen=(folder/'FROZEN.json').read_bytes();cfg=json.loads(frozen);h=hashlib.sha256(frozen).hexdigest()
+            state=json.loads((folder/'STATUS.json').read_text());arms=cfg['arms']
+            if len(set(arms))!=len(arms) or not set(arms)<=set(['stock','random_repair','utility_cheap','utility_cap']):raise ValueError('utility arms')
+            if state['frozen_sha256']!=h or state['target_rows']!=n or state['target_cells']!=n*len(arms):raise ValueError('utility identity')
+            if state['phase'] not in ['running','failed','terminal']:raise ValueError('utility state')
+            x={'phase':state['phase'],'observed':state['observed'],'target_rows':n,'target_cells':n*len(arms),
+               'completed_rows':metric(state['completed_rows'],0,n),'completed_cells':metric(state['completed_cells'],0,n*len(arms)),
+               'frozen_sha256':h,'readout':None}
+            if state['phase']=='terminal':
+                if x['completed_rows']!=n or x['completed_cells']!=x['target_cells']:raise ValueError('partial terminal')
+                x['phase']='awaiting_readout'
+                if (folder/'RESULTS.json').exists():
+                    raw=(folder/'RESULTS.json').read_bytes();r=json.loads(raw)
+                    if r['frozen_sha256']!=h or r['prepared_sha256']!=state['prepared_sha256'] or r['rows']!=n or r['cells']!=x['target_cells']:raise ValueError('utility readout identity')
+                    if type(r['confirmed']) is not bool or (stage=='dev' and r['confirmed']):raise ValueError('development is not confirmation')
+                    if set(r['summaries'])!=set(arms):raise ValueError('utility summaries')
+                    summaries={a:{'solved':metric(r['summaries'][a]['solved'],0,n),'par2_s':metric(r['summaries'][a]['par2_s']),
+                                  'sls_solved':metric(r['summaries'][a]['sls_solved'],0,r['summaries'][a]['solved'])} for a in arms}
+                    if stage=='test':
+                        if cfg['selection_sha256']!=hashlib.sha256((root/'SELECTION.json').read_bytes()).hexdigest():raise ValueError('selection drift')
+                    if r['confirmed'] and (r['errors'] or not r['contrasts'] or not all(c['gate'] for c in r['contrasts'].values())):raise ValueError('unsubstantiated confirmation')
+                    x.update(phase='terminal',readout={'summaries':summaries,'confirmed':r['confirmed'],'errors':len(r['errors']),
+                        'sha256':hashlib.sha256(raw).hexdigest()})
+            result['stages'][stage]=x
+        if (root/'SELECTION.json').exists():
+            selection=json.loads((root/'SELECTION.json').read_text());name=selection['selected']
+            if name not in [None,'utility_cheap','utility_cap']:raise ValueError('unknown utility selection')
+            if selection['development_sha256']!=hashlib.sha256((root/'dev/RESULTS.json').read_bytes()).hexdigest():raise ValueError('selection source')
+            result['selection']={'selected':name,'stopped':name is None}
+        return result
+    except (OSError,ValueError,TypeError,KeyError):return None
+
 def load_performance_plan():
     raw=(HERE/'performance_plan.json').read_bytes()
     plan=json.loads(raw)
@@ -383,6 +435,7 @@ def main():
     data['performance_plan']=load_performance_plan()
     data['pilot']=pilot_progress(args.repo.resolve())
     data['hybrid']=hybrid_progress(args.repo.resolve())
+    data['utility']=utility_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

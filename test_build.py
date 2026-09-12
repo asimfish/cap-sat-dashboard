@@ -5,9 +5,29 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS
+from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_utility_allowlist_and_terminal_identity(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/utility_ranker_20260913_e28';folder=root/'dev';folder.mkdir(parents=True)
+            (root/'DATA_FROZEN.json').write_text('{}')
+            trained=dict(data_frozen_sha256=hashlib.sha256(b'{}').hexdigest(),train_groups=4608,validation_groups=1536,
+                models={a:dict(validation_gain_vs_minbreak=.04,parameters=723,private_weights=[1]) for a in ['utility_cheap','utility_cap']})
+            (root/'TRAINED.json').write_text(json.dumps(trained));arms=['stock','random_repair','utility_cheap','utility_cap']
+            frozen=json.dumps(dict(arms=arms));h=hashlib.sha256(frozen.encode()).hexdigest();(folder/'FROZEN.json').write_text(frozen)
+            state=dict(phase='running',observed='2026-09-13T00:00:00+00:00',target_rows=24,target_cells=96,completed_rows=1,completed_cells=4,frozen_sha256=h,prepared_sha256='prep')
+            (folder/'STATUS.json').write_text(json.dumps(state));out=utility_progress(repo)
+            self.assertEqual(out['stages']['dev']['completed_cells'],4);self.assertNotIn('private',json.dumps(out));self.assertNotIn('test',out['stages'])
+            state.update(phase='terminal',completed_rows=24,completed_cells=96);(folder/'STATUS.json').write_text(json.dumps(state))
+            r=dict(rows=24,cells=96,frozen_sha256=h,prepared_sha256='prep',confirmed=False,errors=['private error'],
+                summaries={a:dict(solved=5,par2_s=8,sls_solved=4) for a in arms})
+            (folder/'RESULTS.json').write_text(json.dumps(r));out=utility_progress(repo)
+            self.assertEqual(out['stages']['dev']['readout']['errors'],1);self.assertNotIn('private',json.dumps(out))
+            r['confirmed']=True;(folder/'RESULTS.json').write_text(json.dumps(r));self.assertIsNone(utility_progress(repo))
+            r['confirmed']=False;r['summaries']['stock']['par2_s']=float('nan')
+            (folder/'RESULTS.json').write_text(json.dumps(r));self.assertIsNone(utility_progress(repo))
+
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
@@ -17,7 +37,8 @@ class CollectorTests(unittest.TestCase):
         actions={a['id']:a for a in plan['actions']}
         self.assertIn('E26',actions['A3']['status'])
         self.assertIn('E27',actions['A6']['status'])
-        self.assertTrue(all(actions[a]['status']=='计划中 · 未启动' for a in ['A1','A2','A4','A5']))
+        self.assertIn('E28',actions['A4']['status'])
+        self.assertTrue(all(actions[a]['status']=='计划中 · 未启动' for a in ['A1','A2','A5']))
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:

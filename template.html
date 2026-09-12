@@ -16,12 +16,14 @@
 <section id="native"><h2>协作任务 · 原生基线训练</h2><div class="panel" id="native-progress"></div><p class="muted">写作 agent 负责训练与交接；面板只读核验。运行中记录超过 5 分钟未更新时显示未知；已核验的终态无需持续心跳。正式比较和补充一致性佐证已完成，原始计分保持不变。</p></section>
 <section id="comparison"><h2>正式原生比较 · 当前进度</h2><div id="comparison-progress" class="panel"></div><p class="muted">619 个实例 × 2 后端 × 6 臂。300 个新随机 n200、300 个复用 n350、19 个复用工业实例；复用数据不算新的独立覆盖。每臂 60 秒墙钟预算；单个训练检查点、训练预算不同。完成行数不代表验收或方法获胜。</p></section>
 <section id="native-results"><h2>原生比较 · 全量结果</h2><div class="toolbar"><label for="cohort">问题族</label><select id="cohort"><option value="fresh_n200">新随机 n200 · 300</option><option value="existing_n350">复用 n350 · 300</option><option value="existing_industrial19">复用工业 · 19</option></select><label for="backend">后端</label><select id="backend"><option value="glucose">Glucose / RLAF</option><option value="kissat">Kissat / NeuroBack</option></select><label for="stratum">子集</label><select id="stratum"><option>ALL</option><option>SAT</option><option>UNSAT</option><option>UNKNOWN</option></select><label for="policy">计分口径</label><select id="policy"><option value="verified">独立核验 · 保守计分</option><option value="reported">求解器原始报告</option></select></div><div class="table"><table><thead><tr><th>方法</th><th>实例</th><th>已核验求解</th><th>未核验 UNSAT</th><th>PAR-2 / 秒 ↓</th><th>相对 CAP 收益 / 秒</th><th>95% 簇区间</th></tr></thead><tbody id="native-result-list"></tbody></table></div><p class="muted">保守计分：未验证 UNSAT 与超时均按 120 秒；原始报告计分保留求解器报告耗时，不等于证明验证通过。收益 = 该方法 − CAP，正值有利于 CAP。区间按生成簇 / 工业家族重采样，单检查点、未做多重比较校正；分层标签条件于原始审计。补充验证不回写原始计分。</p><p id="native-audit-source" class="foot"></p></section>
+<section id="utility"><h2>E28 · 直接学习翻转收益</h2><p class="alert">短程预测变好，不等于求解性能变好。只用廉价特征的学习模型与额外使用 CAP 的同构模型分开验收。</p><p class="muted">48 训练 + 16 验证，三个小模型种子组成固定集成，不是三次独立性能复现。24 新开发实例；过门才生成 48 新确认。每臂 5 秒全成本、0.25 秒预处理含 CAP 推理，不能与 E27 的 10 秒 PAR-2 横向混算；只覆盖随机 3-SAT n325 / n500。</p><div id="utility-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{{DATA}}</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
 const names={frozen:'E17 · Frozen',small:'E19S · 500 train',large:'E19L · 2,000 train'};
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function render(){
  renderHybrid();
+ renderUtility();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -71,6 +73,20 @@ function render(){
  const acceptance=Object.entries(n.acceptance||{}).map(([k,v])=>`${k.startsWith('rlaf')?'RLAF':'NeuroBack'}：${esc(accepted[v]||v)}`).join(' · ');
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
+}
+function renderUtility(){
+ const u=data.utility,target=document.getElementById('utility-progress');
+ if(!u){target.textContent='暂无有效 E28 记录；不推断正在运行。';return;}
+ const labels={stock:'默认 CaDiCaL',random_repair:'随机修复 → 默认',utility_cheap:'收益模型 · 廉价特征',utility_cap:'收益模型 · 廉价特征 + CAP'};
+ const t=u.training,s=u.selection;
+ const training=t?`<p>训练完成：${t.train_groups} 组训练动作比较 / ${t.validation_groups} 组验证。验证短程收益对 min-break 的差：${Object.entries(t.models).map(([a,v])=>`${labels[a]} ${v.proxy_gain.toFixed(4)}`).join('；')}。这些数值不是秒，不用于认定加速。</p>`:'<p>监督 / 训练尚无有效终态，不推断进程状态。</p>';
+ const selection=s?`<p class="alert">${s.stopped?'开发门未通过 · 停止该候选，不生成确认集。':'冻结开发选择：'+esc(labels[s.selected])+'；开发结果不算独立确认。'}</p>`:'<p>尚未完成开发选择。</p>';
+ target.innerHTML=training+selection+Object.entries(u.stages).map(([stage,x])=>{
+  const r=x.readout,age=(Date.now()-Date.parse(x.observed))/60000,stale=!Number.isFinite(age)||age>5||age< -1;
+  const state=r?(stage==='dev'?'开发统计完成':r.confirmed?'局部确认通过 · 保留范围限制':'确认未通过'):x.phase==='failed'?'失败 · 待排查':x.phase==='awaiting_readout'?'运行完成 · 等待读出':stale?'进度陈旧 · 运行态未知':'近期有进度更新 · 无性能结论';
+  const table=r?`<div class="table"><table><thead><tr><th>方法</th><th>已校验 SAT</th><th>全成本 PAR-2 秒 ↓</th><th>局部搜索解出</th></tr></thead><tbody>${Object.entries(r.summaries).map(([a,v])=>`<tr><td>${esc(labels[a])}</td><td>${v.solved}/${x.target_rows}</td><td class="number">${v.par2_s.toFixed(3)}</td><td>${v.sls_solved}</td></tr>`).join('')}</tbody></table></div><p>错误 ${r.errors}；未解实例保留，未佐证 UNSAT 不计成功。</p>`:'<p>完整阶段统计前不展示排名。</p>';
+  return `<article class="panel" data-stage="${stage}"><h3>${stage==='dev'?'开发集':'独立确认集'} · ${esc(state)}</h3><p><progress max="${x.target_cells}" value="${x.completed_cells}"></progress> ${x.completed_cells}/${x.target_cells} 单元 · ${x.completed_rows}/${x.target_rows} 实例</p>${table}<p class="foot">冻结 ${esc(x.frozen_sha256)}${r?' · 读出 '+esc(r.sha256):''}</p></article>`;
+ }).join('');
 }
 function renderHybrid(){
  const h=data.hybrid,target=document.getElementById('hybrid-stages'),selection=document.getElementById('hybrid-selection');
