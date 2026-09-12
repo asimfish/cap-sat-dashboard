@@ -1,11 +1,74 @@
 [
-  {"id":"R1","title":"计时与求解器管道可靠性","state":"已修复","evidence":"Kissat stdout PIPE 等待退出缺陷已修复；主张应仅引用 pipe-safe 重跑。SIMON r8/p1 五臂共 5100 行：stock 166/300，CAP 平均 292.2/300。","next":"论文和附录清除旧管道结果，保留重跑来源。","source":"E9–E16 / pipe-safe"},
-  {"id":"R2","title":"学习信号是否超过廉价初始化","state":"部分解决","evidence":"SIMON 和随机 SAT 的匹配接口比较支持学习残差；但随机 SAT 的 stock 比较仍负，不能把接口收益全部归因于学习。","next":"逐表保留 stock、polarity、equal-cost WalkSAT，并拆分 SAT / UNSAT。","source":"E17 / E19 / E20"},
-  {"id":"R3","title":"随机 SAT 的规模泛化","state":"未解决","evidence":"n=400 seed 42：stock 解出 141/141 SAT，CAP 83/141。n=350 大规模同分布训练已完成，当前结果仍未超过 stock。","next":"论文明确规模边界；新的接口策略需要单独预注册与验证。","source":"E17 n400 / E19L"},
-  {"id":"R4","title":"工业实例泛化","state":"未解决","evidence":"E18 已扩展为 19 个唯一实例（原始 14 + 扩展 5），五个 CaDiCaL 检查点及 Kissat seed 789 完成，v23 已纳入；仍没有正向迁移证据。","next":"现有样本受 stock-runtime 筛选限制；新的工业泛化主张需要独立证据。","source":"v23 claim audit C8–C9 / E18"},
-  {"id":"R5","title":"机制与求解器接口混杂","state":"部分解决","evidence":"E20 六臂 1800 个求解任务完成，表明原生 rephase / walk 行为与覆盖接口存在相互作用。不能声称 override 等同于关闭引擎。","next":"以六臂消融限定机制解释；避免简单归因百分比。","source":"E20"},
-  {"id":"R6","title":"更难密码实例与跨求解器复现","state":"部分解决","evidence":"SIMON r9/p1 CaDiCaL 五种子 CAP 平均 8.4/300、stock 1/300；Kissat 的增益未显著。r10/p1、r8/p2 未获得增益。","next":"明确正向证据适用范围和失败边界。","source":"SIMON reach extension"},
-  {"id":"R7","title":"置信度门控与定时释放修复","state":"负结果关闭","evidence":"E11 门控不及全向量；设计文档记录 E21 释放试验负结果，但 v23 审计未恢复其持久化行级输出，因此论文未使用 E21 数值。","next":"E21 仅作为历史探索记录；新的策略须独立设计、留存可审计结果。","source":"E11 / E21 / v23 audit notes"},
-  {"id":"R8","title":"统计、复现与论文落地","state":"部分解决","evidence":"论文已到 v25，纳入完整 E19 新结果、种子 × 生成簇联合区间及排除补跑种子的敏感性；正文保持 9 页。2800 个训练/验证 CNF 与 300 个评测 CNF 无哈希重叠，旧 PDF 与审计快照保留。首页数值表仍明确展示种子单独区间。","next":"原生方法的正式比较仍待完成；严格引用审计、独立诚信审计及更广泛泛化证据仍有缺口。","source":"REMOTE_AGENTS v25 / e19_followup_20260910_v1"},
-  {"id":"R9","title":"NeuroBack / RLAF 原生系统对比","state":"部分解决","evidence":"训练已验收；正式比较完成619/619实例、7428/7428单元，终态审计0失败、0计分问题。76个UNSAT单元（19个实例）因参考验证超时待核验。CAP在n350 Glucose上优于默认，但Kissat和工业组不支持普遍优势；完整数值见下方双口径结果表。","next":"写作 agent 对19例开展独立600秒补充验证，成本另记，不改原始60秒计分。仍需完成验证审阅、论文落地；单检查点和不等训练预算限制保留。","source":"native_comparison_20260911_v1 / TERMINAL_AUDIT.json / unsat_followup_v1"}
+  {
+    "id": "R1",
+    "title": "计时与求解器管道可靠性",
+    "state": "已修复",
+    "evidence": "Kissat stdout PIPE 等待退出缺陷已修复；主张应仅引用 pipe-safe 重跑。SIMON r8/p1 五臂共 5100 行：stock 166/300，CAP 平均 292.2/300。",
+    "next": "论文和附录清除旧管道结果，保留重跑来源。",
+    "source": "E9–E16 / pipe-safe"
+  },
+  {
+    "id": "R2",
+    "title": "学习信号是否超过廉价初始化",
+    "state": "部分解决",
+    "evidence": "SIMON 和随机 SAT 的匹配接口比较支持学习残差；但随机 SAT 的 stock 比较仍负，不能把接口收益全部归因于学习。",
+    "next": "逐表保留 stock、polarity、equal-cost WalkSAT，并拆分 SAT / UNSAT。",
+    "source": "E17 / E19 / E20"
+  },
+  {
+    "id": "R3",
+    "title": "随机 SAT 的规模泛化",
+    "state": "未解决",
+    "evidence": "E22/E24 单个 seed-42、600秒CPU实验：Kissat锚定接口在n350/n400 SAT均解出全部实例，n400 PAR-2 12.43秒、默认12.09秒；但锚定极性8.77秒，未建立学习收益。CaDiCaL锚定n400仍仅138/141，默认141/141。",
+    "next": "论文明确规模边界；新的接口策略需要单独预注册与验证。",
+    "source": "E22 / E24 READOUT · 不与E17原计分混合"
+  },
+  {
+    "id": "R4",
+    "title": "工业实例泛化",
+    "state": "未解决",
+    "evidence": "E18 已扩展为 19 个唯一实例（原始 14 + 扩展 5），五个 CaDiCaL 检查点及 Kissat seed 789 完成，v23 已纳入；仍没有正向迁移证据。",
+    "next": "现有样本受 stock-runtime 筛选限制；新的工业泛化主张需要独立证据。",
+    "source": "v23 claim audit C8–C9 / E18"
+  },
+  {
+    "id": "R5",
+    "title": "机制与求解器接口混杂",
+    "state": "部分解决",
+    "evidence": "E22–E25补充了覆盖/锚定接口证据：Kissat随机SAT损害可缓解，但r8/p1锚定仅57例、默认73例、常驻覆盖141例。PySAT lucky设置扰动已量化，所测默认求解数变化小、区间含零；不能据此证明所有配置都无混杂。",
+    "next": "机制结论限于所测接口、后端和seed；保留并发污染与重跑说明。不能从锚定负结果推断先验无信息或所有改进均不可能。",
+    "source": "E20 / E22–E25 READOUT / REMOTE_AGENTS"
+  },
+  {
+    "id": "R6",
+    "title": "更难密码实例与跨求解器复现",
+    "state": "部分解决",
+    "evidence": "SIMON r9/p1 CaDiCaL 五种子 CAP 平均 8.4/300、stock 1/300；Kissat 的增益未显著。r10/p1、r8/p2 未获得增益。",
+    "next": "明确正向证据适用范围和失败边界。",
+    "source": "SIMON reach extension"
+  },
+  {
+    "id": "R7",
+    "title": "置信度门控与定时释放修复",
+    "state": "负结果关闭",
+    "evidence": "E11 门控不及全向量；设计文档记录 E21 释放试验负结果，但 v23 审计未恢复其持久化行级输出，因此论文未使用 E21 数值。",
+    "next": "E21 仅作为历史探索记录；新的策略须独立设计、留存可审计结果。",
+    "source": "E11 / E21 / v23 audit notes"
+  },
+  {
+    "id": "R8",
+    "title": "统计、复现与论文落地",
+    "state": "部分解决",
+    "evidence": "共享账本记录论文已至v30（67页，正文9页）；v28已纳入原生比较和独立补充佐证，v29/v30为排版更新。E19联合区间与训练评测隔离证据保留。",
+    "next": "E22–E25是否纳入论文仍待写作侧审阅；严格引用与独立诚信审计状态须单独确认。",
+    "source": "REMOTE_AGENTS / PAPER_INCLUSION_v28.json / supplement_v30_20260912"
+  },
+  {
+    "id": "R9",
+    "title": "NeuroBack / RLAF 原生系统对比",
+    "state": "部分解决",
+    "evidence": "619/619实例、7428/7428单元完成。补充600秒CaDiCaL佐证已覆盖19/19实例、76/76原未核验UNSAT单元，零矛盾；这是求解器一致性佐证，不是UNSAT证明认证。v28已纳入论文，收益仍依赖后端。",
+    "next": "原始60秒计分和分层不回写；下方双口径表保留原始终态审计，76为历史验证缺口，不是当前补充验证未完成数。单检查点、不等训练预算与工业负结果保留。",
+    "source": "unsat_supplement_summary_v1/SUMMARY.json / PAPER_INCLUSION_v28.json"
+  }
 ]
