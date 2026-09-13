@@ -18,6 +18,7 @@
 <section id="native-results"><h2>原生比较 · 全量结果</h2><div class="toolbar"><label for="cohort">问题族</label><select id="cohort"><option value="fresh_n200">新随机 n200 · 300</option><option value="existing_n350">复用 n350 · 300</option><option value="existing_industrial19">复用工业 · 19</option></select><label for="backend">后端</label><select id="backend"><option value="glucose">Glucose / RLAF</option><option value="kissat">Kissat / NeuroBack</option></select><label for="stratum">子集</label><select id="stratum"><option>ALL</option><option>SAT</option><option>UNSAT</option><option>UNKNOWN</option></select><label for="policy">计分口径</label><select id="policy"><option value="verified">独立核验 · 保守计分</option><option value="reported">求解器原始报告</option></select></div><div class="table"><table><thead><tr><th>方法</th><th>实例</th><th>已核验求解</th><th>未核验 UNSAT</th><th>PAR-2 / 秒 ↓</th><th>相对 CAP 收益 / 秒</th><th>95% 簇区间</th></tr></thead><tbody id="native-result-list"></tbody></table></div><p class="muted">保守计分：未验证 UNSAT 与超时均按 120 秒；原始报告计分保留求解器报告耗时，不等于证明验证通过。收益 = 该方法 − CAP，正值有利于 CAP。区间按生成簇 / 工业家族重采样，单检查点、未做多重比较校正；分层标签条件于原始审计。补充验证不回写原始计分。</p><p id="native-audit-source" class="foot"></p></section>
 <section id="utility"><h2>E28 · 直接学习翻转收益</h2><p class="alert">短程预测变好，不等于求解性能变好。只用廉价特征的学习模型与额外使用 CAP 的同构模型分开验收。</p><p class="muted">48 训练 + 16 验证，三个小模型种子组成固定集成，不是三次独立性能复现。24 新开发实例；过门才生成 48 新确认。每臂 5 秒全成本、0.25 秒预处理含 CAP 推理，不能与 E27 的 10 秒 PAR-2 横向混算；只覆盖随机 3-SAT n325 / n500。</p><div id="utility-progress"></div></section>
 <section id="conservative"><h2>E29 · 用完整求解轨迹训练保守策略</h2><p class="alert">固定 min-break 规则，保留随机探索；学习器只调整平局动作权重。训练适应度不是端到端加速，CAP 必须额外胜过同预算廉价模型。</p><p class="muted">96 个新训练公式，两个策略类各 3 轮 × 16 候选 × 2 搜索种子，共 18,432 单元，最多 32 路 CPU。开发 96 新公式 × 3 搜索种子 × 5 臂，8 路固定 CPU、每臂 5 秒全成本；过门才生成 192 新确认公式。训练与正式计时分开运行，不抢占已有 GPU 任务。搜索种子重复不算新增独立实例。</p><div class="toolbar"><a href="#action-A7">计划与验收规则 ↗</a><label for="conservative-scale">表格规模</label><select id="conservative-scale"><option value="ALL">全部规模</option><option value="325">n325</option><option value="500">n500</option></select></div><div id="conservative-progress"></div></section>
+<section id="cost-aware"><h2>E30 · 把计算成本纳入训练</h2><p class="alert">使用 E29 原生引擎；允许关闭 make 扫描和 CAP 特征，以 0.25 秒完整预处理成本训练。若最终关闭 CAP，不算 CAP 内容优势。</p><p class="muted">64 个新训练公式 × 2 搜索种子，两个策略类各 3 轮 × 12 候选，共 9,216 训练单元，16 路 CPU。开发 96 新公式 × 3 搜索种子 × 7 臂，共 2,016 单元，8 路固定 CPU、每臂 5 秒全成本。过门才生成 192 新确认公式；重复种子不算新增独立实例。</p><div class="toolbar"><a href="#action-A8">计划与验收规则 ↗</a><label for="cost-aware-scale">表格规模</label><select id="cost-aware-scale"><option value="ALL">全部规模</option><option value="325">n325</option><option value="500">n500</option></select></div><div id="cost-aware-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{{DATA}}</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
 const names={frozen:'E17 · Frozen',small:'E19S · 500 train',large:'E19L · 2,000 train'};
@@ -26,6 +27,7 @@ function render(){
  renderHybrid();
  renderUtility();
  renderConservative();
+ renderCostAware();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -76,6 +78,20 @@ function render(){
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
 }
+function renderCostAware(){
+ const u=data.cost_aware,target=document.getElementById('cost-aware-progress');
+ if(!u){target.textContent='暂无有效 E30 记录；不推断正在运行。';return;}
+ const labels={stock:'默认 CaDiCaL',random:'随机修复',hand:'固定廉价 recency 规则',e29_cheap:'E29 · 廉价策略',e29_cap:'E29 · CAP 策略',cost_cheap:'成本训练 · 廉价特征',cost_cap:'成本训练 · CAP 可关闭'};
+ const stale=x=>{const a=(Date.now()-Date.parse(x.observed))/60000;return !Number.isFinite(a)||a>5||a< -1;};
+ const t=u.training,s=u.selection,scale=document.getElementById('cost-aware-scale').value;
+ const trainState=t.phase==='terminal'?'成本策略训练完成 · 尚不代表优势':t.phase==='failed'?'训练失败 · 待排查':stale(t)?'训练记录陈旧 · 运行态未知':'训练近期有进度';
+ target.innerHTML=`<article class="panel"><h3>${trainState}</h3><p><progress max="9216" value="${t.completed_cells}"></progress> ${t.completed_cells}/9216 训练单元 · 最大 ${t.workers} 路</p>${t.readout?`<p>训练集 0.25 秒预算 PAR-2：${Object.entries(t.readout.summaries).map(([a,v])=>`${a==='cheap'?'廉价':'CAP 可关闭'} ${v.fitness_s.toFixed(4)} 秒，解出 ${v.solved}/${v.trials} 次轨迹`).join('；')}。不是 5 秒开发结果，也不是独立确认。</p>`:''}</article>`+(s?`<p class="alert">${s.stopped?'开发门未通过 · 不生成确认集。':'开发选择已冻结 · 仍需独立确认。'}</p>`:'')+Object.entries(u.stages).map(([stage,x])=>{
+  const r=x.readout,sm=r?(scale==='ALL'?r.summaries:r.by_scale[scale]):null,n=scale==='ALL'?x.target_rows:x.target_rows/2;
+  const state=r?(stage==='dev'?'开发统计完成':r.confirmed?'局部确认通过 · 保留边界':'确认门未通过'):x.phase==='failed'?'失败 · 待排查':x.phase==='awaiting_readout'?'求解结束 · 等待统计':stale(x)?'记录陈旧 · 运行态未知':'近期有进度 · 尚无结论';
+  return `<article class="panel" data-stage="${stage}"><h3>${stage==='dev'?'开发集':'独立确认集'} · ${state}</h3><p><progress max="${x.target_cells}" value="${x.completed_cells}"></progress> ${x.completed_cells}/${x.target_cells} 单元 · ${x.completed_rows}/${x.target_rows} 种子重复 · ${x.instances} 个独立公式</p>${sm?`<div class="table"><table><thead><tr><th>方法</th><th>已校验 SAT / 种子重复</th><th>全成本 PAR-2 秒 ↓</th><th>修复直接解出</th></tr></thead><tbody>${Object.entries(sm).map(([a,v])=>`<tr><td>${esc(labels[a])}</td><td>${v.solved}/${n}</td><td>${v.par2_s.toFixed(3)}</td><td>${v.sls_solved}</td></tr>`).join('')}</tbody></table></div><p>错误 ${r.errors}；成本 CAP 候选${r.cap_active?'保留 CAP 特征':'已关闭 CAP，不支持内容优势'}。</p>`:'<p>完整阶段统计前不展示排名。</p>'}<p class="foot">冻结 ${esc(x.frozen_sha256)}${r?' · 读出 '+esc(r.sha256):''}</p></article>`;
+ }).join('');
+ if(u.preflight)target.insertAdjacentHTML('beforeend',`<p class="alert">候选与固定廉价规则完全相同 · 已在开发前停止。两个策略均关闭 CAP，没有新学习策略。原定开发评测提前取消，明确记录为协议偏离；不是开发门失败，也不是确认成功。</p><p>未生成开发集或确认集；已重新检查 ${u.preflight.checked_training_sat} 次训练 SAT 见证。</p>`);
+}
 function renderConservative(){
  const u=data.conservative,target=document.getElementById('conservative-progress');
  if(!u){target.textContent='暂无有效 E29 记录；不推断正在运行。';return;}
@@ -121,7 +137,7 @@ function renderHybrid(){
   return `<article class="panel" style="margin-bottom:16px" data-stage="${stage}"><h3>${stage==='dev'?'开发集':'独立确认集'} · ${esc(state)}</h3><p><progress max="${x.target_cells}" value="${x.completed_cells}"></progress> ${x.completed_cells}/${x.target_cells} 单元 · ${x.completed_rows}/${x.target_rows} 完整实例</p><p class="muted">最后进度记录 ${esc(x.observed)}</p>${table}${r?`<p>错误 ${r.errors} · 未佐证 UNSAT ${r.unverified_unsat_cells}；未解实例保持未知。</p>`:''}${comparisons?`<p class="muted">总体主比较同时区间，不随上方规模筛选变化；正值有利于候选。${esc(comparisons)}</p>`:''}<p class="foot">冻结 SHA256 ${esc(x.frozen_sha256)}${r?' · 读出 '+esc(r.sha256):''}</p></article>`;
  }).join('');
 }
-for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale','conservative-scale'])document.getElementById(id).addEventListener('change',render);
+for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale','conservative-scale','cost-aware-scale'])document.getElementById(id).addEventListener('change',render);
 async function refresh(){try{const response=await fetch('status.json?t='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error();const incoming=await response.json();if(incoming.runs&&incoming.results&&incoming.source_sha256){data=incoming;render();}}catch{render();document.getElementById('freshness').textContent+=' · 离线 / 更新失败，显示已有快照';}}
 render();if(location.protocol!=='file:'){refresh();setInterval(refresh,60000);}
 </script></body></html>

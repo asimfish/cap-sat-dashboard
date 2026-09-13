@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T08:51:12.107458+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T09:20:02.341290+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -18,8 +18,9 @@
 <section id="native-results"><h2>原生比较 · 全量结果</h2><div class="toolbar"><label for="cohort">问题族</label><select id="cohort"><option value="fresh_n200">新随机 n200 · 300</option><option value="existing_n350">复用 n350 · 300</option><option value="existing_industrial19">复用工业 · 19</option></select><label for="backend">后端</label><select id="backend"><option value="glucose">Glucose / RLAF</option><option value="kissat">Kissat / NeuroBack</option></select><label for="stratum">子集</label><select id="stratum"><option>ALL</option><option>SAT</option><option>UNSAT</option><option>UNKNOWN</option></select><label for="policy">计分口径</label><select id="policy"><option value="verified">独立核验 · 保守计分</option><option value="reported">求解器原始报告</option></select></div><div class="table"><table><thead><tr><th>方法</th><th>实例</th><th>已核验求解</th><th>未核验 UNSAT</th><th>PAR-2 / 秒 ↓</th><th>相对 CAP 收益 / 秒</th><th>95% 簇区间</th></tr></thead><tbody id="native-result-list"></tbody></table></div><p class="muted">保守计分：未验证 UNSAT 与超时均按 120 秒；原始报告计分保留求解器报告耗时，不等于证明验证通过。收益 = 该方法 − CAP，正值有利于 CAP。区间按生成簇 / 工业家族重采样，单检查点、未做多重比较校正；分层标签条件于原始审计。补充验证不回写原始计分。</p><p id="native-audit-source" class="foot"></p></section>
 <section id="utility"><h2>E28 · 直接学习翻转收益</h2><p class="alert">短程预测变好，不等于求解性能变好。只用廉价特征的学习模型与额外使用 CAP 的同构模型分开验收。</p><p class="muted">48 训练 + 16 验证，三个小模型种子组成固定集成，不是三次独立性能复现。24 新开发实例；过门才生成 48 新确认。每臂 5 秒全成本、0.25 秒预处理含 CAP 推理，不能与 E27 的 10 秒 PAR-2 横向混算；只覆盖随机 3-SAT n325 / n500。</p><div id="utility-progress"></div></section>
 <section id="conservative"><h2>E29 · 用完整求解轨迹训练保守策略</h2><p class="alert">固定 min-break 规则，保留随机探索；学习器只调整平局动作权重。训练适应度不是端到端加速，CAP 必须额外胜过同预算廉价模型。</p><p class="muted">96 个新训练公式，两个策略类各 3 轮 × 16 候选 × 2 搜索种子，共 18,432 单元，最多 32 路 CPU。开发 96 新公式 × 3 搜索种子 × 5 臂，8 路固定 CPU、每臂 5 秒全成本；过门才生成 192 新确认公式。训练与正式计时分开运行，不抢占已有 GPU 任务。搜索种子重复不算新增独立实例。</p><div class="toolbar"><a href="#action-A7">计划与验收规则 ↗</a><label for="conservative-scale">表格规模</label><select id="conservative-scale"><option value="ALL">全部规模</option><option value="325">n325</option><option value="500">n500</option></select></div><div id="conservative-progress"></div></section>
+<section id="cost-aware"><h2>E30 · 把计算成本纳入训练</h2><p class="alert">使用 E29 原生引擎；允许关闭 make 扫描和 CAP 特征，以 0.25 秒完整预处理成本训练。若最终关闭 CAP，不算 CAP 内容优势。</p><p class="muted">64 个新训练公式 × 2 搜索种子，两个策略类各 3 轮 × 12 候选，共 9,216 训练单元，16 路 CPU。开发 96 新公式 × 3 搜索种子 × 7 臂，共 2,016 单元，8 路固定 CPU、每臂 5 秒全成本。过门才生成 192 新确认公式；重复种子不算新增独立实例。</p><div class="toolbar"><a href="#action-A8">计划与验收规则 ↗</a><label for="cost-aware-scale">表格规模</label><select id="cost-aware-scale"><option value="ALL">全部规模</option><option value="325">n325</option><option value="500">n500</option></select></div><div id="cost-aware-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-13T08:51:12.107458+00:00",
+  "generated": "2026-09-13T09:20:02.341290+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3233,14 +3234,12 @@
       {
         "id": "A5",
         "title": "先守住明确问题族，再验证规模与迁移",
-        "priority": "P3 · 确认后扩展",
-        "status": "计划中 · 未启动",
-        "cost": "需新的独立实例及资源预算",
-        "depends_on": [
-          "A1"
-        ],
+        "priority": "P1 · 新方向前置核查",
+        "status": "E31 编码前置核验完成 · 性能训练未启动",
+        "cost": "顶点覆盖 1,099 个小图、6,504 个规模约束组合的精确核验；无 GPU",
+        "depends_on": [],
         "hypothesis": "特定密码结构的局部优势可能可重复；这不意味着工业通用加速，需要分别检验。",
-        "method": "在未用于策略选择的密码实例、不同难度和规模上确认；另按自然家族冻结工业测试，不用已看过的 19/43 例调参。若做领域适配，必须隔离训练/测试家族并单列监督成本。",
+        "method": "E31 先核查顶点覆盖编码：旧生成器在三角形、覆盖上限 1 的反例上错误地给出可满足 CNF。新增隔离的正确 at-most-k 编码，无 SAT 过滤，穷举小图及赋值验证通过；旧脚本和数据未改，历史受影响范围仍待追溯。后续领域适配须冻结独立图种子、规模和预算，并单列监督成本；密码/工业测试也须使用未参与选择的新实例，不拿旧 19/43 例调参。",
         "gate": "报告每个预定问题族的全成本、求解数及簇区间；至少在明确主目标域达到预定优势门槛，其他域失败如实保留。",
         "stop": "更难规模或新家族不复现时收窄适用范围，不混合容易样本掩盖失败，不升级为通用求解器优势。"
       },
@@ -3276,19 +3275,19 @@
       {
         "id": "A8",
         "title": "以计算成本训练，并保留廉价策略底线",
-        "priority": "P1 · 下一候选建议",
-        "status": "计划中 · 未启动",
-        "cost": "先小型成本剖析，再冻结新训练与开发面板；可复用并行控制器",
+        "priority": "P1 · 候选已验收",
+        "status": "E30 训练完成 · 候选等同固定规则，开发前停止",
+        "cost": "64 新训练公式、9,216 单元、16 路 CPU，137 秒；原定 2,016 开发单元未执行",
         "depends_on": [
           "A7"
         ],
         "hypothesis": "按翻转次数最优的策略未必按完整时间最优；额外 make 扫描、相位推理等成本可能抵消搜索收益。",
-        "method": "E29 训练公式的微基准显示学习评分仍有开销。下一次联合选择特征开关、调用频率和策略参数，把预处理及评分成本纳入目标；用新训练数据做随机化配对计时，不在 E29 开发集上删特征后宣称成功。保留原生、随机、固定 recency 及同预算廉价学习控制。若尝试噪声或重启控制，同时加入固定与经典自适应对照。",
+        "method": "E30 保持 E29 原生引擎不变，直接以 0.25 秒完整预处理 PAR-2 训练，允许 make 与 CAP 系数精确归零、真实跳过对应开销。两个策略类各 3 轮 × 12 候选；只在新训练数据上选择，再对新开发集比较默认、随机、固定 recency、两个冻结 E29 策略及两个成本策略。调用频率/在线触发尚未实现，不声称单独因果隔离了目标、训练时长和掩码。",
         "gate": "冻结后的新实例完整成本必须超过所有预定廉价控制，跨生成簇及种子核验；若学会的只是不用 CAP，则只能算调用策略或工程收益，不能支持 CAP 内容优势。",
-        "stop": "若成本下降仍无 CAP 内容增益，转向 A5 的明确问题族适配，并重新隔离训练、开发和测试；不追加通用静态模型规模。领域生成器须先检查编码正确性与 SAT 过滤偏差，不能把已看过的工业切片当新证据。"
+        "stop": "E30 两个策略类最终均选中与 hand 完全相同的系数，实际关闭 CAP 和额外特征。身份核查后提前停止，未生成开发/确认集；此提前取消明确记录为协议偏离，不冒称开发门失败或新加速。2,802 次训练 SAT 见证重新通过校验。转向 A5 前置编码审计；领域适配训练尚未开始，七个性能缺口的解决状态不升级。"
       }
     ],
-    "sha256": "2941d2757b904c6493decfeaafaf2d5a7a9b68efd5e68ef1184cc9bbd0a6ebfd"
+    "sha256": "2fbd7ce657dc6ee81ebd0a08dba7932a4f69ec6247da7e3e3b1f6a214d0863e7"
   },
   "pilot": {
     "id": "E26",
@@ -3872,6 +3871,41 @@
       "selected": null,
       "stopped": true
     }
+  },
+  "cost_aware": {
+    "training": {
+      "phase": "terminal",
+      "observed": "2026-09-13T09:10:18.038106+00:00",
+      "completed_cells": 9216,
+      "target_cells": 9216,
+      "workers": 16,
+      "frozen_sha256": "ef8830e07d92334d0e8b8d8e8cba0a60611ffebdba439b095643be45596d3e86",
+      "readout": {
+        "sha256": "7f15b6a47c076d5f2f9bab69e77a96735eee5b0d9ad36e4de8b62ab860a2d0b5",
+        "summaries": {
+          "cheap": {
+            "fitness_s": 0.34725023299688473,
+            "solved": 47,
+            "trials": 128
+          },
+          "cap": {
+            "fitness_s": 0.340905424032826,
+            "solved": 48,
+            "trials": 128
+          }
+        }
+      }
+    },
+    "stages": {},
+    "selection": null,
+    "preflight": {
+      "reason": "both_candidates_identical_to_hand",
+      "protocol_deviation": true,
+      "dev_generated": false,
+      "test_generated": false,
+      "audit_sha256": "2a6f179c5e69c082239f2f4def014f5ee2a0b01bf1f0771cb10d4b4a084af76b",
+      "checked_training_sat": 2802
+    }
   }
 }</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
@@ -3881,6 +3915,7 @@ function render(){
  renderHybrid();
  renderUtility();
  renderConservative();
+ renderCostAware();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -3931,6 +3966,20 @@ function render(){
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
 }
+function renderCostAware(){
+ const u=data.cost_aware,target=document.getElementById('cost-aware-progress');
+ if(!u){target.textContent='暂无有效 E30 记录；不推断正在运行。';return;}
+ const labels={stock:'默认 CaDiCaL',random:'随机修复',hand:'固定廉价 recency 规则',e29_cheap:'E29 · 廉价策略',e29_cap:'E29 · CAP 策略',cost_cheap:'成本训练 · 廉价特征',cost_cap:'成本训练 · CAP 可关闭'};
+ const stale=x=>{const a=(Date.now()-Date.parse(x.observed))/60000;return !Number.isFinite(a)||a>5||a< -1;};
+ const t=u.training,s=u.selection,scale=document.getElementById('cost-aware-scale').value;
+ const trainState=t.phase==='terminal'?'成本策略训练完成 · 尚不代表优势':t.phase==='failed'?'训练失败 · 待排查':stale(t)?'训练记录陈旧 · 运行态未知':'训练近期有进度';
+ target.innerHTML=`<article class="panel"><h3>${trainState}</h3><p><progress max="9216" value="${t.completed_cells}"></progress> ${t.completed_cells}/9216 训练单元 · 最大 ${t.workers} 路</p>${t.readout?`<p>训练集 0.25 秒预算 PAR-2：${Object.entries(t.readout.summaries).map(([a,v])=>`${a==='cheap'?'廉价':'CAP 可关闭'} ${v.fitness_s.toFixed(4)} 秒，解出 ${v.solved}/${v.trials} 次轨迹`).join('；')}。不是 5 秒开发结果，也不是独立确认。</p>`:''}</article>`+(s?`<p class="alert">${s.stopped?'开发门未通过 · 不生成确认集。':'开发选择已冻结 · 仍需独立确认。'}</p>`:'')+Object.entries(u.stages).map(([stage,x])=>{
+  const r=x.readout,sm=r?(scale==='ALL'?r.summaries:r.by_scale[scale]):null,n=scale==='ALL'?x.target_rows:x.target_rows/2;
+  const state=r?(stage==='dev'?'开发统计完成':r.confirmed?'局部确认通过 · 保留边界':'确认门未通过'):x.phase==='failed'?'失败 · 待排查':x.phase==='awaiting_readout'?'求解结束 · 等待统计':stale(x)?'记录陈旧 · 运行态未知':'近期有进度 · 尚无结论';
+  return `<article class="panel" data-stage="${stage}"><h3>${stage==='dev'?'开发集':'独立确认集'} · ${state}</h3><p><progress max="${x.target_cells}" value="${x.completed_cells}"></progress> ${x.completed_cells}/${x.target_cells} 单元 · ${x.completed_rows}/${x.target_rows} 种子重复 · ${x.instances} 个独立公式</p>${sm?`<div class="table"><table><thead><tr><th>方法</th><th>已校验 SAT / 种子重复</th><th>全成本 PAR-2 秒 ↓</th><th>修复直接解出</th></tr></thead><tbody>${Object.entries(sm).map(([a,v])=>`<tr><td>${esc(labels[a])}</td><td>${v.solved}/${n}</td><td>${v.par2_s.toFixed(3)}</td><td>${v.sls_solved}</td></tr>`).join('')}</tbody></table></div><p>错误 ${r.errors}；成本 CAP 候选${r.cap_active?'保留 CAP 特征':'已关闭 CAP，不支持内容优势'}。</p>`:'<p>完整阶段统计前不展示排名。</p>'}<p class="foot">冻结 ${esc(x.frozen_sha256)}${r?' · 读出 '+esc(r.sha256):''}</p></article>`;
+ }).join('');
+ if(u.preflight)target.insertAdjacentHTML('beforeend',`<p class="alert">候选与固定廉价规则完全相同 · 已在开发前停止。两个策略均关闭 CAP，没有新学习策略。原定开发评测提前取消，明确记录为协议偏离；不是开发门失败，也不是确认成功。</p><p>未生成开发集或确认集；已重新检查 ${u.preflight.checked_training_sat} 次训练 SAT 见证。</p>`);
+}
 function renderConservative(){
  const u=data.conservative,target=document.getElementById('conservative-progress');
  if(!u){target.textContent='暂无有效 E29 记录；不推断正在运行。';return;}
@@ -3976,7 +4025,7 @@ function renderHybrid(){
   return `<article class="panel" style="margin-bottom:16px" data-stage="${stage}"><h3>${stage==='dev'?'开发集':'独立确认集'} · ${esc(state)}</h3><p><progress max="${x.target_cells}" value="${x.completed_cells}"></progress> ${x.completed_cells}/${x.target_cells} 单元 · ${x.completed_rows}/${x.target_rows} 完整实例</p><p class="muted">最后进度记录 ${esc(x.observed)}</p>${table}${r?`<p>错误 ${r.errors} · 未佐证 UNSAT ${r.unverified_unsat_cells}；未解实例保持未知。</p>`:''}${comparisons?`<p class="muted">总体主比较同时区间，不随上方规模筛选变化；正值有利于候选。${esc(comparisons)}</p>`:''}<p class="foot">冻结 SHA256 ${esc(x.frozen_sha256)}${r?' · 读出 '+esc(r.sha256):''}</p></article>`;
  }).join('');
 }
-for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale','conservative-scale'])document.getElementById(id).addEventListener('change',render);
+for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale','conservative-scale','cost-aware-scale'])document.getElementById(id).addEventListener('change',render);
 async function refresh(){try{const response=await fetch('status.json?t='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error();const incoming=await response.json();if(incoming.runs&&incoming.results&&incoming.source_sha256){data=incoming;render();}}catch{render();document.getElementById('freshness').textContent+=' · 离线 / 更新失败，显示已有快照';}}
 render();if(location.protocol!=='file:'){refresh();setInterval(refresh,60000);}
 </script></body></html>

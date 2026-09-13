@@ -364,9 +364,14 @@ def utility_progress(repo):
         return result
     except (OSError,ValueError,TypeError,KeyError):return None
 
-def conservative_progress(repo):
-    """E29 aggregate contract: search trials are not independent instances."""
-    root=repo/'experiments/conservative_search_20260913_e29'
+def conservative_progress(repo, *, cost_aware=False):
+    """E29/E30 allowlisted aggregates; search trials are not independent instances."""
+    root=repo/('experiments/cost_aware_20260913_e30' if cost_aware else 'experiments/conservative_search_20260913_e29')
+    cells,workers,trials=(9216,16,128) if cost_aware else (18432,32,192)
+    score,score_limit=('fitness_s',.5) if cost_aware else ('fitness',400000)
+    learned=['cost_cheap','cost_cap'] if cost_aware else ['learned_cheap','learned_cap']
+    allowed=['stock','random','hand']+(['e29_cheap','e29_cap'] if cost_aware else [])+learned
+    test_arms=[allowed[:5]+['cost_cheap'],allowed[:5]+['cost_cap','cost_cheap']] if cost_aware else [allowed,allowed[:-1]]
     def num(x,lo=0,hi=10,integer=False):
         if type(x) not in (int,float) or not math.isfinite(x) or not lo<=x<=hi or (integer and type(x) is not int):raise ValueError('E29 metric')
         return x
@@ -377,22 +382,21 @@ def conservative_progress(repo):
     try:
         if not (root/'TRAIN_STATUS.json').exists():return None
         raw=(root/'train/FROZEN.json').read_bytes();h=hashlib.sha256(raw).hexdigest();state=json.loads((root/'TRAIN_STATUS.json').read_text())
-        if state['frozen_sha256']!=h or state['phase'] not in ['running','failed','terminal'] or state['target_cells']!=18432:raise ValueError('E29 train identity')
-        train={'phase':state['phase'],'observed':state['observed'],'completed_cells':num(state['completed_cells'],0,18432,True),'target_cells':18432,
-            'workers':num(state['workers'],1,32,True),'frozen_sha256':h,'readout':None}
+        if state['frozen_sha256']!=h or state['phase'] not in ['running','failed','terminal'] or state['target_cells']!=cells:raise ValueError('training identity')
+        train={'phase':state['phase'],'observed':state['observed'],'completed_cells':num(state['completed_cells'],0,cells,True),'target_cells':cells,
+            'workers':num(state['workers'],1,workers,True),'frozen_sha256':h,'readout':None}
         if state['phase']=='terminal':
-            if state['completed_cells']!=18432:raise ValueError('partial training terminal')
+            if state['completed_cells']!=cells:raise ValueError('partial training terminal')
             raw=(root/'TRAINED.json').read_bytes();trained=json.loads(raw)
-            if trained['train_frozen_sha256']!=h or trained['training_cells']!=18432:raise ValueError('trained identity')
-            train['readout']={'sha256':hashlib.sha256(raw).hexdigest(),'summaries':{a:{'fitness_flips':num(trained['selected'][a]['fitness'],0,400000),
-                'solved':num(trained['selected'][a]['solved'],0,192,True),'trials':num(trained['selected'][a]['trials'],192,192,True)} for a in ['cheap','cap']}}
+            if trained['train_frozen_sha256']!=h or trained['training_cells']!=cells:raise ValueError('trained identity')
+            train['readout']={'sha256':hashlib.sha256(raw).hexdigest(),'summaries':{a:{('fitness_s' if cost_aware else 'fitness_flips'):num(trained['selected'][a][score],0,score_limit),
+                'solved':num(trained['selected'][a]['solved'],0,trials,True),'trials':num(trained['selected'][a]['trials'],trials,trials,True)} for a in ['cheap','cap']}}
         result={'training':train,'stages':{},'selection':None}
         for stage,instances in [('dev',96),('test',192)]:
             folder=root/stage
             if not (folder/'STATUS.json').exists():continue
             raw=(folder/'FROZEN.json').read_bytes();cfg=json.loads(raw);h=hashlib.sha256(raw).hexdigest();s=json.loads((folder/'STATUS.json').read_text());arms=cfg['arms'];n=instances*3
-            allowed=['stock','random','hand','learned_cheap','learned_cap']
-            if (stage=='dev' and arms!=allowed) or (stage=='test' and arms not in [allowed,allowed[:-1]]):raise ValueError('E29 stage arms')
+            if (stage=='dev' and arms!=allowed) or (stage=='test' and arms not in test_arms):raise ValueError('stage arms')
             if s['frozen_sha256']!=h or s['phase'] not in ['running','failed','terminal'] or s['instances']!=instances or s['target_rows']!=n or s['target_cells']!=n*len(arms):raise ValueError('E29 stage identity')
             x={'phase':s['phase'],'observed':s['observed'],'instances':instances,'target_rows':n,'target_cells':n*len(arms),
                 'completed_rows':num(s['completed_rows'],0,n,True),'completed_cells':num(s['completed_cells'],0,n*len(arms),True),'frozen_sha256':h,'readout':None}
@@ -407,11 +411,26 @@ def conservative_progress(repo):
                     if r['confirmed'] and (r['errors'] or not r['contrasts'] or not all(c['gate'] for c in r['contrasts'].values())):raise ValueError('unsupported E29 gate')
                     x.update(phase='terminal',readout={'sha256':hashlib.sha256(raw).hexdigest(),'errors':len(r['errors']),'confirmed':r['confirmed'],
                         'summaries':sm(r['summaries'],arms,n),'by_scale':{z:sm(r['by_scale'][z],arms,n//2) for z in ['325','500']}})
+                    if cost_aware:
+                        if type(r['cap_active']) is not bool:raise ValueError('CAP gate type')
+                        x['readout']['cap_active']=r['cap_active']
             result['stages'][stage]=x
         if (root/'SELECTION.json').exists():
             s=json.loads((root/'SELECTION.json').read_text())
-            if s['selected'] not in [None,'learned_cheap','learned_cap'] or s['development_sha256']!=hashlib.sha256((root/'dev/RESULTS.json').read_bytes()).hexdigest():raise ValueError('E29 selection')
+            if s['selected'] not in [None]+learned or s['development_sha256']!=hashlib.sha256((root/'dev/RESULTS.json').read_bytes()).hexdigest():raise ValueError('selection')
             result['selection']={'selected':s['selected'],'stopped':s['selected'] is None}
+        if cost_aware and (root/'PREFLIGHT.json').exists():
+            pre=json.loads((root/'PREFLIGHT.json').read_text())
+            if (pre['reason']!='both_candidates_identical_to_hand' or pre['decision']!='stop_before_development_no_distinct_candidate'
+                or pre['dev_generated'] is not False or pre['test_generated'] is not False or pre['protocol_deviation'] is not True
+                or pre['cap_active'] is not False or train['phase']!='terminal'
+                or pre['trained_sha256']!=train['readout']['sha256'] or result['stages'] or result['selection']
+                or (root/'dev').exists() or (root/'test').exists()
+                or pre['audit_sha256']!=hashlib.sha256((root/'AUDIT.json').read_bytes()).hexdigest()):raise ValueError('cost identity stop')
+            audit=json.loads((root/'AUDIT.json').read_text())
+            if audit['verdict']!='integrity_pass_candidates_identical_to_hand' or audit['trained_sha256']!=pre['trained_sha256'] or audit['training_cells']!=9216:raise ValueError('cost audit')
+            result['preflight']={'reason':'both_candidates_identical_to_hand','protocol_deviation':True,'dev_generated':False,'test_generated':False,
+                                 'audit_sha256':pre['audit_sha256'],'checked_training_sat':num(audit['sat_witnesses_rechecked'],0,9216,True)}
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
@@ -488,6 +507,7 @@ def main():
     data['hybrid']=hybrid_progress(args.repo.resolve())
     data['utility']=utility_progress(args.repo.resolve())
     data['conservative']=conservative_progress(args.repo.resolve())
+    data['cost_aware']=conservative_progress(args.repo.resolve(),cost_aware=True)
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

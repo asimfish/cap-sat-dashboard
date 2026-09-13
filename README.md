@@ -72,6 +72,16 @@ counts. Published E29 data exclude policy coefficients and private CPU affinity.
 New functionality remains linked to A7; neither a completed run nor a lower
 training fitness automatically upgrades a scientific gap to solved.
 
+E30 (#cost-aware/A8) trains on0.25s charged wall-time rather than flips, with
+optional exact-zero feature masks.9216 cells on64 independent training formulas
+finished; both winners are exactly the existing hand rule and skip CAP. A hashed
+preflight/audit receipt records the explicit protocol deviation: stop before
+planned development, with neither development nor test generated. This is NOT
+a statistically failed development gate or a confirmed performance result.
+Training fitness uses seconds, distinct from E29's flip units and5s evaluation.
+A5 separately records E31's small-graph encoding correctness preparation; no
+family performance training or historical dataset migration is claimed.
+
 Only complete, error-free 300-row seeds enter metrics. Invalid indices,
 non-finite times, arm errors, conflicting duplicate rows, differing CNF paths,
 and contradictory SAT/UNSAT outcomes are rejected or excluded. Identity checking

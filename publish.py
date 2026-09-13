@@ -32,6 +32,7 @@ def main():
         age = (dt.datetime.now(dt.timezone.utc)-dt.datetime.fromisoformat(old['generated'])).total_seconds()
         unchanged = old['source_sha256'] == current['source_sha256'] and old['issues'] == current['issues'] and old.get('native') == current.get('native') and old.get('comparison') == current.get('comparison') and old.get('performance_plan') == current.get('performance_plan') and old.get('pilot') == current.get('pilot') and old.get('hybrid') == current.get('hybrid') and old.get('utility') == current.get('utility') and old.get('conservative') == current.get('conservative')
         same_code = all((dest/n).exists() and (dest/n).read_bytes() == (source/n).read_bytes() for n in ['build.py','template.html','issues.json','performance_plan.json','README.md','publish.py','watch.py','test_build.py','EVIDENCE.md','site/evidence.html','LICENSE','.github/workflows/pages.yml'])
+        unchanged = unchanged and old.get('cost_aware') == current.get('cost_aware')
         if unchanged and same_code and age < 3600:
             print('No change; next freshness export within one hour')
             return

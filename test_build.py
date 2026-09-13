@@ -8,6 +8,26 @@ from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_cost_aware_training_units_and_privacy(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/cost_aware_20260913_e30';(root/'train').mkdir(parents=True)
+            (root/'train/FROZEN.json').write_text('{}');h=hashlib.sha256(b'{}').hexdigest()
+            state=dict(phase='terminal',observed='2026-09-13T09:00:00Z',completed_cells=9216,target_cells=9216,workers=16,frozen_sha256=h,worker_cpus=[1,2])
+            (root/'TRAIN_STATUS.json').write_text(json.dumps(state))
+            trained=dict(training_cells=9216,train_frozen_sha256=h,selected={a:dict(fitness_s=.3,solved=60,trials=128,weights=[1,2,3,0]) for a in ['cheap','cap']})
+            (root/'TRAINED.json').write_text(json.dumps(trained));out=conservative_progress(repo,cost_aware=True)
+            self.assertEqual(out['training']['target_cells'],9216)
+            self.assertEqual(out['training']['readout']['summaries']['cheap']['fitness_s'],.3)
+            self.assertNotIn('fitness_flips',json.dumps(out));self.assertNotIn('weights',json.dumps(out));self.assertNotIn('worker_cpus',json.dumps(out))
+            audit=dict(verdict='integrity_pass_candidates_identical_to_hand',trained_sha256=out['training']['readout']['sha256'],training_cells=9216,sat_witnesses_rechecked=2802)
+            (root/'AUDIT.json').write_text(json.dumps(audit))
+            pre=dict(reason='both_candidates_identical_to_hand',decision='stop_before_development_no_distinct_candidate',dev_generated=False,test_generated=False,protocol_deviation=True,cap_active=False,
+                     trained_sha256=audit['trained_sha256'],audit_sha256=hashlib.sha256((root/'AUDIT.json').read_bytes()).hexdigest())
+            (root/'PREFLIGHT.json').write_text(json.dumps(pre));self.assertEqual(conservative_progress(repo,cost_aware=True)['preflight']['checked_training_sat'],2802)
+            pre['protocol_deviation']=False;(root/'PREFLIGHT.json').write_text(json.dumps(pre));self.assertIsNone(conservative_progress(repo,cost_aware=True))
+            pre['protocol_deviation']=True;(root/'PREFLIGHT.json').write_text(json.dumps(pre))
+            trained['selected']['cap']['fitness_s']=.6;(root/'TRAINED.json').write_text(json.dumps(trained));self.assertIsNone(conservative_progress(repo,cost_aware=True))
+
     def test_conservative_dev_trial_denominator_and_confirmation_guard(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/conservative_search_20260913_e29';(root/'train').mkdir(parents=True);folder=root/'dev';folder.mkdir()
@@ -68,8 +88,9 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('E27',actions['A6']['status'])
         self.assertIn('E28',actions['A4']['status'])
         self.assertIn('E29',actions['A7']['status'])
-        self.assertEqual(actions['A8']['status'],'计划中 · 未启动')
-        self.assertTrue(all(actions[a]['status']=='计划中 · 未启动' for a in ['A1','A2','A5']))
+        self.assertIn('E30',actions['A8']['status'])
+        self.assertIn('E31',actions['A5']['status'])
+        self.assertTrue(all(actions[a]['status']=='计划中 · 未启动' for a in ['A1','A2']))
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:
