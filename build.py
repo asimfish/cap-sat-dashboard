@@ -470,6 +470,17 @@ def shared_gpu_progress(repo):
             if t['frozen_sha256']!=h or type(t['completed']) is not bool or set(t['exit_codes'])!={'42','43','44'}:raise ValueError('GPU supervisor identity')
             if t['completed'] and any(type(v) is not int or v!=0 for v in t['exit_codes'].values()):raise ValueError('GPU supervisor exit')
             result['terminal']=t['completed'] and set(result['workers'])=={'42','43','44'} and all(x['phase']=='terminal' for x in result['workers'].values())
+        replay=root/'resource-replay'
+        if (replay/'RESULT.json').exists():
+            r=json.loads((replay/'RESULT.json').read_text());rf=(replay/'REPLAY_FROZEN.json').read_bytes();rs=(replay/'PROCESS_SAMPLES.json').read_bytes()
+            if r['completed'] is not True or r['original_process_memory_still_unmeasured'] is not True or r['scope']!='separate_identical_workload_resource_replay':raise ValueError('GPU replay scope')
+            if r['exit_codes']!={'42':0,'43':0,'44':0} or json.loads(rf)['original_frozen_sha256']!=h or hashlib.sha256(rf).hexdigest()!=r['replay_frozen_sha256'] or hashlib.sha256(rs).hexdigest()!=r['process_samples_sha256']:raise ValueError('GPU replay identity')
+            if sorted(w['seed'] for w in r['workers'])!=[42,43,44]:raise ValueError('GPU replay seeds')
+            result['resource_replay']={'workers':{}}
+            for w in r['workers']:
+                values=[number(s['total_process_mib'][str(w['seed'])],1,81920) for s in json.loads(rs) if str(w['seed']) in s['total_process_mib']]
+                if not values or w['epochs']!=120 or len(values)!=w['samples'] or max(values)!=w['sampled_total_process_peak_mib']:raise ValueError('GPU replay telemetry')
+                result['resource_replay']['workers'][str(w['seed'])]={'gpu_index':number(w['gpu_index'],0,7),'samples':len(values),'sampled_total_process_peak_mib':max(values)}
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 

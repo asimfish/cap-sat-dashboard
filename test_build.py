@@ -20,6 +20,15 @@ class CollectorTests(unittest.TestCase):
                 (folder/'STATUS.json').write_text(json.dumps(state))
             terminal=dict(completed=True,frozen_sha256=h,exit_codes={'42':0,'43':0,'44':0})
             (root/'TERMINAL.json').write_text(json.dumps(terminal));self.assertTrue(shared_gpu_progress(repo)['terminal'])
+            replay=root/'resource-replay';replay.mkdir()
+            rf=json.dumps(dict(original_frozen_sha256=h)).encode();(replay/'REPLAY_FROZEN.json').write_bytes(rf)
+            samples=json.dumps([dict(total_process_mib={'42':928,'43':928,'44':936})]).encode();(replay/'PROCESS_SAMPLES.json').write_bytes(samples)
+            rr=dict(completed=True,original_process_memory_still_unmeasured=True,scope='separate_identical_workload_resource_replay',exit_codes={'42':0,'43':0,'44':0},
+                    replay_frozen_sha256=hashlib.sha256(rf).hexdigest(),process_samples_sha256=hashlib.sha256(samples).hexdigest(),
+                    workers=[dict(seed=s,gpu_index=g,epochs=120,samples=1,sampled_total_process_peak_mib=m) for s,g,m in [(42,3,928),(43,2,928),(44,5,936)]])
+            (replay/'RESULT.json').write_text(json.dumps(rr));self.assertEqual(shared_gpu_progress(repo)['resource_replay']['workers']['44']['sampled_total_process_peak_mib'],936)
+            rr['workers'][0]['sampled_total_process_peak_mib']=900;(replay/'RESULT.json').write_text(json.dumps(rr));self.assertIsNone(shared_gpu_progress(repo))
+            rr['workers'][0]['sampled_total_process_peak_mib']=928;(replay/'RESULT.json').write_text(json.dumps(rr))
             terminal['exit_codes']['44']=1;(root/'TERMINAL.json').write_text(json.dumps(terminal));self.assertIsNone(shared_gpu_progress(repo))
             terminal['exit_codes']['44']=0;(root/'TERMINAL.json').write_text(json.dumps(terminal))
             (root/'seed-44/last.pt').write_bytes(b'changed');self.assertIsNone(shared_gpu_progress(repo))

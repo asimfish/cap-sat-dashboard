@@ -90,6 +90,7 @@ function renderSharedGPU(){
   const t=u.telemetry[seed];
   return `<article class="panel"><h3>种子 ${seed} · GPU ${x.gpu_index} · ${label}</h3><p><progress max="120" value="${x.epoch}"></progress> ${x.epoch}/120 轮</p>${x.val_loss!==undefined?`<p>训练 CSM ${x.train_loss.toFixed(4)} · 验证 CSM ${x.val_loss.toFixed(4)} · 本进程分配峰值 ${x.peak_allocated_mib.toFixed(0)} MiB</p>`:''}${t?`<p>本任务存活期间整卡活跃度均值 ${t.card_utilization_mean.toFixed(1)}%，最高 ${t.card_utilization_max}%（${t.samples} 次采样，含其他任务贡献，非本进程独占利用率）。</p>`:''}<p class="muted">进度时间 ${esc(x.observed)}</p></article>`;
  }).join('');
+ if(u.resource_replay)target.insertAdjacentHTML('beforeend',`<p class="muted">单列资源复测（不是新的独立种子）：${Object.values(u.resource_replay.workers).map(x=>`GPU ${x.gpu_index} 进程总显存采样峰值 ${x.sampled_total_process_peak_mib} MiB（${x.samples} 次）`).join('；')}。包含 CUDA 上下文，非连续峰值。原始训练漏记了该指标，复测不回填原始历史。</p>`);
 }
 function renderCostAware(){
  const u=data.cost_aware,target=document.getElementById('cost-aware-progress');

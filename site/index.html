@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T09:42:31.411451+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T09:50:37.551924+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -21,7 +21,7 @@
 <section id="cost-aware"><h2>E30 · 把计算成本纳入训练</h2><p class="alert">使用 E29 原生引擎；允许关闭 make 扫描和 CAP 特征，以 0.25 秒完整预处理成本训练。若最终关闭 CAP，不算 CAP 内容优势。</p><p class="muted">64 个新训练公式 × 2 搜索种子，两个策略类各 3 轮 × 12 候选，共 9,216 训练单元，16 路 CPU。开发 96 新公式 × 3 搜索种子 × 7 臂，共 2,016 单元，8 路固定 CPU、每臂 5 秒全成本。过门才生成 192 新确认公式；重复种子不算新增独立实例。</p><div class="toolbar"><a href="#action-A8">计划与验收规则 ↗</a><label for="cost-aware-scale">表格规模</label><select id="cost-aware-scale"><option value="ALL">全部规模</option><option value="325">n325</option><option value="500">n500</option></select></div><div id="cost-aware-progress"></div></section>
 <section id="shared-gpu"><h2>E32 · 共享 GPU 与真正的图批处理</h2><p class="alert">GPU 有其他任务不等于不可共享。按显存余量和负载调度，不停止其他任务。训练吞吐量、GPU 活跃度和 SAT 求解优势是三件不同的事。</p><p class="muted">128 新训练图 + 32 验证图，正确的无筛选顶点覆盖编码；三个适配种子、每个 120 轮、batch 16、每进程约 8 GiB PyTorch 分配器上限。采用 CSM-only 领域适配，不冒充原始联合训练。验证损失仅为代理指标，尚无求解性能开发/确认集。</p><a href="#action-A9">计划与边界 ↗</a><div id="shared-gpu-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-13T09:42:31.411451+00:00",
+  "generated": "2026-09-13T09:50:37.551924+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3293,7 +3293,7 @@
         "title": "共享 GPU 真批处理与三种子领域适配",
         "priority": "P1 · 资源与机制并进",
         "status": "E32 三种子训练完成 · 求解性能尚未验证",
-        "cost": "GPU 3/2/5 与已有任务共享，3 种子 × 120 轮约 89 秒完成；每进程约 8 GiB 分配器上限，实测分配峰值 391–407 MiB",
+        "cost": "GPU 3/2/5 共享，3 种子 × 120 轮首轮约 89 秒；资源复测另用 106 秒、不算新独立种子。约 8 GiB 分配器上限；复测进程总显存采样峰值 928–936 MiB",
         "depends_on": [
           "A5"
         ],
@@ -3303,7 +3303,7 @@
         "stop": "单任务超 30 分钟、非有限数值、OOM 或整卡剩余显存低于 12 GiB 时只停止自身；无盲目重试。完成训练不自动启动大规模测试或改论文。"
       }
     ],
-    "sha256": "bc5b93fea176a2faaba268f587ed0fcc7f6f710c199d306ed8cad47bf7ae80c5"
+    "sha256": "3a564baa015a83545a1c5b285beaef739ca3b08e57c8e3a59646ebaf54e09e19"
   },
   "pilot": {
     "id": "E26",
@@ -4002,7 +4002,26 @@
         "card_utilization_max": 94
       }
     },
-    "terminal": true
+    "terminal": true,
+    "resource_replay": {
+      "workers": {
+        "42": {
+          "gpu_index": 3,
+          "samples": 73,
+          "sampled_total_process_peak_mib": 928
+        },
+        "43": {
+          "gpu_index": 2,
+          "samples": 72,
+          "sampled_total_process_peak_mib": 928
+        },
+        "44": {
+          "gpu_index": 5,
+          "samples": 88,
+          "sampled_total_process_peak_mib": 936
+        }
+      }
+    }
   }
 }</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
@@ -4074,6 +4093,7 @@ function renderSharedGPU(){
   const t=u.telemetry[seed];
   return `<article class="panel"><h3>种子 ${seed} · GPU ${x.gpu_index} · ${label}</h3><p><progress max="120" value="${x.epoch}"></progress> ${x.epoch}/120 轮</p>${x.val_loss!==undefined?`<p>训练 CSM ${x.train_loss.toFixed(4)} · 验证 CSM ${x.val_loss.toFixed(4)} · 本进程分配峰值 ${x.peak_allocated_mib.toFixed(0)} MiB</p>`:''}${t?`<p>本任务存活期间整卡活跃度均值 ${t.card_utilization_mean.toFixed(1)}%，最高 ${t.card_utilization_max}%（${t.samples} 次采样，含其他任务贡献，非本进程独占利用率）。</p>`:''}<p class="muted">进度时间 ${esc(x.observed)}</p></article>`;
  }).join('');
+ if(u.resource_replay)target.insertAdjacentHTML('beforeend',`<p class="muted">单列资源复测（不是新的独立种子）：${Object.values(u.resource_replay.workers).map(x=>`GPU ${x.gpu_index} 进程总显存采样峰值 ${x.sampled_total_process_peak_mib} MiB（${x.samples} 次）`).join('；')}。包含 CUDA 上下文，非连续峰值。原始训练漏记了该指标，复测不回填原始历史。</p>`);
 }
 function renderCostAware(){
  const u=data.cost_aware,target=document.getElementById('cost-aware-progress');

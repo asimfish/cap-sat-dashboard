@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-13T09:42:31.411451+00:00",
+  "generated": "2026-09-13T09:50:37.551924+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3271,7 +3271,7 @@
         "title": "共享 GPU 真批处理与三种子领域适配",
         "priority": "P1 · 资源与机制并进",
         "status": "E32 三种子训练完成 · 求解性能尚未验证",
-        "cost": "GPU 3/2/5 与已有任务共享，3 种子 × 120 轮约 89 秒完成；每进程约 8 GiB 分配器上限，实测分配峰值 391–407 MiB",
+        "cost": "GPU 3/2/5 共享，3 种子 × 120 轮首轮约 89 秒；资源复测另用 106 秒、不算新独立种子。约 8 GiB 分配器上限；复测进程总显存采样峰值 928–936 MiB",
         "depends_on": [
           "A5"
         ],
@@ -3281,7 +3281,7 @@
         "stop": "单任务超 30 分钟、非有限数值、OOM 或整卡剩余显存低于 12 GiB 时只停止自身；无盲目重试。完成训练不自动启动大规模测试或改论文。"
       }
     ],
-    "sha256": "bc5b93fea176a2faaba268f587ed0fcc7f6f710c199d306ed8cad47bf7ae80c5"
+    "sha256": "3a564baa015a83545a1c5b285beaef739ca3b08e57c8e3a59646ebaf54e09e19"
   },
   "pilot": {
     "id": "E26",
@@ -3980,6 +3980,25 @@
         "card_utilization_max": 94
       }
     },
-    "terminal": true
+    "terminal": true,
+    "resource_replay": {
+      "workers": {
+        "42": {
+          "gpu_index": 3,
+          "samples": 73,
+          "sampled_total_process_peak_mib": 928
+        },
+        "43": {
+          "gpu_index": 2,
+          "samples": 72,
+          "sampled_total_process_peak_mib": 928
+        },
+        "44": {
+          "gpu_index": 5,
+          "samples": 88,
+          "sampled_total_process_peak_mib": 936
+        }
+      }
+    }
   }
 }

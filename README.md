@@ -92,7 +92,10 @@ rechecks both checkpoint hashes and all three supervisor exit codes before
 declaring terminal completion. Displayed utilization samples describe whole
 cards while our tasks were alive, including other jobs; they are not causal
 measurements of our own utilization. Peak memory is PyTorch allocated memory,
-not total process/CUDA-context memory. Public exports omit process IDs, device
+not total process/CUDA-context memory. A separately frozen resource replay runs
+the unchanged workload and samples total GPU process memory by owned PID; its
+sampled peaks are shown separately and do not backfill the missing original
+measurement or count as new independent scientific seeds. Public exports omit process IDs, device
 UUIDs, unrelated process inventories, private paths and model weights. A lower
 validation CSM loss does not upgrade any performance gap. Full-cost solver
 development/confirmation remains a separate, not-yet-run evaluation.
