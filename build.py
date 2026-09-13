@@ -703,6 +703,15 @@ def native_first_progress(repo):
                 fout[regime]={a:dict(par2_ms=n(fr['summaries'][regime][a]['par2_s']*1000),solved=n(fr['summaries'][regime][a]['solved'],384)) for a in arms}
             result['followup']=dict(sha256=hashlib.sha256(follow.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,
                                     regimes=fout,learning_pass=False,cheap_prediction=True,scope='E39 scale-adaptive development; no confirmation')
+        online=repo/'experiments/native_first_20260913_e40/dev/RESULTS.json'
+        if online.exists() and not (repo/'experiments/native_first_20260913_e40/test').exists():
+            oraw=json.loads(online.read_text())
+            if oraw.get('cells')!=6144 or oraw.get('trials')!=384 or oraw.get('learning_pass') is not False:raise ValueError('native E40 gate')
+            arms=['stock','degree32','random32','online'];oout={}
+            for regime in ['cold','resident']:
+                oout[regime]={a:dict(par2_ms=n(oraw['summaries'][regime][a]['par2_s']*1000),solved=n(oraw['summaries'][regime][a]['solved'],384)) for a in arms}
+            result['online_followup']=dict(sha256=hashlib.sha256(online.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,
+                                           regimes=oout,learning_pass=False,cheap_prediction=True,scope='E40 instance-level online probe development; probe cost charged; no confirmation')
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 

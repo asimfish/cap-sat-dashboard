@@ -93,10 +93,11 @@ function render(){
 function renderNativeFirst(){
  const u=data.native_first,target=document.getElementById('native-first-progress');
  if(!u){target.textContent='E38 尚无可验证的终态汇总。';return;}
- const labels={stock:'默认',degree32:'度数32首步',random32:'随机32首步',adaptive:'尺度自适应',pair42:'成对 seed42',pair43:'成对 seed43',pair44:'成对 seed44'};
+ const labels={stock:'默认',degree32:'度数32首步',random32:'随机32首步',adaptive:'尺度自适应',online:'实例级在线探测',pair42:'成对 seed42',pair43:'成对 seed43',pair44:'成对 seed44'};
  const base=Object.entries(u.regimes).map(([reg,arms])=>`<article class="panel" style="margin-bottom:14px"><h3>${reg==='cold'?'冷启动全成本':'驻留全成本'} · ${u.trials} 次策略试验</h3><div class="table"><table><thead><tr><th>策略</th><th>PAR-2 ms ↓</th><th>求解数</th><th>SAT / UNSAT</th></tr></thead><tbody>${Object.entries(arms).map(([a,v])=>`<tr><td>${labels[a]}</td><td class="number">${v.par2_ms.toFixed(3)}</td><td>${v.solved}/${u.trials}</td><td>${v.sat} / ${v.unsat}</td></tr>`).join('')}</tbody></table></div><p class="muted">每个策略均含加载、预热、序列化、解析、特征/前向、完成、SAT 检查；三种成对模型均未通过全成本门。</p></article>`).join('');
  const next=u.followup?`<article class="panel"><h3>E39 尺度自适应复测 · 仍未过全成本门</h3><p>128 个全新开发图、6,144 个计费单元；冷启动/驻留自适应平均 PAR-2 为 ${u.followup.regimes.cold.adaptive.par2_ms.toFixed(3)} / ${u.followup.regimes.resident.adaptive.par2_ms.toFixed(3)} ms，但仍有跨规模退化，不生成确认集。下一步是实例级在线候选筛选。</p></article>`:'';
- target.innerHTML=base+next+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
+ const online=u.online_followup?`<article class="panel"><h3>E40 实例级在线探测 · 探测成本吞噬收益</h3><p>对每个实例实际探测 degree32/random32 后再完整求解，6,144 个计费单元；冷启动/驻留在线平均 PAR-2 为 ${u.online_followup.regimes.cold.online.par2_ms.toFixed(3)} / ${u.online_followup.regimes.resident.online.par2_ms.toFixed(3)} ms，均明显慢于廉价基线，不生成确认集。结论：在线 portfolio 必须把探测压缩到微秒级或只在高不确定性实例触发。</p></article>`:'';
+ target.innerHTML=base+next+online+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
 }
 function renderStability(){
  const u=data.stability,target=document.getElementById('stability-progress');

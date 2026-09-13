@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T15:53:52.815344+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T16:05:56.274307+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -26,7 +26,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-13T15:53:52.815344+00:00",
+  "generated": "2026-09-13T16:05:56.274307+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3391,18 +3391,18 @@
         "id": "A15",
         "title": "把通过验证门的小策略转为可计费的原生求解路径",
         "priority": "P1 · 阶段完成，学习门失败",
-        "status": "E39 尺度自适应仍未过门",
-        "cost": "E38原生一致性+E38/E39共256新图、13,824计费单元、冷启动/驻留完整成本",
+        "status": "E40 在线探测仍未过门",
+        "cost": "E38/E39/E40共384新图、19,968计费单元、冷启动/驻留完整成本（含在线探针）",
         "depends_on": [
           "A14"
         ],
         "hypothesis": "保持所学首步及完成/交换语义，同时原生实现241参数推理，可能把验证中的可行覆盖改善转成搜索节省；尚无净收益证据。",
         "method": "所有臂共用有界常驻接口和完整SAT检查。保留默认、动态度数、随机多次搜索、匹配首步的静态/随机/未训练控制。冷启动总成本包含加载与预热；驻留成本按预先冻结的实例数摊销，不得另列后排除。单例预测、解析、通信、解码、搜索和最终检查全部计费。新开发前锁定廉价多次搜索预算、排序并列规则及超时计分；确认前冻结实例级多重比较区间。先冻结实现和新数据，再评测三个固定检查点，不得复用E37验证挑部署预算。",
         "gate": "三个训练种子均在完整PAR-2上至少胜过全部廉价控制5%，求解数不减且各规模无害；过开发门才生成独立确认。正确性、超时回退与CPU/原生一致性必须先通过。",
-        "stop": "E38 已观察到廉价32首步在总体PAR-2上更快但n24退化，E39尺度自适应仍在n32/n48出现反转；三种成对检查点均未过完整成本学习门。保留负结果，不生成确认集，不改写验证成绩为端到端成功。下一步仅运行全新图上的实例级在线候选筛选，必须把额外探针成本计入。"
+        "stop": "E38 已观察到廉价32首步在总体PAR-2上更快但n24退化，E39尺度自适应仍在n32/n48出现反转，E40实际双探针又被探测成本吞噬；所有学习臂均未过完整成本门。保留负结果，不生成确认集，不改写验证成绩为端到端成功。下一步只尝试零额外进程的特征门控，并在高不确定性实例之外回退廉价基线。"
       }
     ],
-    "sha256": "123d21c64da161db594c12fb5779665ac06e8213108b44930b0d1d80185d6046"
+    "sha256": "819711e91071f0981ad6130dc9260e6baa5394df8322cec2ae7b15942c11aa47"
   },
   "pilot": {
     "id": "E26",
@@ -6134,6 +6134,54 @@
       "learning_pass": false,
       "cheap_prediction": true,
       "scope": "E39 scale-adaptive development; no confirmation"
+    },
+    "online_followup": {
+      "sha256": "6a717c0d5081366aa771a85b234ba0736c8841d95795770928ccb4cf4a28f247",
+      "phase": "terminal",
+      "instances": 128,
+      "trials": 384,
+      "cells": 6144,
+      "regimes": {
+        "cold": {
+          "stock": {
+            "par2_ms": 71.87173639977118,
+            "solved": 384
+          },
+          "degree32": {
+            "par2_ms": 65.23348408033296,
+            "solved": 384
+          },
+          "random32": {
+            "par2_ms": 66.67351339274319,
+            "solved": 384
+          },
+          "online": {
+            "par2_ms": 392.1709619098692,
+            "solved": 321
+          }
+        },
+        "resident": {
+          "stock": {
+            "par2_ms": 17.44017895058884,
+            "solved": 384
+          },
+          "degree32": {
+            "par2_ms": 11.561892788449768,
+            "solved": 384
+          },
+          "random32": {
+            "par2_ms": 12.330316465522628,
+            "solved": 384
+          },
+          "online": {
+            "par2_ms": 238.64573525670116,
+            "solved": 341
+          }
+        }
+      },
+      "learning_pass": false,
+      "cheap_prediction": true,
+      "scope": "E40 instance-level online probe development; probe cost charged; no confirmation"
     }
   }
 }</script><script>
@@ -6204,10 +6252,11 @@ function render(){
 function renderNativeFirst(){
  const u=data.native_first,target=document.getElementById('native-first-progress');
  if(!u){target.textContent='E38 尚无可验证的终态汇总。';return;}
- const labels={stock:'默认',degree32:'度数32首步',random32:'随机32首步',adaptive:'尺度自适应',pair42:'成对 seed42',pair43:'成对 seed43',pair44:'成对 seed44'};
+ const labels={stock:'默认',degree32:'度数32首步',random32:'随机32首步',adaptive:'尺度自适应',online:'实例级在线探测',pair42:'成对 seed42',pair43:'成对 seed43',pair44:'成对 seed44'};
  const base=Object.entries(u.regimes).map(([reg,arms])=>`<article class="panel" style="margin-bottom:14px"><h3>${reg==='cold'?'冷启动全成本':'驻留全成本'} · ${u.trials} 次策略试验</h3><div class="table"><table><thead><tr><th>策略</th><th>PAR-2 ms ↓</th><th>求解数</th><th>SAT / UNSAT</th></tr></thead><tbody>${Object.entries(arms).map(([a,v])=>`<tr><td>${labels[a]}</td><td class="number">${v.par2_ms.toFixed(3)}</td><td>${v.solved}/${u.trials}</td><td>${v.sat} / ${v.unsat}</td></tr>`).join('')}</tbody></table></div><p class="muted">每个策略均含加载、预热、序列化、解析、特征/前向、完成、SAT 检查；三种成对模型均未通过全成本门。</p></article>`).join('');
  const next=u.followup?`<article class="panel"><h3>E39 尺度自适应复测 · 仍未过全成本门</h3><p>128 个全新开发图、6,144 个计费单元；冷启动/驻留自适应平均 PAR-2 为 ${u.followup.regimes.cold.adaptive.par2_ms.toFixed(3)} / ${u.followup.regimes.resident.adaptive.par2_ms.toFixed(3)} ms，但仍有跨规模退化，不生成确认集。下一步是实例级在线候选筛选。</p></article>`:'';
- target.innerHTML=base+next+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
+ const online=u.online_followup?`<article class="panel"><h3>E40 实例级在线探测 · 探测成本吞噬收益</h3><p>对每个实例实际探测 degree32/random32 后再完整求解，6,144 个计费单元；冷启动/驻留在线平均 PAR-2 为 ${u.online_followup.regimes.cold.online.par2_ms.toFixed(3)} / ${u.online_followup.regimes.resident.online.par2_ms.toFixed(3)} ms，均明显慢于廉价基线，不生成确认集。结论：在线 portfolio 必须把探测压缩到微秒级或只在高不确定性实例触发。</p></article>`:'';
+ target.innerHTML=base+next+online+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
 }
 function renderStability(){
  const u=data.stability,target=document.getElementById('stability-progress');
