@@ -730,6 +730,14 @@ def native_first_progress(repo):
                 for regime in ['cold','resident']:
                     vals[regime]={a:dict(par2_ms=n(rr['summaries'][regime][a]['par2_s']*1000),solved=n(rr['summaries'][regime][a]['solved'],384)) for a in ['stock','degree32','random32',arm_name]}
                 result[key]=dict(sha256=hashlib.sha256(p.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=vals,learning_pass=False,cheap_prediction=True,scope=scope_name+'; no confirmation')
+        tail=repo/'experiments/native_first_20260913_e44/dev/RESULTS.json'
+        if tail.exists() and not (repo/'experiments/native_first_20260913_e44/test').exists():
+            tr=json.loads(tail.read_text())
+            if tr.get('cells')!=6144 or tr.get('trials')!=384 or tr.get('learning_pass') is not False:raise ValueError('native E44 gate')
+            tv={}
+            for regime in ['cold','resident']:
+                tv[regime]={a:dict(par2_ms=n(tr['summaries'][regime][a]['par2_s']*1000),solved=n(tr['summaries'][regime][a]['solved'],384)) for a in ['stock','degree32','random32','tail']}
+            result['tail_followup']=dict(sha256=hashlib.sha256(tail.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=tv,learning_pass=False,cheap_prediction=True,scope='E44 solver restart-tail development; no confirmation')
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
