@@ -36,6 +36,7 @@ def main():
         unchanged = unchanged and old.get('shared_gpu') == current.get('shared_gpu')
         unchanged = unchanged and old.get('structured_decoder') == current.get('structured_decoder') and old.get('structured_policy') == current.get('structured_policy')
         unchanged = unchanged and old.get('resident_policy') == current.get('resident_policy')
+        unchanged = unchanged and old.get('decoder_utility') == current.get('decoder_utility')
         if unchanged and same_code and age < 3600:
             print('No change; next freshness export within one hour')
             return

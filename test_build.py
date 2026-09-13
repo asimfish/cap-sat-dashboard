@@ -5,9 +5,33 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress
+from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_decoder_utility_validation_gate_privacy_and_fail_closed(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/decoder_utility_20260913_e36';root.mkdir(parents=True)
+            def save(name,value):
+                raw=json.dumps(value).encode();(root/name).write_bytes(raw);return hashlib.sha256(raw).hexdigest()
+            h=save('READOUT_FROZEN.json',{'private_path':'/private/models'})
+            teacher={split:dict(count=n,variable_graphs=n,degree_covers=n//2,oracle_covers=n,degree_mean=6,oracle_mean=8) for split,n in [('train',256),('validation',64)]}
+            workers={s:dict(seed=int(s),steps=600,selected_step=0,mean_q=6,covers=32,changed_choices=0,samples=4,process_peak_mib=534,elapsed_s=11,
+                choices=[1]*64,checkpoint='/private/weights',by_scale={str(n):dict(count=16,baseline_mean=6,mean_q=6,baseline_covers=8,covers=8) for n in [24,32,48,64]}) for s in ['42','43','44']}
+            r=dict(scope='selected_validation_not_solver_performance',frozen_sha256=h,teacher=teacher,workers=workers,training_elapsed_s=14,
+                diagnostic={'validation':{a:dict(greedy_covers=18,deployed_covers=21) for a in ['untrained','tiny42','tiny43','tiny44']}},label_gate=True,training_gate=False,dev_generated=False,test_generated=False)
+            def save_result():
+                rh=save('READOUT.json',r);save('AUDIT.json',dict(verdict='integrity_pass',readout_sha256=rh,frozen_sha256=h,cnfs=320,diagnostic_rows=160,cpu_checkpoint_replays=192,
+                    label_gate=r['label_gate'],training_gate=r['training_gate'],dev_generated=False,test_generated=False))
+            self.assertIsNone(decoder_utility_progress(repo));save_result();out=decoder_utility_progress(repo)
+            self.assertFalse(out['training_gate']);self.assertEqual(out['workers']['43']['selected_step'],0)
+            for word in ['private','checkpoint','choices','path']:self.assertNotIn('"'+word+'"',json.dumps(out))
+            for key in ['training_gate','label_gate']:
+                r[key]=not r[key];save_result();self.assertIsNone(decoder_utility_progress(repo));r[key]=not r[key]
+            workers['42']['by_scale']['64']['covers']=9;save_result();self.assertIsNone(decoder_utility_progress(repo));workers['42']['by_scale']['64']['covers']=8
+            workers['42']['mean_q']=float('nan');save_result();self.assertIsNone(decoder_utility_progress(repo));workers['42']['mean_q']=6;save_result()
+            (root/'dev').mkdir();self.assertIsNone(decoder_utility_progress(repo));(root/'dev').rmdir()
+            (root/'READOUT.json').write_text('{}');self.assertIsNone(decoder_utility_progress(repo))
+
     def test_resident_audits_separate_conversion_from_learning_and_omit_private_data(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/resident_policy_20260913_e35';(root/'dev').mkdir(parents=True)
@@ -158,7 +182,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),14)
+        self.assertEqual(len(plan['actions']),15)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -173,7 +197,8 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('E33',actions['A10']['status'])
         self.assertIn('E34',actions['A11']['status'])
         self.assertIn('E35',actions['A12']['status'])
-        self.assertEqual(actions['A13']['status'],'计划中 · 未训练或评测')
+        self.assertEqual(actions['A13']['status'],'E36 局部信号 · 三种子门未过')
+        self.assertEqual(actions['A14']['status'],'计划中 · 未训练或评测')
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:

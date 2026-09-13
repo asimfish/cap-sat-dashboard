@@ -571,6 +571,53 @@ def resident_progress(repo):
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
+def decoder_utility_progress(repo):
+    """E36 audited validation-only evidence; never publish graphs, choices or paths."""
+    root=repo/'experiments/decoder_utility_20260913_e36'
+    def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+    def num(v,limit=64,integer=False):
+        if type(v) not in (int,float) or (integer and type(v) is not int) or not math.isfinite(v) or not 0<=v<=limit:raise ValueError('utility numeric bound')
+        return v
+    try:
+        a=json.loads((root/'AUDIT.json').read_text());r=json.loads((root/'READOUT.json').read_text())
+        h=digest(root/'READOUT.json');f=digest(root/'READOUT_FROZEN.json')
+        if a['verdict']!='integrity_pass' or a['readout_sha256']!=h or a['frozen_sha256']!=f or r['frozen_sha256']!=f or r['scope']!='selected_validation_not_solver_performance':raise ValueError('utility audit identity')
+        if a['cnfs']!=320 or a['diagnostic_rows']!=160 or a['cpu_checkpoint_replays']!=192:raise ValueError('utility audit count')
+        if any(x[k] is not False for x in [a,r] for k in ['dev_generated','test_generated']) or (root/'dev').exists() or (root/'test').exists():raise ValueError('utility stop')
+        teacher={}
+        for split,count in [('train',256),('validation',64)]:
+            s=r['teacher'][split]
+            if s['count']!=count:raise ValueError('utility split')
+            teacher[split]={'count':count,**{k:num(s[k],count,True) for k in ['variable_graphs','degree_covers','oracle_covers']},
+                            **{k:num(s[k]) for k in ['degree_mean','oracle_mean']}}
+            if s['oracle_covers']<s['degree_covers'] or s['oracle_mean']<s['degree_mean']:raise ValueError('utility oracle')
+        v=teacher['validation'];label_gate=v['variable_graphs']>=16 and (v['oracle_covers']-v['degree_covers']>=2 or v['oracle_mean']-v['degree_mean']>=.10)
+        workers={}
+        if set(r['workers'])!={'42','43','44'}:raise ValueError('utility seeds')
+        for seed in ['42','43','44']:
+            w=r['workers'][seed]
+            if w['steps']!=600 or w['seed']!=int(seed):raise ValueError('utility worker')
+            out={'steps':600,**{k:num(w[k],limit,True) for k,limit in [('selected_step',600),('covers',64),('changed_choices',64),('samples',10000),('process_peak_mib',8192)]},
+                 'mean_q':num(w['mean_q']),'elapsed_s':num(w['elapsed_s'],300),'by_scale':{}}
+            if not out['samples']:raise ValueError('utility telemetry')
+            for n in ['24','32','48','64']:
+                s=w['by_scale'][n]
+                if s['count']!=16:raise ValueError('utility scale count')
+                out['by_scale'][n]={'count':16,**{k:num(s[k],16,True) for k in ['baseline_covers','covers']},
+                                    **{k:num(s[k]) for k in ['baseline_mean','mean_q']}}
+            scales=out['by_scale'].values()
+            if sum(s['covers'] for s in scales)!=out['covers'] or not math.isclose(sum(s['mean_q'] for s in scales)/4,out['mean_q'],abs_tol=1e-12):raise ValueError('utility scale total')
+            if sum(s['baseline_covers'] for s in scales)!=v['degree_covers'] or not math.isclose(sum(s['baseline_mean'] for s in scales)/4,v['degree_mean'],abs_tol=1e-12):raise ValueError('utility baseline total')
+            workers[seed]=out
+        training_gate=all(w['mean_q']>v['degree_mean'] and w['covers']>=v['degree_covers'] for w in workers.values())
+        if training_gate or not label_gate or any(x['training_gate'] is not training_gate or x['label_gate'] is not label_gate for x in [a,r]):raise ValueError('utility gates')
+        diagnostic={}
+        for arm in ['untrained','tiny42','tiny43','tiny44']:
+            s=r['diagnostic']['validation'][arm];diagnostic[arm]={k:num(s[k],32,True) for k in ['greedy_covers','deployed_covers']}
+        return dict(sha256=h,phase='terminal',scope=r['scope'],diagnostic=diagnostic,teacher=teacher,workers=workers,
+                    label_gate=label_gate,training_gate=training_gate,no_dev=True,no_test=True,training_elapsed_s=num(r['training_elapsed_s'],360))
+    except (OSError,ValueError,KeyError,TypeError):return None
+
 def load_performance_plan():
     raw=(HERE/'performance_plan.json').read_bytes()
     plan=json.loads(raw)
@@ -649,6 +696,7 @@ def main():
     data['structured_decoder']=structured_progress(args.repo.resolve())
     data['structured_policy']=structured_progress(args.repo.resolve(),small=True)
     data['resident_policy']=resident_progress(args.repo.resolve())
+    data['decoder_utility']=decoder_utility_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

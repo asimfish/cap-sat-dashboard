@@ -148,6 +148,12 @@ completed after the monitor exits; altered/missing artifacts fail verification.
 
 Only aggregate data and manually reviewed issue descriptions are published.
 No raw CNF, model, credential, hostname, or absolute experiment path is exported.
+E36 `#decoder-utility` separates the old32-graph proxy/deployment diagnosis from
+new64-graph selected validation. Three-seed600-step training is complete, but
+the across-seed gate failed: no development, test or solver-speed claim. The
+collector requires matching audited readout identities and consistent per-scale
+counts; the UI preserves the seed43 step0 checkpoint and n48 regression. A14 is
+only planned. Labels, model choices, checkpoints and process identities stay private.
 `evidence.html` is a dated, offline evidence summary generated using the
 render-html skill; it is an archival snapshot, not the live exporter.
 

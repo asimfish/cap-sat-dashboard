@@ -22,6 +22,7 @@
 <section id="shared-gpu"><h2>E32 · 共享 GPU 与真正的图批处理</h2><p class="alert">GPU 有其他任务不等于不可共享。按显存余量和负载调度，不停止其他任务。训练吞吐量、GPU 活跃度和 SAT 求解优势是三件不同的事。</p><p class="muted">128 新训练图 + 32 验证图，正确的无筛选顶点覆盖编码；三个适配种子、每个 120 轮、batch 16、每进程约 8 GiB PyTorch 分配器上限。采用 CSM-only 领域适配，不冒充原始联合训练。验证损失仅为代理指标；后续完整成本开发结果另见 E33，不能倒填为 E32 的训练验收。</p><a href="#action-A9">计划与边界 ↗</a><div id="shared-gpu-progress"></div></section>
 <section id="structured"><h2>E33 / E34 · 约束解码与直接训练可行选择</h2><p class="alert">E32 验证集诊断：平均子句错误下降，但三个模型直接取整均为 0/32 完整见证，且多数超过覆盖数量上限。E33 加入保持图边约束的解码；E34 改用 113 参数小策略，直接奖励可行独立集大小。两者都必须通过完整成本与廉价控制比较。</p><p class="muted">两批开发数据分别为 64 个独立图 × 3 个搜索种子 × 8 臂，每臂 1 秒；不合并成同一面板。图顶点 n24/32/48/64，不是 CNF 总变量数。所有 SAT 赋值检查原 CNF；UNSAT 获独立求解器一致结论、不是证明认证。全成本包含实测单例预测、传输、序列化、进程启动、原生搜索及 SAT 见证检查；驻留加载/预热另列。共享主机长尾仍限制延迟推断。</p><div class="toolbar"><label for="structured-scale">图顶点规模</label><select id="structured-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A10">E33 计划 ↗</a><a href="#action-A11">E34 计划 ↗</a></div><div id="structured-progress"></div></section>
 <section id="resident"><h2>E35 · 原生常驻路径：调用降本与学习优势分开验收</h2><p class="alert">同一 E34 小策略、相同输入的调用路径已提速。新的开发比较仍未建立净胜廉价基线的学习优势；不是原 CAP 已修复。</p><p class="muted">配对降本测试使用 8 个既有验证图，每图 10 次重复，三条路径 × 两种策略；不是新确认。下方开发另用 64 个新独立图 × 3 个搜索种子 × 8 臂，所有对照都使用同一常驻接口。每请求重新解析 CNF、构建图与求解器，模型加载/子进程启动和预热单列，完整单例成本包括请求/响应、解析、推理、搜索及原生 SAT 检查。共享主机长尾仍存在。</p><div id="resident-benchmark"></div><div class="toolbar"><label for="resident-scale">开发图顶点规模</label><select id="resident-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A12">E35 实施与门槛 ↗</a><a href="#action-A13">后续机制计划 ↗</a></div><div id="resident-development"></div></section>
+<section id="decoder-utility"><h2>E36 · 学习解码后的收益：有局部信号，稳定性仍不足</h2><p class="alert">这里展示选过检查点的验证结果，不是 SAT 求解数、端到端加速或独立确认。全部训练种子保留，不能只挑最好的一次。</p><p class="muted">先复核旧 E34 的训练/部署差距；另生成 256 训练 + 64 验证图，均含 n24/32/48/64。首步选点后以动态度数和交换完成独立集，直接学习完成后大小。新241参数模型，不是原 CAP 的等价优化。</p><div class="toolbar"><label for="decoder-utility-scale">验证图顶点规模</label><select id="decoder-utility-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A13">E36 实施与停止条件 ↗</a><a href="#action-A14">稳定性下一步 ↗</a></div><div id="decoder-utility-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{{DATA}}</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
 const names={frozen:'E17 · Frozen',small:'E19S · 500 train',large:'E19L · 2,000 train'};
@@ -34,6 +35,7 @@ function render(){
  renderSharedGPU();
  renderStructured();
  renderResident();
+ renderDecoderUtility();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -83,6 +85,14 @@ function render(){
  const acceptance=Object.entries(n.acceptance||{}).map(([k,v])=>`${k.startsWith('rlaf')?'RLAF':'NeuroBack'}：${esc(accepted[v]||v)}`).join(' · ');
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
+}
+function renderDecoderUtility(){
+ const u=data.decoder_utility,target=document.getElementById('decoder-utility-progress');
+ if(!u){target.textContent='暂无已审计的 E36 结果；不推断训练正在运行。';return;}
+ const v=u.teacher.validation,scale=document.getElementById('decoder-utility-scale').value,n=scale==='ALL'?64:16;
+ const first=u.workers['42'],base=scale==='ALL'?{mean_q:v.degree_mean,covers:v.degree_covers}:{mean_q:first.by_scale[scale].baseline_mean,covers:first.by_scale[scale].baseline_covers};
+ const rows=[['度数首步 · 未训练',base,null],...Object.entries(u.workers).map(([s,w])=>['学习 seed'+s,scale==='ALL'?w:w.by_scale[scale],w])];
+ target.innerHTML=`<article class="panel"><h3>旧机制诊断 · 同一批32验证图</h3><p>贪心可行覆盖：未训练 ${u.diagnostic.untrained.greedy_covers}/32，训练三个种子均 ${u.diagnostic.tiny42.greedy_covers}/32；实际部署全部 ${u.diagnostic.untrained.deployed_covers}/32。代理收益没有变成部署可行覆盖收益。</p><p>新标签检查：64验证中 ${v.variable_graphs} 图有不同首步收益；oracle可行覆盖 ${v.oracle_covers}/64，度数 ${v.degree_covers}/64。Oracle仅表示选择空间，不是模型成绩或速度。</p></article><article class="panel"><h3>新目标训练完成 · 三种子门未通过</h3><p><progress max="1800" value="1800"></progress> 1800/1800 优化步骤 · 三进程总墙钟 ${u.training_elapsed_s.toFixed(2)} 秒</p><div class="table"><table><thead><tr><th>方法</th><th>解码可行覆盖 / 验证图</th><th>平均独立集大小 ↑</th><th>所选步骤</th><th>自身进程采样峰值 MiB</th></tr></thead><tbody>${rows.map(([name,s,w])=>`<tr><td>${esc(name)}</td><td>${s.covers}/${n}</td><td>${s.mean_q.toFixed(4)}</td><td>${w?w.selected_step:'—'}</td><td>${w?w.process_peak_mib+' ('+w.samples+'次采样)':'—'}</td></tr>`).join('')}</tbody></table></div><p class="alert">未生成新开发集或独立确认集。seed43 最佳仍为第0步；seed42 在 n48 的覆盖从15/16降至13/16。局部改善不能替代跨种子、跨规模稳定性，更不能替代全成本比较。</p><p class="muted">13,440个首步标签已由独立集合实现重放，192个验证选择由CPU重放。单模型显存分配峰值约18.86MiB，与完整进程534MiB口径不同；不报告整卡利用率为本任务贡献。</p><p class="foot">审计读出 SHA256 ${esc(u.sha256)}</p></article>`;
 }
 function renderResident(){
  const u=data.resident_policy,bp=document.getElementById('resident-benchmark'),dp=document.getElementById('resident-development');
@@ -175,7 +185,7 @@ function renderHybrid(){
   return `<article class="panel" style="margin-bottom:16px" data-stage="${stage}"><h3>${stage==='dev'?'开发集':'独立确认集'} · ${esc(state)}</h3><p><progress max="${x.target_cells}" value="${x.completed_cells}"></progress> ${x.completed_cells}/${x.target_cells} 单元 · ${x.completed_rows}/${x.target_rows} 完整实例</p><p class="muted">最后进度记录 ${esc(x.observed)}</p>${table}${r?`<p>错误 ${r.errors} · 未佐证 UNSAT ${r.unverified_unsat_cells}；未解实例保持未知。</p>`:''}${comparisons?`<p class="muted">总体主比较同时区间，不随上方规模筛选变化；正值有利于候选。${esc(comparisons)}</p>`:''}<p class="foot">冻结 SHA256 ${esc(x.frozen_sha256)}${r?' · 读出 '+esc(r.sha256):''}</p></article>`;
  }).join('');
 }
-for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale','conservative-scale','cost-aware-scale','structured-scale','resident-scale'])document.getElementById(id).addEventListener('change',render);
+for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale','conservative-scale','cost-aware-scale','structured-scale','resident-scale','decoder-utility-scale'])document.getElementById(id).addEventListener('change',render);
 async function refresh(){try{const response=await fetch('status.json?t='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error();const incoming=await response.json();if(incoming.runs&&incoming.results&&incoming.source_sha256){data=incoming;render();}}catch{render();document.getElementById('freshness').textContent+=' · 离线 / 更新失败，显示已有快照';}}
 render();if(location.protocol!=='file:'){refresh();setInterval(refresh,60000);}
 </script></body></html>
