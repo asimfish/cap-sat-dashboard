@@ -738,6 +738,14 @@ def native_first_progress(repo):
             for regime in ['cold','resident']:
                 tv[regime]={a:dict(par2_ms=n(tr['summaries'][regime][a]['par2_s']*1000),solved=n(tr['summaries'][regime][a]['solved'],384)) for a in ['stock','degree32','random32','tail']}
             result['tail_followup']=dict(sha256=hashlib.sha256(tail.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=tv,learning_pass=False,cheap_prediction=True,scope='E44 solver restart-tail development; no confirmation')
+        conditional=repo/'experiments/native_first_20260913_e45/dev/RESULTS.json'
+        if conditional.exists() and not (repo/'experiments/native_first_20260913_e45/test').exists():
+            cr=json.loads(conditional.read_text())
+            if cr.get('cells')!=6144 or cr.get('trials')!=384 or cr.get('learning_pass') is not False:raise ValueError('native E45 gate')
+            cv={}
+            for regime in ['cold','resident']:
+                cv[regime]={a:dict(par2_ms=n(cr['summaries'][regime][a]['par2_s']*1000),solved=n(cr['summaries'][regime][a]['solved'],384)) for a in ['stock','degree32','random32','conditional_tail']}
+            result['conditional_followup']=dict(sha256=hashlib.sha256(conditional.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=cv,learning_pass=False,cheap_prediction=True,scope='E45 conditional solver-tail development; no confirmation')
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
