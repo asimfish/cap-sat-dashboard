@@ -712,6 +712,15 @@ def native_first_progress(repo):
                 oout[regime]={a:dict(par2_ms=n(oraw['summaries'][regime][a]['par2_s']*1000),solved=n(oraw['summaries'][regime][a]['solved'],384)) for a in arms}
             result['online_followup']=dict(sha256=hashlib.sha256(online.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,
                                            regimes=oout,learning_pass=False,cheap_prediction=True,scope='E40 instance-level online probe development; probe cost charged; no confirmation')
+        gate=repo/'experiments/native_first_20260913_e41/dev/RESULTS.json'
+        if gate.exists() and not (repo/'experiments/native_first_20260913_e41/test').exists():
+            graw=json.loads(gate.read_text())
+            if graw.get('cells')!=6144 or graw.get('trials')!=384 or graw.get('learning_pass') is not False:raise ValueError('native E41 gate')
+            arms=['stock','degree32','random32','gate'];gout={}
+            for regime in ['cold','resident']:
+                gout[regime]={a:dict(par2_ms=n(graw['summaries'][regime][a]['par2_s']*1000),solved=n(graw['summaries'][regime][a]['solved'],384)) for a in arms}
+            result['gate_followup']=dict(sha256=hashlib.sha256(gate.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,
+                                         regimes=gout,learning_pass=False,cheap_prediction=True,scope='E41 zero-extra-process feature gate; no confirmation')
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
