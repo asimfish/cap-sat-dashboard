@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-13T15:33:10.883520+00:00",
+  "generated": "2026-09-13T15:53:52.815344+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3364,18 +3364,18 @@
         "id": "A15",
         "title": "把通过验证门的小策略转为可计费的原生求解路径",
         "priority": "P1 · 阶段完成，学习门失败",
-        "status": "E38 开发完成 · 学习门未通过",
-        "cost": "固定E37 pair_mlp三个检查点；128新图、384试验、10臂、冷启动/驻留共7,680计费单元",
+        "status": "E39 尺度自适应仍未过门",
+        "cost": "E38原生一致性+E38/E39共256新图、13,824计费单元、冷启动/驻留完整成本",
         "depends_on": [
           "A14"
         ],
         "hypothesis": "保持所学首步及完成/交换语义，同时原生实现241参数推理，可能把验证中的可行覆盖改善转成搜索节省；尚无净收益证据。",
         "method": "所有臂共用有界常驻接口和完整SAT检查。保留默认、动态度数、随机多次搜索、匹配首步的静态/随机/未训练控制。冷启动总成本包含加载与预热；驻留成本按预先冻结的实例数摊销，不得另列后排除。单例预测、解析、通信、解码、搜索和最终检查全部计费。新开发前锁定廉价多次搜索预算、排序并列规则及超时计分；确认前冻结实例级多重比较区间。先冻结实现和新数据，再评测三个固定检查点，不得复用E37验证挑部署预算。",
         "gate": "三个训练种子均在完整PAR-2上至少胜过全部廉价控制5%，求解数不减且各规模无害；过开发门才生成独立确认。正确性、超时回退与CPU/原生一致性必须先通过。",
-        "stop": "E38 已观察到廉价32首步在总体PAR-2上更快但n24退化，三种成对检查点均未过完整成本学习门；保留负结果，不生成确认集，不改写验证成绩为端到端成功。下一步仅运行全新图上的预注册尺度自适应廉价策略，不能用E38事后组合直接确认。"
+        "stop": "E38 已观察到廉价32首步在总体PAR-2上更快但n24退化，E39尺度自适应仍在n32/n48出现反转；三种成对检查点均未过完整成本学习门。保留负结果，不生成确认集，不改写验证成绩为端到端成功。下一步仅运行全新图上的实例级在线候选筛选，必须把额外探针成本计入。"
       }
     ],
-    "sha256": "c1de65f10e28386a18ba33c0e58473acea0d8d91aec3810e22210697f17f847a"
+    "sha256": "123d21c64da161db594c12fb5779665ac06e8213108b44930b0d1d80185d6046"
   },
   "pilot": {
     "id": "E26",
@@ -6043,6 +6043,70 @@
     "learning_pass": false,
     "cheap_prediction": true,
     "compute_median_gain_pct": 99.526816539056,
-    "scope": "E38 native full-cost development; validation-only model selection excluded"
+    "scope": "E38 native full-cost development; validation-only model selection excluded",
+    "followup": {
+      "sha256": "12563d89904acdb61d2e721ea8bd165c65b864f884f0ef8390320a7868a47c05",
+      "phase": "terminal",
+      "instances": 128,
+      "trials": 384,
+      "cells": 6144,
+      "regimes": {
+        "cold": {
+          "stock": {
+            "par2_ms": 63.86045421095332,
+            "solved": 384
+          },
+          "random32": {
+            "par2_ms": 53.41193530815266,
+            "solved": 384
+          },
+          "adaptive": {
+            "par2_ms": 52.98302222217899,
+            "solved": 384
+          },
+          "pair42": {
+            "par2_ms": 59.894710049168985,
+            "solved": 384
+          },
+          "pair43": {
+            "par2_ms": 59.004096498635285,
+            "solved": 384
+          },
+          "pair44": {
+            "par2_ms": 59.5166113077236,
+            "solved": 384
+          }
+        },
+        "resident": {
+          "stock": {
+            "par2_ms": 18.14513091085246,
+            "solved": 384
+          },
+          "random32": {
+            "par2_ms": 11.599751291214488,
+            "solved": 384
+          },
+          "adaptive": {
+            "par2_ms": 12.247295080063243,
+            "solved": 384
+          },
+          "pair42": {
+            "par2_ms": 16.16965644886174,
+            "solved": 384
+          },
+          "pair43": {
+            "par2_ms": 16.799548485626776,
+            "solved": 384
+          },
+          "pair44": {
+            "par2_ms": 17.77843845775351,
+            "solved": 384
+          }
+        }
+      },
+      "learning_pass": false,
+      "cheap_prediction": true,
+      "scope": "E39 scale-adaptive development; no confirmation"
+    }
   }
 }

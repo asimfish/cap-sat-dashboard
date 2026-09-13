@@ -692,8 +692,18 @@ def native_first_progress(repo):
             scale[regime]={}
             for size,vv in r['by_scale'][regime].items():
                 scale[regime][size]={a:dict(par2_ms=n(vv[a]['par2_s']*1000),solved=n(vv[a]['solved'],96)) for a in arms}
-        return dict(sha256=h,frozen_sha256=fh,phase='terminal',instances=128,trials=384,cells=7680,target_cells=7680,
+        result=dict(sha256=h,frozen_sha256=fh,phase='terminal',instances=128,trials=384,cells=7680,target_cells=7680,
                     regimes=out,by_scale=scale,learning_pass=False,cheap_prediction=True,compute_median_gain_pct=n(json.loads((root/'COMPAT.json').read_text())['core_median_gain']*100,100),scope='E38 native full-cost development; validation-only model selection excluded')
+        follow=repo/'experiments/native_first_20260913_e39/dev/RESULTS.json'
+        if follow.exists() and not (repo/'experiments/native_first_20260913_e39/test').exists():
+            fr=json.loads(follow.read_text());
+            if fr.get('cells')!=6144 or fr.get('trials')!=384 or fr.get('learning_pass') is not False:raise ValueError('native E39 gate')
+            arms=['stock','random32','adaptive','pair42','pair43','pair44'];fout={}
+            for regime in ['cold','resident']:
+                fout[regime]={a:dict(par2_ms=n(fr['summaries'][regime][a]['par2_s']*1000),solved=n(fr['summaries'][regime][a]['solved'],384)) for a in arms}
+            result['followup']=dict(sha256=hashlib.sha256(follow.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,
+                                    regimes=fout,learning_pass=False,cheap_prediction=True,scope='E39 scale-adaptive development; no confirmation')
+        return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
 def load_performance_plan():

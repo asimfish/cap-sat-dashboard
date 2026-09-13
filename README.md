@@ -156,8 +156,9 @@ counts; the UI preserves the seed43 step0 checkpoint and n48 regression. E37/A14
 has a separate `#stability` panel: a frozen four-candidate/three-seed validation
 grid selects the pairwise small policy, but neither native development nor
 independent confirmation has run. Positive training selection cannot upgrade
-the seven scientific gaps. E38 now adds a native/full-cost development panel;
-A15 records its failed learning gate and the next adaptive-control frontier. Labels, model
+the seven scientific gaps. E38/E39 now add a native/full-cost development panel;
+A15 records the failed native and size-adaptive learning gates and the next
+instance-level online-selection frontier. Labels, model
 choices, checkpoints and process identities stay private.
 `evidence.html` is a dated, offline evidence summary generated using the
 render-html skill; it is an archival snapshot, not the live exporter.
