@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T12:23:41.730715+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T12:27:06.048171+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -24,7 +24,7 @@
 <section id="resident"><h2>E35 · 原生常驻路径：调用降本与学习优势分开验收</h2><p class="alert">同一 E34 小策略、相同输入的调用路径已提速。新的开发比较仍未建立净胜廉价基线的学习优势；不是原 CAP 已修复。</p><p class="muted">配对降本测试使用 8 个既有验证图，每图 10 次重复，三条路径 × 两种策略；不是新确认。下方开发另用 64 个新独立图 × 3 个搜索种子 × 8 臂，所有对照都使用同一常驻接口。每请求重新解析 CNF、构建图与求解器，模型加载/子进程启动和预热单列，完整单例成本包括请求/响应、解析、推理、搜索及原生 SAT 检查。共享主机长尾仍存在。</p><div id="resident-benchmark"></div><div class="toolbar"><label for="resident-scale">开发图顶点规模</label><select id="resident-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A12">E35 实施与门槛 ↗</a><a href="#action-A13">后续机制计划 ↗</a></div><div id="resident-development"></div></section>
 <section id="decoder-utility"><h2>E36 · 学习解码后的收益：有局部信号，稳定性仍不足</h2><p class="alert">这里展示选过检查点的验证结果，不是 SAT 求解数、端到端加速或独立确认。全部训练种子保留，不能只挑最好的一次。</p><p class="muted">先复核旧 E34 的训练/部署差距；另生成 256 训练 + 64 验证图，均含 n24/32/48/64。首步选点后以动态度数和交换完成独立集，直接学习完成后大小。新241参数模型，不是原 CAP 的等价优化。</p><div class="toolbar"><label for="decoder-utility-scale">验证图顶点规模</label><select id="decoder-utility-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A13">E36 实施与停止条件 ↗</a><a href="#action-A14">稳定性下一步 ↗</a></div><div id="decoder-utility-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-13T12:23:41.730715+00:00",
+  "generated": "2026-09-13T12:27:06.048171+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3367,7 +3367,7 @@
         "hypothesis": "预测开销已显著降低，仍未净胜廉价控制；仅提高独立集代理奖励可能没有改善部署解码/后端真正困难的选择。",
         "method": "新首步策略后接动态度数完成与1→2交换，以完成后独立集大小作标签。64验证中58图标签有区分，oracle可行覆盖56/64对度数46/64。241参数、13个纯结构特征，三个独立种子全保留；GPU自身进程采样峰值各534MiB，不把整卡利用率算成本任务贡献。独立集合参考重放全部标签、CPU重放192个检查点选择通过；验证选择结果不是独立确认。",
         "gate": "先证明新增信号能在留出的验证实例上区分真正有收益的选择，再冻结多训练种子与全新开发数据；完整单例成本和求解数同时胜过预设廉价控制才进入独立确认。",
-        "stop": "seed42/43/44验证覆盖51/46/47，平均独立集7.5625/7.5000/7.5156对度数7.5000；seed43最佳仍是第0步。seed42在n48覆盖15→13退化。训练门未过，未生成开发/确认，未实现原生部署或测全成本；不挑seed42宣称突破，不追加轮数。"
+        "stop": "seed42/43/44验证覆盖51/46/47，平均独立集7.5625/7.5000/7.5156对度数7.5000；seed43最佳仍是第0步。seed42在n48覆盖15→13；seed44在n24覆盖15→14、平均独立集5.9375→5.875，同样退化。训练门未过，未生成开发/确认，未实现原生部署或测全成本；不挑seed42宣称突破，不追加轮数。"
       },
       {
         "id": "A14",
@@ -3384,7 +3384,7 @@
         "stop": "若只能改善训练损失、依赖个别种子或把退化转移到另一规模，停止该候选；不把更多GPU工作量写成性能问题已解决。"
       }
     ],
-    "sha256": "5fe18dd5abed4ae04b5197147d0875753afadfdc269561d814514a08e6521136"
+    "sha256": "f9b951812a7b3d47a3547c41b267aa2a1bb3cde2cc604b6745f9edf2a64c56ee"
   },
   "pilot": {
     "id": "E26",
@@ -5345,6 +5345,7 @@ function renderDecoderUtility(){
  const first=u.workers['42'],base=scale==='ALL'?{mean_q:v.degree_mean,covers:v.degree_covers}:{mean_q:first.by_scale[scale].baseline_mean,covers:first.by_scale[scale].baseline_covers};
  const rows=[['度数首步 · 未训练',base,null],...Object.entries(u.workers).map(([s,w])=>['学习 seed'+s,scale==='ALL'?w:w.by_scale[scale],w])];
  target.innerHTML=`<article class="panel"><h3>旧机制诊断 · 同一批32验证图</h3><p>贪心可行覆盖：未训练 ${u.diagnostic.untrained.greedy_covers}/32，训练三个种子均 ${u.diagnostic.tiny42.greedy_covers}/32；实际部署全部 ${u.diagnostic.untrained.deployed_covers}/32。代理收益没有变成部署可行覆盖收益。</p><p>新标签检查：64验证中 ${v.variable_graphs} 图有不同首步收益；oracle可行覆盖 ${v.oracle_covers}/64，度数 ${v.degree_covers}/64。Oracle仅表示选择空间，不是模型成绩或速度。</p></article><article class="panel"><h3>新目标训练完成 · 三种子门未通过</h3><p><progress max="1800" value="1800"></progress> 1800/1800 优化步骤 · 三进程总墙钟 ${u.training_elapsed_s.toFixed(2)} 秒</p><div class="table"><table><thead><tr><th>方法</th><th>解码可行覆盖 / 验证图</th><th>平均独立集大小 ↑</th><th>所选步骤</th><th>自身进程采样峰值 MiB</th></tr></thead><tbody>${rows.map(([name,s,w])=>`<tr><td>${esc(name)}</td><td>${s.covers}/${n}</td><td>${s.mean_q.toFixed(4)}</td><td>${w?w.selected_step:'—'}</td><td>${w?w.process_peak_mib+' ('+w.samples+'次采样)':'—'}</td></tr>`).join('')}</tbody></table></div><p class="alert">未生成新开发集或独立确认集。seed43 最佳仍为第0步；seed42 在 n48 的覆盖从15/16降至13/16。局部改善不能替代跨种子、跨规模稳定性，更不能替代全成本比较。</p><p class="muted">13,440个首步标签已由独立集合实现重放，192个验证选择由CPU重放。单模型显存分配峰值约18.86MiB，与完整进程534MiB口径不同；不报告整卡利用率为本任务贡献。</p><p class="foot">审计读出 SHA256 ${esc(u.sha256)}</p></article>`;
+ target.insertAdjacentHTML('beforeend','<p class="muted">另一项退化：seed44 在 n24 的可行覆盖15→14/16，平均独立集5.9375→5.8750；三个种子的完整分规模结果均可用上方筛选查看。</p>');
 }
 function renderResident(){
  const u=data.resident_policy,bp=document.getElementById('resident-benchmark'),dp=document.getElementById('resident-development');
