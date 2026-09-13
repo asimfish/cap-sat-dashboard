@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T11:38:06.616292+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T11:53:19.760899+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -21,8 +21,9 @@
 <section id="cost-aware"><h2>E30 · 把计算成本纳入训练</h2><p class="alert">使用 E29 原生引擎；允许关闭 make 扫描和 CAP 特征，以 0.25 秒完整预处理成本训练。若最终关闭 CAP，不算 CAP 内容优势。</p><p class="muted">64 个新训练公式 × 2 搜索种子，两个策略类各 3 轮 × 12 候选，共 9,216 训练单元，16 路 CPU。开发 96 新公式 × 3 搜索种子 × 7 臂，共 2,016 单元，8 路固定 CPU、每臂 5 秒全成本。过门才生成 192 新确认公式；重复种子不算新增独立实例。</p><div class="toolbar"><a href="#action-A8">计划与验收规则 ↗</a><label for="cost-aware-scale">表格规模</label><select id="cost-aware-scale"><option value="ALL">全部规模</option><option value="325">n325</option><option value="500">n500</option></select></div><div id="cost-aware-progress"></div></section>
 <section id="shared-gpu"><h2>E32 · 共享 GPU 与真正的图批处理</h2><p class="alert">GPU 有其他任务不等于不可共享。按显存余量和负载调度，不停止其他任务。训练吞吐量、GPU 活跃度和 SAT 求解优势是三件不同的事。</p><p class="muted">128 新训练图 + 32 验证图，正确的无筛选顶点覆盖编码；三个适配种子、每个 120 轮、batch 16、每进程约 8 GiB PyTorch 分配器上限。采用 CSM-only 领域适配，不冒充原始联合训练。验证损失仅为代理指标；后续完整成本开发结果另见 E33，不能倒填为 E32 的训练验收。</p><a href="#action-A9">计划与边界 ↗</a><div id="shared-gpu-progress"></div></section>
 <section id="structured"><h2>E33 / E34 · 约束解码与直接训练可行选择</h2><p class="alert">E32 验证集诊断：平均子句错误下降，但三个模型直接取整均为 0/32 完整见证，且多数超过覆盖数量上限。E33 加入保持图边约束的解码；E34 改用 113 参数小策略，直接奖励可行独立集大小。两者都必须通过完整成本与廉价控制比较。</p><p class="muted">两批开发数据分别为 64 个独立图 × 3 个搜索种子 × 8 臂，每臂 1 秒；不合并成同一面板。图顶点 n24/32/48/64，不是 CNF 总变量数。所有 SAT 赋值检查原 CNF；UNSAT 获独立求解器一致结论、不是证明认证。全成本包含实测单例预测、传输、序列化、进程启动、原生搜索及 SAT 见证检查；驻留加载/预热另列。共享主机长尾仍限制延迟推断。</p><div class="toolbar"><label for="structured-scale">图顶点规模</label><select id="structured-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A10">E33 计划 ↗</a><a href="#action-A11">E34 计划 ↗</a></div><div id="structured-progress"></div></section>
+<section id="resident"><h2>E35 · 原生常驻路径：调用降本与学习优势分开验收</h2><p class="alert">同一 E34 小策略、相同输入的调用路径已提速。新的开发比较仍未建立净胜廉价基线的学习优势；不是原 CAP 已修复。</p><p class="muted">配对降本测试使用 8 个既有验证图，每图 10 次重复，三条路径 × 两种策略；不是新确认。下方开发另用 64 个新独立图 × 3 个搜索种子 × 8 臂，所有对照都使用同一常驻接口。每请求重新解析 CNF、构建图与求解器，模型加载/子进程启动和预热单列，完整单例成本包括请求/响应、解析、推理、搜索及原生 SAT 检查。共享主机长尾仍存在。</p><div id="resident-benchmark"></div><div class="toolbar"><label for="resident-scale">开发图顶点规模</label><select id="resident-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A12">E35 实施与门槛 ↗</a><a href="#action-A13">后续机制计划 ↗</a></div><div id="resident-development"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-13T11:38:06.616292+00:00",
+  "generated": "2026-09-13T11:53:19.760899+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3048,7 +3049,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-13",
-    "scope": "人工审读的性能计划：历史与后续实验分开，不混合样本、接口和预算。E27 有独立的局部工程提速，CAP 额外贡献仍未通过。E28 已实际训练收益模型并完成开发比较，但未胜过廉价修复，按预设条件停止；短程指标改善不能冒充性能解决。本轮不改论文。",
+    "scope": "人工审读的性能计划：历史与后续实验分开，不混合样本、接口和预算。E27 有独立局部工程提速；E35 已实现同权重常驻路径，配对完整调用中位数 11.21→2.20 ms，但新开发仍未建立学习净优势。调用降本、训练改善和科学缺口分别标注，本轮不改论文。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3070,9 +3071,11 @@
           "A1",
           "A2",
           "A6",
-          "A8"
+          "A8",
+          "A12",
+          "A13"
         ],
-        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计",
+        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35",
         "evidence_level": "历史报告 + 后续局部审计；不是普遍加速"
       },
       {
@@ -3104,9 +3107,10 @@
           "A6",
           "A7",
           "A10",
-          "A11"
+          "A11",
+          "A13"
         ],
-        "source": "rebuttal 等成本比较与多解参考准确率限制；E33/E34 审计",
+        "source": "rebuttal 等成本比较与多解参考准确率限制；E33/E34/E35 审计",
         "evidence_level": "问题已实测；收益对齐训练为未验证假设"
       },
       {
@@ -3201,9 +3205,9 @@
       {
         "id": "A2",
         "title": "测量并降低单实例预测开销",
-        "priority": "P1 · 单例成本已测",
-        "status": "E34 新小策略单例预测更便宜 · 净优势未通过",
-        "cost": "新方法 113 参数、CPU 推理；不是原 CAP 等价压缩",
+        "priority": "P1 · 已实现调用降本",
+        "status": "E35 常驻完整调用中位数降低 80% · 学习净优势未通过",
+        "cost": "同一 E34 小策略权重原生 CPU 推理；不是原 CAP 等价压缩",
         "depends_on": [],
         "hypothesis": "部分搜索节省被构图、传输和推理吞掉；降低这些成本可能改善实际收益，但不会自动修复搜索退化。",
         "method": "分别测冷启动与驻留模型的构图/传输/推理/求解成本；先排查重复处理，再评估小模型或 CPU 推理。禁止把批处理吞吐量冒充单实例加速。",
@@ -3338,19 +3342,33 @@
       {
         "id": "A12",
         "title": "剖析并消除重复解析和进程启动成本",
-        "priority": "P1 · 下一可执行前沿",
-        "status": "计划中 · 未实施",
-        "cost": "先固定现有工作负载做等价性与分项剖析，再决定新数据评测",
+        "priority": "P1 · 实施及对照完成",
+        "status": "E35 调用降本通过 · 新开发两门未过",
+        "cost": "8 既有验证图 × 10 重复 × 6 路径/策略组合；另 64 新图 × 3 重复 × 8 臂，8 路原生常驻 CPU，无新增训练",
         "depends_on": [
           "A11"
         ],
         "hypothesis": "小策略单例中位数已降低，但 Python 重复解析、跨进程启动及共享主机长尾仍占大量成本；原生驻留实现可能减少这部分部署损耗。",
-        "method": "比较默认和学习策略均使用驻留原生后端的对称实现；CNF 只解析一次，低成本策略原生计算，记录加载、解析、传输、搜索、见证检查和 CPU/墙钟。先证明同参数同输入相位/决定一致；保留静态度数与动态度数两种强廉价对照，不让模型白拿驻留优化。",
+        "method": "已实现有界私有子进程协议、原生特征/113 参数预测、每请求单次 CNF 解析和全新求解器；全部廉价控制同走常驻路径。特征/预测通过 2e-6 数值容差，96 组旧解码候选/结果对照通过。配对小策略旧路径→常驻：均值 29.71→9.46 ms，中位数 11.21→2.20 ms；每次启动的新原生路径中位数仍 11.09 ms。记录完整客户端墙钟与分项，启动/加载/预热另列；未测 CPU 执行时间。",
         "gate": "等价性和完整单例成本同时通过，再在新数据上比较；如果学习策略仍与初始规则行为相同或更差，不能称为学习优势。",
-        "stop": "不修改 E33/E34 已冻结协议、数据或计分，不用扣除原开销的重算制造旧正结果；没有可验证机制改善时停止该候选并保留失败证据。"
+        "stop": "E35 新开发 1,536 单元完成，全部方法 192/192 解完。PAR-2 毫秒：默认 11.79、动态度数 7.37、静态度数 8.55、小策略三种子 8.17/9.28/9.59。学习均未胜动态控制；工程总体点估计改善但 n32 不及随机，两门均失败，无确认集。不重算或改写 E33/E34 旧结果，不把共享主机长尾或调用降本归为学习胜出。"
+      },
+      {
+        "id": "A13",
+        "title": "把训练信号对齐实际部署解码后的增益",
+        "priority": "P1 · 下一机制前沿",
+        "status": "计划中 · 未训练或评测",
+        "cost": "先在训练/验证数据做配对机制诊断，冻结收益标签和小预算；有区分度才共享 GPU 训练",
+        "depends_on": [
+          "A12"
+        ],
+        "hypothesis": "预测开销已显著降低，仍未净胜廉价控制；仅提高独立集代理奖励可能没有改善部署解码/后端真正困难的选择。",
+        "method": "先核对相同预算下静态/动态规则与学习策略何处分歧，区分初始排序、受限交换和后端成本；以实际部署解码之后的配对搜索增益设计监督。保留同结构未训练模型、无网络静态规则、动态度数及随机控制。训练/验证诊断不能冒充新确认，不在 E35 开发上反复挑动作、阈值或种子。",
+        "gate": "先证明新增信号能在留出的验证实例上区分真正有收益的选择，再冻结多训练种子与全新开发数据；完整单例成本和求解数同时胜过预设廉价控制才进入独立确认。",
+        "stop": "若训练标签或最终行为仍等价于廉价规则，或学习收益不足以覆盖所有开销，停止扩大训练，不靠占满 GPU 或增加轮数声称解决。"
       }
     ],
-    "sha256": "9dec443b72c2029b6e09189ef9380eb61beec73e1504098e5f40afdd48495684"
+    "sha256": "099d5451a96fdf9b412a904eb39ddd689a193cd72ff3c099f99558deb421afd5"
   },
   "pilot": {
     "id": "E26",
@@ -4681,6 +4699,397 @@
       },
       "no_test": true
     }
+  },
+  "resident_policy": {
+    "benchmark": {
+      "sha256": "5995683ceae6f0f3b5c6b0bde699711099769606f707618b95e94f15a1e0cb23",
+      "conversion_pass": true,
+      "summaries": {
+        "old_stock": {
+          "mean": 0.02194039251189679,
+          "median": 0.008748242631554604,
+          "std": 0.027079112686979743,
+          "p95": 0.07888489402830601
+        },
+        "old_tiny42": {
+          "mean": 0.029708040959667413,
+          "median": 0.011211934499442577,
+          "std": 0.030859002003741757,
+          "p95": 0.08685688208788633
+        },
+        "cold_stock": {
+          "mean": 0.023385279159992934,
+          "median": 0.010551314800977707,
+          "std": 0.026538522182790313,
+          "p95": 0.0830697612836957
+        },
+        "cold_tiny42": {
+          "mean": 0.027906968374736607,
+          "median": 0.011089523322880268,
+          "std": 0.030456549602737016,
+          "p95": 0.08279678877443075
+        },
+        "resident_stock": {
+          "mean": 0.005341527459677309,
+          "median": 0.002361451741307974,
+          "std": 0.013439325369987832,
+          "p95": 0.005209285765886307
+        },
+        "resident_tiny42": {
+          "mean": 0.009459329675883055,
+          "median": 0.0022033844143152237,
+          "std": 0.021083699394549103,
+          "p95": 0.07535222079604864
+        }
+      },
+      "instances": 8,
+      "repetitions": 10,
+      "cells": 480,
+      "resident_setup_s": 0.006573094055056572
+    },
+    "development": {
+      "frozen_sha256": "78de8295ffdd4e619e1022dec7e3483e922698be1aef9a81678cbecfc618a5bb",
+      "phase": "terminal",
+      "completed_cells": 1536,
+      "target_cells": 1536,
+      "observed": "2026-09-13T11:43:29.996634+00:00",
+      "readout": {
+        "sha256": "b50632a4ef3f712c79a02ce0ce307e0fc936dec444bfe3fc576232fe38d4a38a",
+        "summaries": {
+          "stock": {
+            "solved": 192,
+            "sat": 156,
+            "unsat": 36,
+            "candidates": 0,
+            "par2_s": 0.01179407945407244,
+            "median_s": 0.003875832073390484
+          },
+          "random": {
+            "solved": 192,
+            "sat": 156,
+            "unsat": 36,
+            "candidates": 143,
+            "par2_s": 0.008747691657238951,
+            "median_s": 0.0033305813558399677
+          },
+          "degree": {
+            "solved": 192,
+            "sat": 156,
+            "unsat": 36,
+            "candidates": 146,
+            "par2_s": 0.007374355836266962,
+            "median_s": 0.003455613274127245
+          },
+          "static": {
+            "solved": 192,
+            "sat": 156,
+            "unsat": 36,
+            "candidates": 147,
+            "par2_s": 0.008552465093089268,
+            "median_s": 0.0033793579787015915
+          },
+          "untrained": {
+            "solved": 192,
+            "sat": 156,
+            "unsat": 36,
+            "candidates": 147,
+            "par2_s": 0.009118701826082543,
+            "median_s": 0.003210272639989853
+          },
+          "tiny42": {
+            "solved": 192,
+            "sat": 156,
+            "unsat": 36,
+            "candidates": 147,
+            "par2_s": 0.008171395228904052,
+            "median_s": 0.0034179240465164185
+          },
+          "tiny43": {
+            "solved": 192,
+            "sat": 156,
+            "unsat": 36,
+            "candidates": 147,
+            "par2_s": 0.009284500638993146,
+            "median_s": 0.0033720391802489758
+          },
+          "tiny44": {
+            "solved": 192,
+            "sat": 156,
+            "unsat": 36,
+            "candidates": 147,
+            "par2_s": 0.009588905639247969,
+            "median_s": 0.003402063623070717
+          }
+        },
+        "by_scale": {
+          "24": {
+            "stock": {
+              "solved": 48,
+              "sat": 39,
+              "unsat": 9,
+              "candidates": 0,
+              "par2_s": 0.0023005681190018854,
+              "median_s": 0.0021125562489032745
+            },
+            "random": {
+              "solved": 48,
+              "sat": 39,
+              "unsat": 9,
+              "candidates": 39,
+              "par2_s": 0.0034997340796204903,
+              "median_s": 0.0020392490550875664
+            },
+            "degree": {
+              "solved": 48,
+              "sat": 39,
+              "unsat": 9,
+              "candidates": 39,
+              "par2_s": 0.0021829771382423737,
+              "median_s": 0.0019990145228803158
+            },
+            "static": {
+              "solved": 48,
+              "sat": 39,
+              "unsat": 9,
+              "candidates": 39,
+              "par2_s": 0.003503454014814148,
+              "median_s": 0.0018628984689712524
+            },
+            "untrained": {
+              "solved": 48,
+              "sat": 39,
+              "unsat": 9,
+              "candidates": 39,
+              "par2_s": 0.004350984119810164,
+              "median_s": 0.0020179455168545246
+            },
+            "tiny42": {
+              "solved": 48,
+              "sat": 39,
+              "unsat": 9,
+              "candidates": 39,
+              "par2_s": 0.003602230552739153,
+              "median_s": 0.0019817729480564594
+            },
+            "tiny43": {
+              "solved": 48,
+              "sat": 39,
+              "unsat": 9,
+              "candidates": 39,
+              "par2_s": 0.0036572800405944386,
+              "median_s": 0.002000874374061823
+            },
+            "tiny44": {
+              "solved": 48,
+              "sat": 39,
+              "unsat": 9,
+              "candidates": 39,
+              "par2_s": 0.004978124479142328,
+              "median_s": 0.0019440855830907822
+            }
+          },
+          "32": {
+            "stock": {
+              "solved": 48,
+              "sat": 24,
+              "unsat": 24,
+              "candidates": 0,
+              "par2_s": 0.004728237128195663,
+              "median_s": 0.0036060884594917297
+            },
+            "random": {
+              "solved": 48,
+              "sat": 24,
+              "unsat": 24,
+              "candidates": 24,
+              "par2_s": 0.003211822477169335,
+              "median_s": 0.0034434725530445576
+            },
+            "degree": {
+              "solved": 48,
+              "sat": 24,
+              "unsat": 24,
+              "candidates": 24,
+              "par2_s": 0.004623435922743131,
+              "median_s": 0.0035319305025041103
+            },
+            "static": {
+              "solved": 48,
+              "sat": 24,
+              "unsat": 24,
+              "candidates": 24,
+              "par2_s": 0.004738564311992377,
+              "median_s": 0.0034654270857572556
+            },
+            "untrained": {
+              "solved": 48,
+              "sat": 24,
+              "unsat": 24,
+              "candidates": 24,
+              "par2_s": 0.005907431341862927,
+              "median_s": 0.0032022171653807163
+            },
+            "tiny42": {
+              "solved": 48,
+              "sat": 24,
+              "unsat": 24,
+              "candidates": 24,
+              "par2_s": 0.0031568499786468842,
+              "median_s": 0.003193183336406946
+            },
+            "tiny43": {
+              "solved": 48,
+              "sat": 24,
+              "unsat": 24,
+              "candidates": 24,
+              "par2_s": 0.006094809039495885,
+              "median_s": 0.0037151677533984184
+            },
+            "tiny44": {
+              "solved": 48,
+              "sat": 24,
+              "unsat": 24,
+              "candidates": 24,
+              "par2_s": 0.004723068928190817,
+              "median_s": 0.003587446641176939
+            }
+          },
+          "48": {
+            "stock": {
+              "solved": 48,
+              "sat": 48,
+              "unsat": 0,
+              "candidates": 0,
+              "par2_s": 0.004998946795240045,
+              "median_s": 0.0042271981947124004
+            },
+            "random": {
+              "solved": 48,
+              "sat": 48,
+              "unsat": 0,
+              "candidates": 48,
+              "par2_s": 0.006249745822666834,
+              "median_s": 0.003240144345909357
+            },
+            "degree": {
+              "solved": 48,
+              "sat": 48,
+              "unsat": 0,
+              "candidates": 48,
+              "par2_s": 0.0039013951706389585,
+              "median_s": 0.0033919503912329674
+            },
+            "static": {
+              "solved": 48,
+              "sat": 48,
+              "unsat": 0,
+              "candidates": 48,
+              "par2_s": 0.007378069101832807,
+              "median_s": 0.0032397196628153324
+            },
+            "untrained": {
+              "solved": 48,
+              "sat": 48,
+              "unsat": 0,
+              "candidates": 48,
+              "par2_s": 0.00882950066200768,
+              "median_s": 0.0031348392367362976
+            },
+            "tiny42": {
+              "solved": 48,
+              "sat": 48,
+              "unsat": 0,
+              "candidates": 48,
+              "par2_s": 0.005046530219260603,
+              "median_s": 0.0033774576149880886
+            },
+            "tiny43": {
+              "solved": 48,
+              "sat": 48,
+              "unsat": 0,
+              "candidates": 48,
+              "par2_s": 0.0048193070106208324,
+              "median_s": 0.003291664645075798
+            },
+            "tiny44": {
+              "solved": 48,
+              "sat": 48,
+              "unsat": 0,
+              "candidates": 48,
+              "par2_s": 0.007539545806745688,
+              "median_s": 0.003390111029148102
+            }
+          },
+          "64": {
+            "stock": {
+              "solved": 48,
+              "sat": 45,
+              "unsat": 3,
+              "candidates": 0,
+              "par2_s": 0.03514856577385217,
+              "median_s": 0.011391059961169958
+            },
+            "random": {
+              "solved": 48,
+              "sat": 45,
+              "unsat": 3,
+              "candidates": 32,
+              "par2_s": 0.022029464249499142,
+              "median_s": 0.004921925254166126
+            },
+            "degree": {
+              "solved": 48,
+              "sat": 45,
+              "unsat": 3,
+              "candidates": 35,
+              "par2_s": 0.018789615113443386,
+              "median_s": 0.005339789669960737
+            },
+            "static": {
+              "solved": 48,
+              "sat": 45,
+              "unsat": 3,
+              "candidates": 36,
+              "par2_s": 0.018589772943717737,
+              "median_s": 0.004653891082853079
+            },
+            "untrained": {
+              "solved": 48,
+              "sat": 45,
+              "unsat": 3,
+              "candidates": 36,
+              "par2_s": 0.0173868911806494,
+              "median_s": 0.005222249776124954
+            },
+            "tiny42": {
+              "solved": 48,
+              "sat": 45,
+              "unsat": 3,
+              "candidates": 36,
+              "par2_s": 0.020879970164969563,
+              "median_s": 0.005417517386376858
+            },
+            "tiny43": {
+              "solved": 48,
+              "sat": 45,
+              "unsat": 3,
+              "candidates": 36,
+              "par2_s": 0.02256660646526143,
+              "median_s": 0.005593994166702032
+            },
+            "tiny44": {
+              "solved": 48,
+              "sat": 45,
+              "unsat": 3,
+              "candidates": 36,
+              "par2_s": 0.021114883342913043,
+              "median_s": 0.005338627845048904
+            }
+          }
+        },
+        "no_test": true
+      }
+    }
   }
 }</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
@@ -4693,6 +5102,7 @@ function render(){
  renderCostAware();
  renderSharedGPU();
  renderStructured();
+ renderResident();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -4742,6 +5152,16 @@ function render(){
  const acceptance=Object.entries(n.acceptance||{}).map(([k,v])=>`${k.startsWith('rlaf')?'RLAF':'NeuroBack'}：${esc(accepted[v]||v)}`).join(' · ');
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
+}
+function renderResident(){
+ const u=data.resident_policy,bp=document.getElementById('resident-benchmark'),dp=document.getElementById('resident-development');
+ if(!u){bp.textContent='暂无已审计的常驻路径结果';dp.textContent='';return;}
+ const b=u.benchmark,names={old_stock:'旧子进程 · 默认',old_tiny42:'旧子进程 · 小策略42',cold_stock:'新原生每次启动 · 默认',cold_tiny42:'新原生每次启动 · 小策略42',resident_stock:'新原生常驻 · 默认',resident_tiny42:'新原生常驻 · 小策略42'};
+ bp.innerHTML=`<article class="panel"><h3>同输入配对降本 · ${b.conversion_pass?'达到预设 ≥20% 转换门槛':'未过转换门槛'}</h3><p>480/480 单元 · 8 个既有验证图，不与新开发合并。</p><div class="table"><table><thead><tr><th>调用路径</th><th>完整均值 ms ↓</th><th>完整中位数 ms ↓</th><th>P95 ms ↓</th></tr></thead><tbody>${Object.entries(b.summaries).map(([a,v])=>`<tr><td>${esc(names[a])}</td><td>${(v.mean*1000).toFixed(2)}</td><td>${(v.median*1000).toFixed(2)}</td><td>${(v.p95*1000).toFixed(2)}</td></tr>`).join('')}</tbody></table></div><p class="muted">常驻子进程/模型启动实测 ${(b.resident_setup_s*1000).toFixed(2)} ms，另计；这不是冷启动请求加速。保留相同权重，特征/预测数值误差在 2e-6 容差内。</p></article>`;
+ const d=u.development;if(!d){dp.textContent='尚无开发记录';return;}
+ const r=d.readout,scale=document.getElementById('resident-scale').value,n=scale==='ALL'?192:48,sm=r?(scale==='ALL'?r.summaries:r.by_scale[scale]):null;
+ const an={stock:'默认 CaDiCaL',random:'随机可行解码',degree:'动态度数',static:'静态度数 · 无网络',untrained:'未训练同结构小策略',tiny42:'小策略 seed42',tiny43:'小策略 seed43',tiny44:'小策略 seed44'};
+ dp.innerHTML=`<article class="panel"><h3>新开发 · ${r?'工程门/学习门均未通过':d.phase==='failed'?'失败 · 待排查':'未审计 · 不显示排名'}</h3><p><progress max="1536" value="${d.completed_cells}"></progress> ${d.completed_cells}/1536 单元 · 64 个独立图</p>${r?'<p class="alert">没有生成独立确认集。调用开销改善不能替代学习净优势。</p>':''}${sm?`<div class="table"><table><thead><tr><th>方法</th><th>求解 / 重复试验</th><th>完整 PAR-2 ms ↓</th><th>完整中位数 ms ↓</th><th>可行覆盖候选</th></tr></thead><tbody>${Object.entries(sm).map(([a,v])=>`<tr><td>${esc(an[a])}</td><td>${v.solved}/${n}</td><td>${(v.par2_s*1000).toFixed(2)}</td><td>${(v.median_s*1000).toFixed(2)}</td><td>${v.candidates}</td></tr>`).join('')}</tbody></table></div>`:''}<p class="muted">图 n24/32/48/64，不是 CNF 总变量数；UNSAT 为独立求解器佐证，不是证明认证。各训练种子均保留，不挑最好种子报成功。</p></article>`;
 }
 function renderStructured(){
  const target=document.getElementById('structured-progress'),scale=document.getElementById('structured-scale').value;
@@ -4824,7 +5244,7 @@ function renderHybrid(){
   return `<article class="panel" style="margin-bottom:16px" data-stage="${stage}"><h3>${stage==='dev'?'开发集':'独立确认集'} · ${esc(state)}</h3><p><progress max="${x.target_cells}" value="${x.completed_cells}"></progress> ${x.completed_cells}/${x.target_cells} 单元 · ${x.completed_rows}/${x.target_rows} 完整实例</p><p class="muted">最后进度记录 ${esc(x.observed)}</p>${table}${r?`<p>错误 ${r.errors} · 未佐证 UNSAT ${r.unverified_unsat_cells}；未解实例保持未知。</p>`:''}${comparisons?`<p class="muted">总体主比较同时区间，不随上方规模筛选变化；正值有利于候选。${esc(comparisons)}</p>`:''}<p class="foot">冻结 SHA256 ${esc(x.frozen_sha256)}${r?' · 读出 '+esc(r.sha256):''}</p></article>`;
  }).join('');
 }
-for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale','conservative-scale','cost-aware-scale','structured-scale'])document.getElementById(id).addEventListener('change',render);
+for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale','conservative-scale','cost-aware-scale','structured-scale','resident-scale'])document.getElementById(id).addEventListener('change',render);
 async function refresh(){try{const response=await fetch('status.json?t='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error();const incoming=await response.json();if(incoming.runs&&incoming.results&&incoming.source_sha256){data=incoming;render();}}catch{render();document.getElementById('freshness').textContent+=' · 离线 / 更新失败，显示已有快照';}}
 render();if(location.protocol!=='file:'){refresh();setInterval(refresh,60000);}
 </script></body></html>

@@ -520,6 +520,57 @@ def structured_progress(repo, small=False):
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
+def resident_progress(repo):
+    """E35 conversion and fresh development stay separate; fixed public fields only."""
+    root=repo/'experiments/resident_policy_20260913_e35'
+    def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+    def number(v,maximum=2):
+        if type(v) not in (int,float) or not math.isfinite(v) or not 0<=v<=maximum:raise ValueError('resident numeric field')
+        return v
+    try:
+        if not (root/'BENCHMARK_AUDIT.json').exists():return None
+        a=json.loads((root/'BENCHMARK_AUDIT.json').read_text());b=json.loads((root/'BENCHMARK.json').read_text())
+        if a['verdict']!='conversion_integrity_pass_not_learning_advantage' or a['benchmark_sha256']!=digest(root/'BENCHMARK.json') or a['frozen_sha256']!=digest(root/'BENCHMARK_FROZEN.json') or b['frozen_sha256']!=a['frozen_sha256'] or a['cells']!=480 or a['independent_formulas']!=8:raise ValueError('conversion audit')
+        summaries={}
+        for kind in ['old','cold','resident']:
+            for mode in ['stock','tiny42']:
+                key=kind+'_'+mode;v=b['summaries'][key]
+                if v['count']!=80:raise ValueError('conversion count')
+                summaries[key]={k:number(v[k],10) for k in ['mean','median','std','p95']}
+        passed=all(summaries['resident_tiny42'][k]<=.8*summaries['old_tiny42'][k] for k in ['mean','median'])
+        if a['conversion_pass'] is not passed or b['conversion_pass'] is not passed:raise ValueError('conversion gate')
+        result={'benchmark':{'sha256':a['benchmark_sha256'],'conversion_pass':passed,'summaries':summaries,
+            'instances':8,'repetitions':10,'cells':480,'resident_setup_s':number(b['resident_setup_s'],10)},'development':None}
+        folder=root/'dev'
+        if not (folder/'FROZEN.json').exists():return result
+        cfg=json.loads((folder/'FROZEN.json').read_text());h=digest(folder/'FROZEN.json')
+        arms=['stock','random','degree','static','untrained','tiny42','tiny43','tiny44']
+        if len(cfg['rows'])!=64 or cfg['arms']!=arms or cfg['seeds']!=[42,43,44]:raise ValueError('resident design')
+        state=json.loads((folder/'STATUS.json').read_text())
+        if state['frozen_sha256']!=h or state['target_cells']!=1536 or type(state['completed_cells']) is not int or not 0<=state['completed_cells']<=1536 or state['phase'] not in ['running','failed','terminal']:raise ValueError('resident state')
+        dev={'frozen_sha256':h,'phase':'awaiting_audit' if state['phase']=='terminal' else state['phase'],
+             'completed_cells':state['completed_cells'],'target_cells':1536,'observed':state.get('observed',state['created']),'readout':None}
+        result['development']=dev
+        if not (folder/'AUDIT.json').exists():return result
+        audit=json.loads((folder/'AUDIT.json').read_text());r=json.loads((folder/'RESULTS.json').read_text());choice=json.loads((root/'SELECTION.json').read_text())
+        if audit['verdict']!='integrity_pass' or audit['frozen_sha256']!=h or audit['results_sha256']!=digest(folder/'RESULTS.json') or r['frozen_sha256']!=h or audit['selection_sha256']!=digest(root/'SELECTION.json') or choice['results_sha256']!=audit['results_sha256']:raise ValueError('resident readout identity')
+        if audit['engineering'] is not False or audit['learning'] is not False or r['engineering_pass'] is not False or r['learning_pass'] is not False or choice['engineering'] is not False or choice['learning'] is not False or audit['test_generated'] is not False or (root/'test').exists():raise ValueError('resident negative stop')
+        if dev['phase']!='awaiting_audit' or dev['completed_cells']!=1536 or r['cells']!=1536 or r['trials']!=192 or r['instances']!=64:raise ValueError('resident completeness')
+        def summary(values,limit):
+            if set(values)!=set(arms):raise ValueError('resident arms')
+            out={}
+            for arm,v in values.items():
+                if any(type(v[k]) is not int or not 0<=v[k]<=limit for k in ['solved','sat','unsat','candidates']) or v['solved']!=v['sat']+v['unsat']:raise ValueError('resident counts')
+                out[arm]={k:v[k] for k in ['solved','sat','unsat','candidates']};out[arm]['par2_s']=number(v['par2_s'])
+                out[arm]['median_s']=number(v['full_s']['median'])
+            return out
+        sm=summary(r['summaries'],192);scales={str(n):summary(r['by_scale'][str(n)],48) for n in [24,32,48,64]}
+        for arm,v in sm.items():
+            if any(sum(s[arm][k] for s in scales.values())!=v[k] for k in ['solved','sat','unsat','candidates']) or not math.isclose(sum(s[arm]['par2_s'] for s in scales.values())/4,v['par2_s'],abs_tol=1e-12):raise ValueError('resident scale reconciliation')
+        dev.update(phase='terminal',readout={'sha256':audit['results_sha256'],'summaries':sm,'by_scale':scales,'no_test':True})
+        return result
+    except (OSError,ValueError,KeyError,TypeError):return None
+
 def load_performance_plan():
     raw=(HERE/'performance_plan.json').read_bytes()
     plan=json.loads(raw)
@@ -597,6 +648,7 @@ def main():
     data['shared_gpu']=shared_gpu_progress(args.repo.resolve())
     data['structured_decoder']=structured_progress(args.repo.resolve())
     data['structured_policy']=structured_progress(args.repo.resolve(),small=True)
+    data['resident_policy']=resident_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

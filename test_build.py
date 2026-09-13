@@ -5,9 +5,33 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress
+from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_resident_audits_separate_conversion_from_learning_and_omit_private_data(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/resident_policy_20260913_e35';(root/'dev').mkdir(parents=True)
+            def save(name,value):
+                raw=json.dumps(value).encode();(root/name).write_bytes(raw);return hashlib.sha256(raw).hexdigest()
+            bh=save('BENCHMARK_FROZEN.json',{'private':'/private/checkpoint'})
+            summaries={k+'_'+m:dict(mean=.1 if k!='resident' else .01,median=.1 if k!='resident' else .01,std=.001,p95=.12,count=80) for k in ['old','cold','resident'] for m in ['stock','tiny42']}
+            b=dict(summaries=summaries,conversion_pass=True,frozen_sha256=bh,resident_setup_s=.01,cpu=123,weights='/private/weights')
+            br=save('BENCHMARK.json',b)
+            save('BENCHMARK_AUDIT.json',dict(verdict='conversion_integrity_pass_not_learning_advantage',benchmark_sha256=br,frozen_sha256=bh,cells=480,independent_formulas=8,conversion_pass=True))
+            self.assertTrue(resident_progress(repo)['benchmark']['conversion_pass'])
+            arms=['stock','random','degree','static','untrained','tiny42','tiny43','tiny44']
+            h=save('dev/FROZEN.json',dict(rows=[{}]*64,arms=arms,seeds=[42,43,44]))
+            save('dev/STATUS.json',dict(created='2026-09-13T12:00:00Z',phase='terminal',completed_cells=1536,target_cells=1536,frozen_sha256=h,worker_cpus=[1,2]))
+            self.assertIsNone(resident_progress(repo)['development']['readout'])
+            def sm(n):return {a:dict(solved=n,sat=n,unsat=0,candidates=0,par2_s=.01,full_s={'median':.01},private='/private/data') for a in arms}
+            r=dict(frozen_sha256=h,cells=1536,trials=192,instances=64,engineering_pass=False,learning_pass=False,summaries=sm(192),by_scale={str(n):sm(48) for n in [24,32,48,64]})
+            rh=save('dev/RESULTS.json',r);ch=save('SELECTION.json',dict(engineering=False,learning=False,results_sha256=rh))
+            save('dev/AUDIT.json',dict(verdict='integrity_pass',frozen_sha256=h,results_sha256=rh,selection_sha256=ch,engineering=False,learning=False,test_generated=False))
+            result=resident_progress(repo);self.assertEqual(result['development']['phase'],'terminal');self.assertTrue(result['development']['readout']['no_test'])
+            for word in ['private','weights','worker_cpus','checkpoint']:self.assertNotIn(word,json.dumps(result))
+            (root/'test').mkdir();self.assertIsNone(resident_progress(repo));(root/'test').rmdir()
+            r['summaries']['tiny42']['par2_s']=float('nan');save('dev/RESULTS.json',r);self.assertIsNone(resident_progress(repo))
+
     def test_structured_panels_require_audited_readout_and_exclude_private_fields(self):
         arms=['stock','random','degree','original','untrained','cap42','cap43','cap44']
         with tempfile.TemporaryDirectory() as d:
@@ -134,7 +158,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),13)
+        self.assertEqual(len(plan['actions']),14)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -145,10 +169,11 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('E30',actions['A8']['status'])
         self.assertIn('E31',actions['A5']['status'])
         self.assertEqual(actions['A1']['status'],'计划中 · 未启动')
-        self.assertIn('E34',actions['A2']['status'])
+        self.assertIn('E35',actions['A2']['status'])
         self.assertIn('E33',actions['A10']['status'])
         self.assertIn('E34',actions['A11']['status'])
-        self.assertEqual(actions['A12']['status'],'计划中 · 未实施')
+        self.assertIn('E35',actions['A12']['status'])
+        self.assertEqual(actions['A13']['status'],'计划中 · 未训练或评测')
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:

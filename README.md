@@ -34,7 +34,7 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Thirteen actions have dependencies, costs, acceptance and stopping rules. Their
+Fourteen actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
@@ -111,9 +111,24 @@ and exports only fixed aggregate fields. Tables use milliseconds and original
 graph-vertex counts, not CNF auxiliary-variable counts. SAT witnesses are checked;
 global UNSAT is independently corroborated, not proof-certified. Assumption-UNSAT
 cannot be reported as global UNSAT. Shared-host long tails and component-charged
-resident timing remain limitations. A12 proposes symmetric native/resident
-accounting, but has not implemented or launched it. No scientific gap is promoted
+resident timing remain limitations. A12 is now implemented as the separate E35
+experiment described below; E33/E34 frozen results are not rescored. No scientific gap is promoted
 by validation rewards, new-model inference savings or selected point estimates.
+
+E35 (#resident/A12) implements native113-parameter inference and a private resident
+child, parsing each request once and recreating the solver. A paired conversion
+benchmark on8 existing validation graphs x10 repeats compares old subprocess,
+new cold subprocess and new resident, for BOTH default and the same seed42 policy.
+Tiny-policy complete median11.212→2.203ms and mean29.708→9.459ms pass the20%
+conversion gate; cold/load/warmup separate, numerical parity2e-6, no original-CAP
+compression claim. Eight new resident development arms include static degree
+WITHOUT a network as well as matched untrained, dynamic/random/default controls
+and all three tiny seeds. On64 new graphs x3 repeats, all arms192/192 solved;
+tiny PAR2 means8.171/9.285/9.589ms vs dynamic degree7.374ms. Both prespecified
+development gates fail, no confirmation generated. Shared-host tails remain;
+CPU execution time was not recorded. The collector requires matching benchmark
+and development audits and never combines their sample denominators or claims.
+A13 is a planned deployment-aligned learning-signal investigation, not executed.
 
 Only complete, error-free 300-row seeds enter metrics. Invalid indices,
 non-finite times, arm errors, conflicting duplicate rows, differing CNF paths,
