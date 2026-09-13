@@ -8,6 +8,22 @@ from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_gpu_supervisor_requires_all_zero_exits_and_matching_artifacts(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/shared_gpu_20260913_e32';root.mkdir(parents=True)
+            frozen=json.dumps(dict(seeds=[42,43,44],epochs=120,batch_size=16));(root/'FROZEN.json').write_text(frozen);h=hashlib.sha256(frozen.encode()).hexdigest()
+            artifact=hashlib.sha256(b'synthetic-checkpoint').hexdigest()
+            for seed in [42,43,44]:
+                folder=root/f'seed-{seed}';folder.mkdir()
+                for name in ['best','last']:(folder/f'{name}.pt').write_bytes(b'synthetic-checkpoint')
+                state=dict(phase='terminal',observed='2026-09-13T09:00:00Z',seed=seed,gpu_index=3,epoch=120,frozen_sha256=h,best_sha256=artifact,last_sha256=artifact)
+                (folder/'STATUS.json').write_text(json.dumps(state))
+            terminal=dict(completed=True,frozen_sha256=h,exit_codes={'42':0,'43':0,'44':0})
+            (root/'TERMINAL.json').write_text(json.dumps(terminal));self.assertTrue(shared_gpu_progress(repo)['terminal'])
+            terminal['exit_codes']['44']=1;(root/'TERMINAL.json').write_text(json.dumps(terminal));self.assertIsNone(shared_gpu_progress(repo))
+            terminal['exit_codes']['44']=0;(root/'TERMINAL.json').write_text(json.dumps(terminal))
+            (root/'seed-44/last.pt').write_bytes(b'changed');self.assertIsNone(shared_gpu_progress(repo))
+
     def test_gpu_progress_excludes_other_processes_and_rejects_false_terminal(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/shared_gpu_20260913_e32';folder=root/'seed-42';folder.mkdir(parents=True)

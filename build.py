@@ -467,7 +467,8 @@ def shared_gpu_progress(repo):
                 if values:result['telemetry'][seed]={'samples':len(values),'card_utilization_mean':sum(values)/len(values),'card_utilization_max':max(values)}
         if (root/'TERMINAL.json').exists():
             t=json.loads((root/'TERMINAL.json').read_text())
-            if t['frozen_sha256']!=h or type(t['completed']) is not bool:raise ValueError('GPU supervisor identity')
+            if t['frozen_sha256']!=h or type(t['completed']) is not bool or set(t['exit_codes'])!={'42','43','44'}:raise ValueError('GPU supervisor identity')
+            if t['completed'] and any(type(v) is not int or v!=0 for v in t['exit_codes'].values()):raise ValueError('GPU supervisor exit')
             result['terminal']=t['completed'] and set(result['workers'])=={'42','43','44'} and all(x['phase']=='terminal' for x in result['workers'].values())
         return result
     except (OSError,ValueError,KeyError,TypeError):return None

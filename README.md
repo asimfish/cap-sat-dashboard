@@ -34,7 +34,7 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Nine actions have dependencies, costs, acceptance and stopping rules. Their
+Ten actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
@@ -80,7 +80,22 @@ planned development, with neither development nor test generated. This is NOT
 a statistically failed development gate or a confirmed performance result.
 Training fitness uses seconds, distinct from E29's flip units and5s evaluation.
 A5 separately records E31's small-graph encoding correctness preparation; no
-family performance training or historical dataset migration is claimed.
+historical dataset migration is claimed.
+
+E32 (#shared-gpu/A9) adds actual disjoint-graph batching and three CSM-only
+adaptation seeds on shared GPUs 3/2/5. All three completed 120 epochs on 128 new
+training graphs with 32 validation graphs. The matched, GPU-resident 8-graph
+forward/backward benchmark improved throughput 7.51x; this is neither the full
+old joint training pipeline nor single-instance SAT latency. Per-formula feature
+normalization and loss weighting preserve checkpoint semantics. The collector
+rechecks both checkpoint hashes and all three supervisor exit codes before
+declaring terminal completion. Displayed utilization samples describe whole
+cards while our tasks were alive, including other jobs; they are not causal
+measurements of our own utilization. Peak memory is PyTorch allocated memory,
+not total process/CUDA-context memory. Public exports omit process IDs, device
+UUIDs, unrelated process inventories, private paths and model weights. A lower
+validation CSM loss does not upgrade any performance gap. Full-cost solver
+development/confirmation remains a separate, not-yet-run evaluation.
 
 Only complete, error-free 300-row seeds enter metrics. Invalid indices,
 non-finite times, arm errors, conflicting duplicate rows, differing CNF paths,

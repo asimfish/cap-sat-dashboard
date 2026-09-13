@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T09:36:39.091106+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T09:42:31.411451+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -21,7 +21,7 @@
 <section id="cost-aware"><h2>E30 · 把计算成本纳入训练</h2><p class="alert">使用 E29 原生引擎；允许关闭 make 扫描和 CAP 特征，以 0.25 秒完整预处理成本训练。若最终关闭 CAP，不算 CAP 内容优势。</p><p class="muted">64 个新训练公式 × 2 搜索种子，两个策略类各 3 轮 × 12 候选，共 9,216 训练单元，16 路 CPU。开发 96 新公式 × 3 搜索种子 × 7 臂，共 2,016 单元，8 路固定 CPU、每臂 5 秒全成本。过门才生成 192 新确认公式；重复种子不算新增独立实例。</p><div class="toolbar"><a href="#action-A8">计划与验收规则 ↗</a><label for="cost-aware-scale">表格规模</label><select id="cost-aware-scale"><option value="ALL">全部规模</option><option value="325">n325</option><option value="500">n500</option></select></div><div id="cost-aware-progress"></div></section>
 <section id="shared-gpu"><h2>E32 · 共享 GPU 与真正的图批处理</h2><p class="alert">GPU 有其他任务不等于不可共享。按显存余量和负载调度，不停止其他任务。训练吞吐量、GPU 活跃度和 SAT 求解优势是三件不同的事。</p><p class="muted">128 新训练图 + 32 验证图，正确的无筛选顶点覆盖编码；三个适配种子、每个 120 轮、batch 16、每进程约 8 GiB PyTorch 分配器上限。采用 CSM-only 领域适配，不冒充原始联合训练。验证损失仅为代理指标，尚无求解性能开发/确认集。</p><a href="#action-A9">计划与边界 ↗</a><div id="shared-gpu-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-13T09:36:39.091106+00:00",
+  "generated": "2026-09-13T09:42:31.411451+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3053,7 +3053,7 @@
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
       "开发集选择策略，冻结后才看独立测试集；已反复使用的 n350 与工业切片只能作回归，不能冒充新的确认性证据。",
       "不得用最终 SAT/UNSAT 标签、参考赋值或测试结果决定是否调用模型、注入密度及触发阈值。",
-      "先锁定预算、主比较、成功与停止条件；多策略比较须控制选择偏差。新重型实验等待存储余量与独占计时资源核验。",
+      "先锁定预算、主比较、成功与停止条件；多策略比较须控制选择偏差。训练按显存余量和负载共享 GPU，不因已有任务就弃用；正式延迟比较须记录并控制共享干扰，不能把整卡活跃度当作本任务的独占贡献。",
       "门控、定时释放、稀疏注入与锚定均有历史尝试；只有明确不同的机制假设才进入新 pilot。"
     ],
     "gaps": [
@@ -3126,14 +3126,14 @@
         "title": "工业及自然问题族迁移",
         "state": "未解决",
         "priority": "高",
-        "progress": "历史 43 例、10 家族测试出现负迁移；九月独立台账中的 19 例切片也未改变缺少正向迁移证据的结论。两套实例不合并。",
+        "progress": "历史 43 例、10 家族测试出现负迁移；九月独立台账中的 19 例切片也未改变缺少正向迁移证据的结论。两套实例不合并。E32 已在正确顶点覆盖编码上完成三种子的 120 轮 CSM-only 适配；验证损失下降，尚无完整求解成本的正向证据。",
         "remaining": "还没有可信的现实任务加速能力。共同监督的编码器对照也不能支持仅靠换大网络即可修复。",
         "directions": [
           "A5",
           "A9"
         ],
         "source": "rebuttal 工业/OOD 对照；E18；native_comparison_20260911_v1",
-        "evidence_level": "实测负结果；新问题族适配尚未开展"
+        "evidence_level": "历史实测负结果；新领域训练完成，求解性能未评测"
       },
       {
         "id": "P6",
@@ -3237,8 +3237,8 @@
         "id": "A5",
         "title": "先守住明确问题族，再验证规模与迁移",
         "priority": "P1 · 新方向前置核查",
-        "status": "E31 编码前置核验完成 · 性能训练未启动",
-        "cost": "顶点覆盖 1,099 个小图、6,504 个规模约束组合的精确核验；无 GPU",
+        "status": "E31 编码核验完成 · E32 领域训练见 A9，性能未验证",
+        "cost": "顶点覆盖 1,099 个小图、6,504 个规模约束组合的精确核验；编码核验无 GPU",
         "depends_on": [],
         "hypothesis": "特定密码结构的局部优势可能可重复；这不意味着工业通用加速，需要分别检验。",
         "method": "E31 先核查顶点覆盖编码：旧生成器在三角形、覆盖上限 1 的反例上错误地给出可满足 CNF。新增隔离的正确 at-most-k 编码，无 SAT 过滤，穷举小图及赋值验证通过；旧脚本和数据未改，历史受影响范围仍待追溯。后续领域适配须冻结独立图种子、规模和预算，并单列监督成本；密码/工业测试也须使用未参与选择的新实例，不拿旧 19/43 例调参。",
@@ -3286,14 +3286,14 @@
         "hypothesis": "按翻转次数最优的策略未必按完整时间最优；额外 make 扫描、相位推理等成本可能抵消搜索收益。",
         "method": "E30 保持 E29 原生引擎不变，直接以 0.25 秒完整预处理 PAR-2 训练，允许 make 与 CAP 系数精确归零、真实跳过对应开销。两个策略类各 3 轮 × 12 候选；只在新训练数据上选择，再对新开发集比较默认、随机、固定 recency、两个冻结 E29 策略及两个成本策略。调用频率/在线触发尚未实现，不声称单独因果隔离了目标、训练时长和掩码。",
         "gate": "冻结后的新实例完整成本必须超过所有预定廉价控制，跨生成簇及种子核验；若学会的只是不用 CAP，则只能算调用策略或工程收益，不能支持 CAP 内容优势。",
-        "stop": "E30 两个策略类最终均选中与 hand 完全相同的系数，实际关闭 CAP 和额外特征。身份核查后提前停止，未生成开发/确认集；此提前取消明确记录为协议偏离，不冒称开发门失败或新加速。2,802 次训练 SAT 见证重新通过校验。转向 A5 前置编码审计；领域适配训练尚未开始，七个性能缺口的解决状态不升级。"
+        "stop": "E30 两个策略类最终均选中与 hand 完全相同的系数，实际关闭 CAP 和额外特征。身份核查后提前停止，未生成开发/确认集；此提前取消明确记录为协议偏离，不冒称开发门失败或新加速。2,802 次训练 SAT 见证重新通过校验。后续 E31 编码审计和 E32 领域训练另列 A5/A9，七个性能缺口的解决状态不升级。"
       },
       {
         "id": "A9",
         "title": "共享 GPU 真批处理与三种子领域适配",
         "priority": "P1 · 资源与机制并进",
-        "status": "E32 执行中 · 以 GPU 进度卡为准",
-        "cost": "3 张已有任务的 GPU 共享，3 种子 × 120 轮，每进程约 8 GiB 分配器上限",
+        "status": "E32 三种子训练完成 · 求解性能尚未验证",
+        "cost": "GPU 3/2/5 与已有任务共享，3 种子 × 120 轮约 89 秒完成；每进程约 8 GiB 分配器上限，实测分配峰值 391–407 MiB",
         "depends_on": [
           "A5"
         ],
@@ -3303,7 +3303,7 @@
         "stop": "单任务超 30 分钟、非有限数值、OOM 或整卡剩余显存低于 12 GiB 时只停止自身；无盲目重试。完成训练不自动启动大规模测试或改论文。"
       }
     ],
-    "sha256": "fe08389ed4e68424471885035be4c07420154d46bf0a83f5aad6b93880af5e1d"
+    "sha256": "bc5b93fea176a2faaba268f587ed0fcc7f6f710c199d306ed8cad47bf7ae80c5"
   },
   "pilot": {
     "id": "E26",
