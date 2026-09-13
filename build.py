@@ -434,6 +434,44 @@ def conservative_progress(repo, *, cost_aware=False):
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
+def shared_gpu_progress(repo):
+    """E32 own-work aggregates, never publish other users' process inventory."""
+    root=repo/'experiments/shared_gpu_20260913_e32'
+    def number(x,lo=0,hi=100000):
+        if type(x) not in (int,float) or not math.isfinite(x) or not lo<=x<=hi:raise ValueError('GPU metric')
+        return x
+    try:
+        if not (root/'FROZEN.json').exists():return None
+        raw=(root/'FROZEN.json').read_bytes();cfg=json.loads(raw);h=hashlib.sha256(raw).hexdigest()
+        if cfg['seeds']!=[42,43,44] or cfg['epochs']!=120 or cfg['batch_size']!=16:raise ValueError('GPU contract')
+        result={'frozen_sha256':h,'workers':{},'benchmark':None,'telemetry':{},'terminal':False}
+        if (root/'BENCHMARK.json').exists():
+            raw=(root/'BENCHMARK.json').read_bytes();b=json.loads(raw)
+            if b['graphs']!=8 or b['warmups']!=3 or b['gradients_match'] is not True or b['batching_sha256']!=cfg['hashes']['experiments/shared_gpu_20260913_e32/batching.py']:raise ValueError('GPU benchmark identity')
+            result['benchmark']={'sha256':hashlib.sha256(raw).hexdigest(),'summaries':{a:{k:number(b['summaries'][a][k],0,10000) for k in ['median_s','stdev_s','graphs_per_s']} for a in ['serial','batched']},'ratio':number(b['ratio'],0,100)}
+        for seed in cfg['seeds']:
+            folder=root/f'seed-{seed}'
+            if not (folder/'STATUS.json').exists():continue
+            s=json.loads((folder/'STATUS.json').read_text())
+            if s['frozen_sha256']!=h or s['seed']!=seed or s['phase'] not in ['starting','running','failed','terminal'] or type(s['epoch']) is not int:raise ValueError('GPU worker identity')
+            x={'phase':s['phase'],'observed':s['observed'],'epoch':number(s['epoch'],0,120),'target_epochs':120,'gpu_index':number(s['gpu_index'],0,7)}
+            for k in ['train_loss','val_loss','best_val_loss','initial_validation_loss','peak_allocated_mib','reserved_mib','elapsed_s']:
+                if k in s:x[k]=number(s[k])
+            if s['phase']=='terminal':
+                if s['epoch']!=120 or any(s[f'{n}_sha256']!=hashlib.sha256((folder/f'{n}.pt').read_bytes()).hexdigest() for n in ['best','last']):raise ValueError('GPU terminal integrity')
+            result['workers'][str(seed)]=x
+        if (root/'GPU_SAMPLES.json').exists():
+            samples=json.loads((root/'GPU_SAMPLES.json').read_text())
+            for seed,x in result['workers'].items():
+                values=[number(d['utilization'],0,100) for sample in samples if sample.get('worker_alive',{}).get(seed) is True for d in sample['devices'] if d['index']==x['gpu_index']]
+                if values:result['telemetry'][seed]={'samples':len(values),'card_utilization_mean':sum(values)/len(values),'card_utilization_max':max(values)}
+        if (root/'TERMINAL.json').exists():
+            t=json.loads((root/'TERMINAL.json').read_text())
+            if t['frozen_sha256']!=h or type(t['completed']) is not bool:raise ValueError('GPU supervisor identity')
+            result['terminal']=t['completed'] and set(result['workers'])=={'42','43','44'} and all(x['phase']=='terminal' for x in result['workers'].values())
+        return result
+    except (OSError,ValueError,KeyError,TypeError):return None
+
 def load_performance_plan():
     raw=(HERE/'performance_plan.json').read_bytes()
     plan=json.loads(raw)
@@ -508,6 +546,7 @@ def main():
     data['utility']=utility_progress(args.repo.resolve())
     data['conservative']=conservative_progress(args.repo.resolve())
     data['cost_aware']=conservative_progress(args.repo.resolve(),cost_aware=True)
+    data['shared_gpu']=shared_gpu_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

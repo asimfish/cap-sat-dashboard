@@ -5,9 +5,20 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress
+from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_gpu_progress_excludes_other_processes_and_rejects_false_terminal(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/shared_gpu_20260913_e32';folder=root/'seed-42';folder.mkdir(parents=True)
+            frozen=json.dumps(dict(seeds=[42,43,44],epochs=120,batch_size=16));(root/'FROZEN.json').write_text(frozen);h=hashlib.sha256(frozen.encode()).hexdigest()
+            state=dict(phase='running',observed='2026-09-13T09:00:00Z',seed=42,gpu_index=3,epoch=12,frozen_sha256=h,pid=999,private_host='private')
+            (folder/'STATUS.json').write_text(json.dumps(state));out=shared_gpu_progress(repo)
+            self.assertEqual(out['workers']['42']['epoch'],12);self.assertNotIn('private',json.dumps(out));self.assertNotIn('pid',json.dumps(out))
+            (root/'GPU_SAMPLES.json').write_text(json.dumps([dict(worker_alive={'42':True},devices=[dict(index=3,utilization=90,uuid='private'),dict(index=6,utilization=1,process='private')])]))
+            self.assertEqual(shared_gpu_progress(repo)['telemetry']['42']['card_utilization_mean'],90)
+            state.update(phase='terminal',epoch=120);(folder/'STATUS.json').write_text(json.dumps(state));self.assertIsNone(shared_gpu_progress(repo))
+
     def test_cost_aware_training_units_and_privacy(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/cost_aware_20260913_e30';(root/'train').mkdir(parents=True)
@@ -80,7 +91,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),9)
+        self.assertEqual(len(plan['actions']),10)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}

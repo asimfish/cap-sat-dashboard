@@ -19,6 +19,7 @@
 <section id="utility"><h2>E28 · 直接学习翻转收益</h2><p class="alert">短程预测变好，不等于求解性能变好。只用廉价特征的学习模型与额外使用 CAP 的同构模型分开验收。</p><p class="muted">48 训练 + 16 验证，三个小模型种子组成固定集成，不是三次独立性能复现。24 新开发实例；过门才生成 48 新确认。每臂 5 秒全成本、0.25 秒预处理含 CAP 推理，不能与 E27 的 10 秒 PAR-2 横向混算；只覆盖随机 3-SAT n325 / n500。</p><div id="utility-progress"></div></section>
 <section id="conservative"><h2>E29 · 用完整求解轨迹训练保守策略</h2><p class="alert">固定 min-break 规则，保留随机探索；学习器只调整平局动作权重。训练适应度不是端到端加速，CAP 必须额外胜过同预算廉价模型。</p><p class="muted">96 个新训练公式，两个策略类各 3 轮 × 16 候选 × 2 搜索种子，共 18,432 单元，最多 32 路 CPU。开发 96 新公式 × 3 搜索种子 × 5 臂，8 路固定 CPU、每臂 5 秒全成本；过门才生成 192 新确认公式。训练与正式计时分开运行，不抢占已有 GPU 任务。搜索种子重复不算新增独立实例。</p><div class="toolbar"><a href="#action-A7">计划与验收规则 ↗</a><label for="conservative-scale">表格规模</label><select id="conservative-scale"><option value="ALL">全部规模</option><option value="325">n325</option><option value="500">n500</option></select></div><div id="conservative-progress"></div></section>
 <section id="cost-aware"><h2>E30 · 把计算成本纳入训练</h2><p class="alert">使用 E29 原生引擎；允许关闭 make 扫描和 CAP 特征，以 0.25 秒完整预处理成本训练。若最终关闭 CAP，不算 CAP 内容优势。</p><p class="muted">64 个新训练公式 × 2 搜索种子，两个策略类各 3 轮 × 12 候选，共 9,216 训练单元，16 路 CPU。开发 96 新公式 × 3 搜索种子 × 7 臂，共 2,016 单元，8 路固定 CPU、每臂 5 秒全成本。过门才生成 192 新确认公式；重复种子不算新增独立实例。</p><div class="toolbar"><a href="#action-A8">计划与验收规则 ↗</a><label for="cost-aware-scale">表格规模</label><select id="cost-aware-scale"><option value="ALL">全部规模</option><option value="325">n325</option><option value="500">n500</option></select></div><div id="cost-aware-progress"></div></section>
+<section id="shared-gpu"><h2>E32 · 共享 GPU 与真正的图批处理</h2><p class="alert">GPU 有其他任务不等于不可共享。按显存余量和负载调度，不停止其他任务。训练吞吐量、GPU 活跃度和 SAT 求解优势是三件不同的事。</p><p class="muted">128 新训练图 + 32 验证图，正确的无筛选顶点覆盖编码；三个适配种子、每个 120 轮、batch 16、每进程约 8 GiB PyTorch 分配器上限。采用 CSM-only 领域适配，不冒充原始联合训练。验证损失仅为代理指标，尚无求解性能开发/确认集。</p><a href="#action-A9">计划与边界 ↗</a><div id="shared-gpu-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{{DATA}}</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
 const names={frozen:'E17 · Frozen',small:'E19S · 500 train',large:'E19L · 2,000 train'};
@@ -28,6 +29,7 @@ function render(){
  renderUtility();
  renderConservative();
  renderCostAware();
+ renderSharedGPU();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -77,6 +79,17 @@ function render(){
  const acceptance=Object.entries(n.acceptance||{}).map(([k,v])=>`${k.startsWith('rlaf')?'RLAF':'NeuroBack'}：${esc(accepted[v]||v)}`).join(' · ');
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
+}
+function renderSharedGPU(){
+ const u=data.shared_gpu,target=document.getElementById('shared-gpu-progress');
+ if(!u){target.textContent='暂无有效 GPU 实验记录；不推断正在运行。';return;}
+ const b=u.benchmark;
+ target.innerHTML=(b?`<p>同卡、同 8 图、3 次预热 + 10 次重复，前向与反向：逐图 ${b.summaries.serial.median_s.toFixed(3)} 秒 → 真批处理 ${b.summaries.batched.median_s.toFixed(3)} 秒，吞吐比 ${b.ratio.toFixed(2)}×。已核对预测与梯度；不含完整旧联合训练流程或 SAT 求解。</p>`:'')+(u.terminal?'<p class="alert">三个适配种子训练完成 · 不等于性能门通过。</p>':'')+Object.entries(u.workers).map(([seed,x])=>{
+  const age=(Date.now()-Date.parse(x.observed))/60000,stale=!Number.isFinite(age)||age>5||age< -1;
+  const label=x.phase==='terminal'?'训练完成':x.phase==='failed'?'失败 · 待排查':stale?'记录陈旧 · 运行态未知':x.phase==='starting'?'正在初始化':'近期训练有进度';
+  const t=u.telemetry[seed];
+  return `<article class="panel"><h3>种子 ${seed} · GPU ${x.gpu_index} · ${label}</h3><p><progress max="120" value="${x.epoch}"></progress> ${x.epoch}/120 轮</p>${x.val_loss!==undefined?`<p>训练 CSM ${x.train_loss.toFixed(4)} · 验证 CSM ${x.val_loss.toFixed(4)} · 本进程分配峰值 ${x.peak_allocated_mib.toFixed(0)} MiB</p>`:''}${t?`<p>本任务存活期间整卡活跃度均值 ${t.card_utilization_mean.toFixed(1)}%，最高 ${t.card_utilization_max}%（${t.samples} 次采样，含其他任务贡献，非本进程独占利用率）。</p>`:''}<p class="muted">进度时间 ${esc(x.observed)}</p></article>`;
+ }).join('');
 }
 function renderCostAware(){
  const u=data.cost_aware,target=document.getElementById('cost-aware-progress');

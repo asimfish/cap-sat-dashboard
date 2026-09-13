@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-13T09:20:02.341290+00:00",
+  "generated": "2026-09-13T09:36:39.091106+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3107,7 +3107,8 @@
         "progress": "历史 43 例、10 家族测试出现负迁移；九月独立台账中的 19 例切片也未改变缺少正向迁移证据的结论。两套实例不合并。",
         "remaining": "还没有可信的现实任务加速能力。共同监督的编码器对照也不能支持仅靠换大网络即可修复。",
         "directions": [
-          "A5"
+          "A5",
+          "A9"
         ],
         "source": "rebuttal 工业/OOD 对照；E18；native_comparison_20260911_v1",
         "evidence_level": "实测负结果；新问题族适配尚未开展"
@@ -3264,9 +3265,23 @@
         "method": "E30 保持 E29 原生引擎不变，直接以 0.25 秒完整预处理 PAR-2 训练，允许 make 与 CAP 系数精确归零、真实跳过对应开销。两个策略类各 3 轮 × 12 候选；只在新训练数据上选择，再对新开发集比较默认、随机、固定 recency、两个冻结 E29 策略及两个成本策略。调用频率/在线触发尚未实现，不声称单独因果隔离了目标、训练时长和掩码。",
         "gate": "冻结后的新实例完整成本必须超过所有预定廉价控制，跨生成簇及种子核验；若学会的只是不用 CAP，则只能算调用策略或工程收益，不能支持 CAP 内容优势。",
         "stop": "E30 两个策略类最终均选中与 hand 完全相同的系数，实际关闭 CAP 和额外特征。身份核查后提前停止，未生成开发/确认集；此提前取消明确记录为协议偏离，不冒称开发门失败或新加速。2,802 次训练 SAT 见证重新通过校验。转向 A5 前置编码审计；领域适配训练尚未开始，七个性能缺口的解决状态不升级。"
+      },
+      {
+        "id": "A9",
+        "title": "共享 GPU 真批处理与三种子领域适配",
+        "priority": "P1 · 资源与机制并进",
+        "status": "E32 执行中 · 以 GPU 进度卡为准",
+        "cost": "3 张已有任务的 GPU 共享，3 种子 × 120 轮，每进程约 8 GiB 分配器上限",
+        "depends_on": [
+          "A5"
+        ],
+        "hypothesis": "逐图前向和频繁同步限制 GPU 吞吐；真正图批处理可提高有效训练量，领域适配可能比继续调整通用静态相位更有希望。",
+        "method": "保持每个公式的特征归一化与等权 CSM 损失，图和特征预缓存；在同卡 8 图基准中核验预测和梯度后比较吞吐。128 个新正确顶点覆盖训练图、32 验证图，三个随机适配种子从同一旧检查点出发，CSM-only、batch 16、120 轮。按余量共享 GPU 3/2/5，不要求整卡空闲；不抢占或终止既有任务。",
+        "gate": "报告三种子完成度、显存峰值、吞吐和整卡活跃度，后者不冒充本进程贡献。验证 CSM 改善不能升级为 SAT 加速；完整求解比较须另行冻结默认、原 CAP、廉价控制及同成本基准。",
+        "stop": "单任务超 30 分钟、非有限数值、OOM 或整卡剩余显存低于 12 GiB 时只停止自身；无盲目重试。完成训练不自动启动大规模测试或改论文。"
       }
     ],
-    "sha256": "2fbd7ce657dc6ee81ebd0a08dba7932a4f69ec6247da7e3e3b1f6a214d0863e7"
+    "sha256": "fe08389ed4e68424471885035be4c07420154d46bf0a83f5aad6b93880af5e1d"
   },
   "pilot": {
     "id": "E26",
@@ -3885,5 +3900,86 @@
       "audit_sha256": "2a6f179c5e69c082239f2f4def014f5ee2a0b01bf1f0771cb10d4b4a084af76b",
       "checked_training_sat": 2802
     }
+  },
+  "shared_gpu": {
+    "frozen_sha256": "0066e7c6cfffff759ea952149efa2aa3fc4c9dcfac36df36d311be1d7f80bbb1",
+    "workers": {
+      "42": {
+        "phase": "terminal",
+        "observed": "2026-09-13T09:33:56.117555+00:00",
+        "epoch": 120,
+        "target_epochs": 120,
+        "gpu_index": 3,
+        "train_loss": 0.015764832496643066,
+        "val_loss": 0.015689503401517868,
+        "best_val_loss": 0.01561719086021185,
+        "initial_validation_loss": 0.17035934329032898,
+        "peak_allocated_mib": 390.6162109375,
+        "reserved_mib": 418.0,
+        "elapsed_s": 86.492541750893
+      },
+      "43": {
+        "phase": "terminal",
+        "observed": "2026-09-13T09:33:57.416082+00:00",
+        "epoch": 120,
+        "target_epochs": 120,
+        "gpu_index": 2,
+        "train_loss": 0.016240639612078667,
+        "val_loss": 0.016221188008785248,
+        "best_val_loss": 0.016197901219129562,
+        "initial_validation_loss": 0.17035932838916779,
+        "peak_allocated_mib": 391.18701171875,
+        "reserved_mib": 418.0,
+        "elapsed_s": 87.78111820761114
+      },
+      "44": {
+        "phase": "terminal",
+        "observed": "2026-09-13T09:33:53.413331+00:00",
+        "epoch": 120,
+        "target_epochs": 120,
+        "gpu_index": 5,
+        "train_loss": 0.015760112553834915,
+        "val_loss": 0.015623675659298897,
+        "best_val_loss": 0.015608826652169228,
+        "initial_validation_loss": 0.17035932838916779,
+        "peak_allocated_mib": 407.46142578125,
+        "reserved_mib": 426.0,
+        "elapsed_s": 83.79468807391822
+      }
+    },
+    "benchmark": {
+      "sha256": "e31803135783e0b62a6e8387e58141e2c82bc7697cea3f61193e2d11e21d3f00",
+      "summaries": {
+        "serial": {
+          "median_s": 0.5231978255324066,
+          "stdev_s": 0.044350866936568874,
+          "graphs_per_s": 15.290583426754866
+        },
+        "batched": {
+          "median_s": 0.0696216793730855,
+          "stdev_s": 0.008880449940852181,
+          "graphs_per_s": 114.90673698245575
+        }
+      },
+      "ratio": 7.514869366030626
+    },
+    "telemetry": {
+      "42": {
+        "samples": 7,
+        "card_utilization_mean": 48.714285714285715,
+        "card_utilization_max": 71
+      },
+      "43": {
+        "samples": 7,
+        "card_utilization_mean": 83.85714285714286,
+        "card_utilization_max": 98
+      },
+      "44": {
+        "samples": 6,
+        "card_utilization_mean": 73.83333333333333,
+        "card_utilization_max": 94
+      }
+    },
+    "terminal": true
   }
 }
