@@ -4,10 +4,42 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from build import stability_progress
 from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_stability_selection_requires_all_seeds_scales_and_safe_aggregates(self):
+        import math
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/stability_20260913_e37';root.mkdir(parents=True)
+            def save(name,value):
+                raw=json.dumps(value).encode();(root/name).write_bytes(raw);return hashlib.sha256(raw).hexdigest()
+            fh=save('READOUT_FROZEN.json',{'private':'/private/experiment'})
+            def base(n):return dict(count=n,baseline_covers=n//2,oracle_covers=n,variable_graphs=n,baseline_mean=6,oracle_mean=8)
+            results={}
+            for c in ['ce_mlp','pair_mlp','ce_graph','pair_graph']:
+                passed=c=='pair_mlp';params=241 if c.endswith('mlp') else 4641;mean=6.1 if passed else 6;covers=132 if passed else 128
+                workers={s:dict(count=256,steps=600,parameters=params,selected_step=25,mean_q=mean,covers=covers,passed=passed,
+                    cpu_choice_disagreements=0,cpu_utility_disagreements=0,choices=[0]*256,checkpoint='/private/file',
+                    by_scale={str(n):dict(count=64,mean_q=mean,covers=covers//4) for n in [24,32,48,64]}) for s in ['42','43','44']}
+                results[c]=dict(parameters=params,workers=workers,passed=passed,selection_score=mean-6-.001*math.log2(params/241))
+            r=dict(scope='factorial_selected_validation_not_solver_performance',frozen_sha256=fh,baseline=dict(summary=base(256),by_scale={str(n):base(64) for n in [24,32,48,64]}),
+                results=results,predictions=dict(H1=True,H2=False),selected='pair_mlp',resources={s:dict(samples=20,process_peak_mib=612,pid=123) for s in ['42','43','44']},
+                diagnostic={'initial':{'tie_gradient_fraction':.9}},training_elapsed_s=45,dev_generated=False,test_generated=False)
+            def save_result():
+                h=save('READOUT.json',r);save('AUDIT.json',dict(verdict='integrity_pass',readout_sha256=h,frozen_sha256=fh,cnfs=1280,reference_choices=53760,cpu_checkpoint_choices=3072,
+                    validation_history_rechecks=73728,selected=r['selected'],dev_generated=False,test_generated=False))
+            self.assertIsNone(stability_progress(repo));save_result();out=stability_progress(repo);self.assertEqual(out['selected'],'pair_mlp')
+            for word in ['private','checkpoint','choices','pid']:self.assertNotIn('"'+word+'"',json.dumps(out))
+            r['selected']='ce_graph';save_result();self.assertIsNone(stability_progress(repo));r['selected']='pair_mlp'
+            w=results['pair_mlp']['workers']['43'];w['passed']=False;save_result();self.assertIsNone(stability_progress(repo));w['passed']=True
+            w['by_scale']['24']['covers']=32;save_result();self.assertIsNone(stability_progress(repo));w['by_scale']['24']['covers']=33
+            w['mean_q']=float('nan');save_result();self.assertIsNone(stability_progress(repo));w['mean_q']=6.1
+            w['cpu_utility_disagreements']=1;save_result();self.assertIsNone(stability_progress(repo));w['cpu_utility_disagreements']=0;save_result()
+            (root/'test').mkdir();self.assertIsNone(stability_progress(repo));(root/'test').rmdir()
+            (root/'READOUT_FROZEN.json').write_text('{}');self.assertIsNone(stability_progress(repo))
+
     def test_decoder_utility_validation_gate_privacy_and_fail_closed(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/decoder_utility_20260913_e36';root.mkdir(parents=True)
@@ -182,7 +214,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),15)
+        self.assertEqual(len(plan['actions']),16)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -198,7 +230,8 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('E34',actions['A11']['status'])
         self.assertIn('E35',actions['A12']['status'])
         self.assertEqual(actions['A13']['status'],'E36 局部信号 · 三种子门未过')
-        self.assertEqual(actions['A14']['status'],'计划中 · 未训练或评测')
+        self.assertEqual(actions['A14']['status'],'E37 成对小网络通过训练门')
+        self.assertEqual(actions['A15']['status'],'计划中 · 未部署或评测')
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T12:27:06.048171+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-13T13:09:13.968118+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -23,8 +23,9 @@
 <section id="structured"><h2>E33 / E34 · 约束解码与直接训练可行选择</h2><p class="alert">E32 验证集诊断：平均子句错误下降，但三个模型直接取整均为 0/32 完整见证，且多数超过覆盖数量上限。E33 加入保持图边约束的解码；E34 改用 113 参数小策略，直接奖励可行独立集大小。两者都必须通过完整成本与廉价控制比较。</p><p class="muted">两批开发数据分别为 64 个独立图 × 3 个搜索种子 × 8 臂，每臂 1 秒；不合并成同一面板。图顶点 n24/32/48/64，不是 CNF 总变量数。所有 SAT 赋值检查原 CNF；UNSAT 获独立求解器一致结论、不是证明认证。全成本包含实测单例预测、传输、序列化、进程启动、原生搜索及 SAT 见证检查；驻留加载/预热另列。共享主机长尾仍限制延迟推断。</p><div class="toolbar"><label for="structured-scale">图顶点规模</label><select id="structured-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A10">E33 计划 ↗</a><a href="#action-A11">E34 计划 ↗</a></div><div id="structured-progress"></div></section>
 <section id="resident"><h2>E35 · 原生常驻路径：调用降本与学习优势分开验收</h2><p class="alert">同一 E34 小策略、相同输入的调用路径已提速。新的开发比较仍未建立净胜廉价基线的学习优势；不是原 CAP 已修复。</p><p class="muted">配对降本测试使用 8 个既有验证图，每图 10 次重复，三条路径 × 两种策略；不是新确认。下方开发另用 64 个新独立图 × 3 个搜索种子 × 8 臂，所有对照都使用同一常驻接口。每请求重新解析 CNF、构建图与求解器，模型加载/子进程启动和预热单列，完整单例成本包括请求/响应、解析、推理、搜索及原生 SAT 检查。共享主机长尾仍存在。</p><div id="resident-benchmark"></div><div class="toolbar"><label for="resident-scale">开发图顶点规模</label><select id="resident-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A12">E35 实施与门槛 ↗</a><a href="#action-A13">后续机制计划 ↗</a></div><div id="resident-development"></div></section>
 <section id="decoder-utility"><h2>E36 · 学习解码后的收益：有局部信号，稳定性仍不足</h2><p class="alert">这里展示选过检查点的验证结果，不是 SAT 求解数、端到端加速或独立确认。全部训练种子保留，不能只挑最好的一次。</p><p class="muted">先复核旧 E34 的训练/部署差距；另生成 256 训练 + 64 验证图，均含 n24/32/48/64。首步选点后以动态度数和交换完成独立集，直接学习完成后大小。新241参数模型，不是原 CAP 的等价优化。</p><div class="toolbar"><label for="decoder-utility-scale">验证图顶点规模</label><select id="decoder-utility-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A13">E36 实施与停止条件 ↗</a><a href="#action-A14">稳定性下一步 ↗</a></div><div id="decoder-utility-progress"></div></section>
+<section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，尚未进行新原生开发。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-13T12:27:06.048171+00:00",
+  "generated": "2026-09-13T13:09:13.968118+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3050,7 +3051,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-13",
-    "scope": "人工审读的性能计划：历史与后续实验分开，不混合样本、接口和预算。E35 配对完整调用中位数 11.21→2.20 ms；E36 新目标验证可行覆盖由 46/64 变为三种子 51/46/47，存在局部信号但稳定性门未过，尚未进入开发或端到端比较。调用降本、训练改善和科学缺口分别标注，本轮不改论文。",
+    "scope": "人工审读的性能计划：历史与后续实验分开。E35调用降本、E36局部信号保留；E37固定四组×三种子中，成对收益小网络在256新验证图上均168覆盖，对基线159，且四规模无害，获选进入后续部署。但尚无新原生开发、端到端加速或独立确认。训练门通过不等于七项缺口解决，本轮不改论文。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3074,7 +3075,8 @@
           "A6",
           "A8",
           "A12",
-          "A13"
+          "A13",
+          "A15"
         ],
         "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35",
         "evidence_level": "历史报告 + 后续局部审计；不是普遍加速"
@@ -3100,7 +3102,7 @@
         "title": "相位质量与最终求解收益脱节",
         "state": "未解决",
         "priority": "高",
-        "progress": "已识别指标错位：SIMON 参考准确率更高仍可求解更慢。E36 复核旧验证：E34 贪心覆盖 18→19/32，实际部署三种子与未训练均 21/32。新241参数首步收益模型在64个新验证图上覆盖46→51/46/47；只有两个种子改善，且分规模仍有退化，没有进入开发/确认或证明完整成本优势。",
+        "progress": "已识别指标错位：SIMON参考准确率更高仍可求解更慢；E36旧验证代理改善未变成部署覆盖改善。E37在新1024训练/256验证上做四组×三种子对照：成对收益小网络三种子覆盖均168对度数159、四规模无害，通过训练门。其他组仍有n24退化；尚无新原生开发/独立确认，不证明完整成本优势。",
         "remaining": "还没有经独立测试证明的训练目标或置信度，能可靠预测何种相位会减少求解成本。识别问题不等于修复性能。",
         "directions": [
           "A3",
@@ -3110,10 +3112,11 @@
           "A10",
           "A11",
           "A13",
-          "A14"
+          "A14",
+          "A15"
         ],
-        "source": "rebuttal 等成本比较与多解参考准确率限制；E33–E36 审计",
-        "evidence_level": "旧目标错位已实测；新目标局部验证信号，跨种子稳定性仍未过门"
+        "source": "rebuttal 等成本比较与多解参考准确率限制；E33–E37 审计",
+        "evidence_level": "E37成对小策略通过所选验证的三种子/四规模门；尚无全成本开发或独立确认"
       },
       {
         "id": "P4",
@@ -3372,19 +3375,33 @@
       {
         "id": "A14",
         "title": "解释并改善收益学习的跨种子及跨规模不稳定",
-        "priority": "P1 · 下一机制前沿",
-        "status": "计划中 · 未训练或评测",
-        "cost": "先用E36训练轨迹诊断；冻结小型目标/容量对照后才用新验证集和共享GPU",
+        "priority": "P1 · 验证选择完成",
+        "status": "E37 成对小网络通过训练门",
+        "cost": "1024新训练+256新验证；53760首步标签独立复核；四组×三种子各600步，GPU3/2/5，总墙钟44.46秒",
         "depends_on": [
           "A13"
         ],
         "hypothesis": "首步标签存在真实区分度，但平收益动作的均匀监督、局部特征容量或优化差异可能导致种子不稳；尚未确定根因。",
-        "method": "先量化平标签梯度和收益差标签占比、各规模排序错误；比较只学习非零配对收益且保留度数回退的目标，与固定容量对照。预先限定候选数量、训练预算、每种子/每规模验收，在全新验证上选择；保留当前失败模型和原规则，不在E36验证反复挑超参。",
+        "method": "梯度诊断仅用E36训练数据。新四组为原CE/成对收益损失×241参数小网络/4641参数图网络；同结构两损失匹配初始化与批次。成对小策略三种子均168/256覆盖，对度数159/256；平均收益7.4141/7.4102/7.4063，对7.3516，四规模均无害。其余三组在n24有退化而未过门。3072个CPU选择一致；自身进程采样峰值各612MiB，不等于整卡占用。",
         "gate": "全部种子在解码后的可行覆盖/效用上稳定改善且各规模无害，才实施全成本原生开发。后续仍须同时胜过默认、廉价、随机和未训练控制，并通过独立确认。",
-        "stop": "若只能改善训练损失、依赖个别种子或把退化转移到另一规模，停止该候选；不把更多GPU工作量写成性能问题已解决。"
+        "stop": "固定12次训练已结束，只选pair_mlp，不扩大该网格。两个强机制预测仍失败：成对损失未普遍提高平均收益，图网络未稳定胜小网络。不能宣称唯一根因已证实；目前只是所选验证门通过，未生成开发/确认或测新原生全成本。"
+      },
+      {
+        "id": "A15",
+        "title": "把通过验证门的小策略转为可计费的原生求解路径",
+        "priority": "P1 · 下一部署前沿",
+        "status": "计划中 · 未部署或评测",
+        "cost": "固定E37 pair_mlp三个检查点；先CPU/原生一致性，再冻结新开发与同成本廉价控制",
+        "depends_on": [
+          "A14"
+        ],
+        "hypothesis": "保持所学首步及完成/交换语义，同时原生实现241参数推理，可能把验证中的可行覆盖改善转成搜索节省；尚无净收益证据。",
+        "method": "所有臂共用有界常驻接口和完整SAT检查。保留默认、动态度数、随机多次搜索、匹配首步的静态/随机/未训练控制，不能把更短搜索或排除模型开销当优势。加载/预热另列，所有单例预测、解析、通信、解码与搜索计费。先冻结实现和新数据，再评测三个训练种子；不得复用E37验证挑部署预算。",
+        "gate": "三个训练种子均在完整PAR-2上至少胜过全部廉价控制5%，求解数不减且各规模无害；过开发门才生成独立确认。正确性、超时回退与CPU/原生一致性必须先通过。",
+        "stop": "若重启解码抹平学习差异、廉价多次搜索已胜出，或推理开销抵消收益，则保留负结果并停止该部署候选；不改写验证成绩为端到端成功。"
       }
     ],
-    "sha256": "f9b951812a7b3d47a3547c41b267aa2a1bb3cde2cc604b6745f9edf2a64c56ee"
+    "sha256": "8af3f12c7f2733c8995a196efdcc4d1ec6915b114b9dcd675c05f41460c52743"
   },
   "pilot": {
     "id": "E26",
@@ -5274,6 +5291,468 @@
     "no_dev": true,
     "no_test": true,
     "training_elapsed_s": 13.457513402216136
+  },
+  "stability": {
+    "sha256": "f4edf9814328f6ffbd20540d189830c3bdffab66c99b84ec97989c446fbcf257",
+    "baseline": {
+      "summary": {
+        "count": 256,
+        "baseline_covers": 159,
+        "oracle_covers": 209,
+        "variable_graphs": 235,
+        "baseline_mean": 7.3515625,
+        "oracle_mean": 7.61328125
+      },
+      "by_scale": {
+        "24": {
+          "count": 64,
+          "baseline_covers": 50,
+          "oracle_covers": 54,
+          "variable_graphs": 45,
+          "baseline_mean": 5.78125,
+          "oracle_mean": 5.84375
+        },
+        "32": {
+          "count": 64,
+          "baseline_covers": 24,
+          "oracle_covers": 31,
+          "variable_graphs": 63,
+          "baseline_mean": 6.84375,
+          "oracle_mean": 7.171875
+        },
+        "48": {
+          "count": 64,
+          "baseline_covers": 50,
+          "oracle_covers": 64,
+          "variable_graphs": 63,
+          "baseline_mean": 7.78125,
+          "oracle_mean": 8.0
+        },
+        "64": {
+          "count": 64,
+          "baseline_covers": 35,
+          "oracle_covers": 60,
+          "variable_graphs": 64,
+          "baseline_mean": 9.0,
+          "oracle_mean": 9.4375
+        }
+      }
+    },
+    "results": {
+      "ce_mlp": {
+        "parameters": 241,
+        "workers": {
+          "42": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.44921875,
+            "covers": 177,
+            "selected_step": 525,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.78125,
+                "covers": 50
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 7.015625,
+                "covers": 28
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.90625,
+                "covers": 58
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.09375,
+                "covers": 41
+              }
+            },
+            "passed": true
+          },
+          "43": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.40234375,
+            "covers": 166,
+            "selected_step": 600,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.75,
+                "covers": 48
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 6.96875,
+                "covers": 26
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.84375,
+                "covers": 54
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.046875,
+                "covers": 38
+              }
+            },
+            "passed": false
+          },
+          "44": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.44140625,
+            "covers": 175,
+            "selected_step": 575,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.765625,
+                "covers": 49
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 7.0,
+                "covers": 28
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.890625,
+                "covers": 57
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.109375,
+                "covers": 41
+              }
+            },
+            "passed": false
+          }
+        },
+        "passed": false,
+        "selection_score": 0.05078125
+      },
+      "pair_mlp": {
+        "parameters": 241,
+        "workers": {
+          "42": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.4140625,
+            "covers": 168,
+            "selected_step": 475,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.78125,
+                "covers": 50
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 6.96875,
+                "covers": 27
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.84375,
+                "covers": 54
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.0625,
+                "covers": 37
+              }
+            },
+            "passed": true
+          },
+          "43": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.41015625,
+            "covers": 168,
+            "selected_step": 500,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.78125,
+                "covers": 50
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 6.953125,
+                "covers": 27
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.84375,
+                "covers": 54
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.0625,
+                "covers": 37
+              }
+            },
+            "passed": true
+          },
+          "44": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.40625,
+            "covers": 168,
+            "selected_step": 375,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.78125,
+                "covers": 50
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 6.9375,
+                "covers": 27
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.84375,
+                "covers": 54
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.0625,
+                "covers": 37
+              }
+            },
+            "passed": true
+          }
+        },
+        "passed": true,
+        "selection_score": 0.0546875
+      },
+      "ce_graph": {
+        "parameters": 4641,
+        "workers": {
+          "42": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.4296875,
+            "covers": 172,
+            "selected_step": 125,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.78125,
+                "covers": 50
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 6.984375,
+                "covers": 27
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.875,
+                "covers": 56
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.078125,
+                "covers": 39
+              }
+            },
+            "passed": true
+          },
+          "43": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.41796875,
+            "covers": 166,
+            "selected_step": 600,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.765625,
+                "covers": 49
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 7.046875,
+                "covers": 27
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.8125,
+                "covers": 52
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.046875,
+                "covers": 38
+              }
+            },
+            "passed": false
+          },
+          "44": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.44140625,
+            "covers": 171,
+            "selected_step": 425,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.765625,
+                "covers": 49
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 7.0625,
+                "covers": 28
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.859375,
+                "covers": 55
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.078125,
+                "covers": 39
+              }
+            },
+            "passed": false
+          }
+        },
+        "passed": false,
+        "selection_score": 0.06213891935405977
+      },
+      "pair_graph": {
+        "parameters": 4641,
+        "workers": {
+          "42": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.421875,
+            "covers": 169,
+            "selected_step": 575,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.78125,
+                "covers": 50
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 6.984375,
+                "covers": 27
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.859375,
+                "covers": 55
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.0625,
+                "covers": 37
+              }
+            },
+            "passed": true
+          },
+          "43": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.4140625,
+            "covers": 171,
+            "selected_step": 150,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.765625,
+                "covers": 49
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 6.9375,
+                "covers": 27
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.859375,
+                "covers": 55
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.09375,
+                "covers": 40
+              }
+            },
+            "passed": false
+          },
+          "44": {
+            "steps": 600,
+            "count": 256,
+            "mean_q": 7.4140625,
+            "covers": 170,
+            "selected_step": 150,
+            "by_scale": {
+              "24": {
+                "count": 64,
+                "mean_q": 5.765625,
+                "covers": 49
+              },
+              "32": {
+                "count": 64,
+                "mean_q": 6.9375,
+                "covers": 27
+              },
+              "48": {
+                "count": 64,
+                "mean_q": 7.859375,
+                "covers": 55
+              },
+              "64": {
+                "count": 64,
+                "mean_q": 9.09375,
+                "covers": 39
+              }
+            },
+            "passed": false
+          }
+        },
+        "passed": false,
+        "selection_score": 0.05823266935405977
+      }
+    },
+    "selected": "pair_mlp",
+    "predictions": {
+      "H1": false,
+      "H2": false
+    },
+    "resources": {
+      "42": {
+        "samples": 29,
+        "process_peak_mib": 612
+      },
+      "43": {
+        "samples": 32,
+        "process_peak_mib": 612
+      },
+      "44": {
+        "samples": 26,
+        "process_peak_mib": 612
+      }
+    },
+    "training_elapsed_s": 44.45612842030823,
+    "diagnostic_tie_fraction": 0.904430670339914,
+    "no_dev": true,
+    "no_test": true,
+    "scope": "factorial_selected_validation_not_solver_performance",
+    "phase": "terminal"
   }
 }</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
@@ -5288,6 +5767,7 @@ function render(){
  renderStructured();
  renderResident();
  renderDecoderUtility();
+ renderStability();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -5337,6 +5817,14 @@ function render(){
  const acceptance=Object.entries(n.acceptance||{}).map(([k,v])=>`${k.startsWith('rlaf')?'RLAF':'NeuroBack'}：${esc(accepted[v]||v)}`).join(' · ');
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
+}
+function renderStability(){
+ const u=data.stability,target=document.getElementById('stability-progress');
+ if(!u){target.textContent='暂无已审计的 E37 读出，不推断正在训练。';return;}
+ const scale=document.getElementById('stability-scale').value,base=scale==='ALL'?u.baseline.summary:u.baseline.by_scale[scale],n=base.count;
+ const names={ce_mlp:'CE · 小网络',pair_mlp:'成对 · 小网络',ce_graph:'CE · 图网络',pair_graph:'成对 · 图网络'};
+ const cell=s=>`${s.covers}/${n} · ${s.mean_q.toFixed(4)}`,baseline=`${base.baseline_covers}/${n} · ${base.baseline_mean.toFixed(4)}`;
+ target.innerHTML=`<article class="panel"><h3>12/12 训练完成 · 所选候选：${u.selected?esc(names[u.selected]):'无'}</h3><p><progress max="7200" value="7200"></progress> 7200/7200 优化步骤 · 三进程总墙钟 ${u.training_elapsed_s.toFixed(2)} 秒（含准备）</p><p class="muted">每个种子单元：可行覆盖/验证图 · 平均独立集大小。最后一列是全部规模的共同门，不随筛选改变。</p><div class="table"><table><thead><tr><th>策略</th><th>参数</th><th>seed42</th><th>seed43</th><th>seed44</th><th>总体训练门</th></tr></thead><tbody><tr><td>度数首步基线</td><td>0</td><td>${baseline}</td><td>${baseline}</td><td>${baseline}</td><td>对照</td></tr>${Object.entries(u.results).map(([key,c])=>`<tr><td>${esc(names[key])}</td><td>${c.parameters}</td>${['42','43','44'].map(s=>`<td>${cell(scale==='ALL'?c.workers[s]:c.workers[s].by_scale[scale])}</td>`).join('')}<td>${c.passed?'通过 · 仅验证':'未过 · 保留退化'}</td></tr>`).join('')}</tbody></table></div><p>成对小网络三个种子均168/256，对度数159/256；n24不变，n32为27对24、n48为54对50、n64为37对35（各64图）。其他三组在n24的seed43/44仍有退化。</p><p class="alert">没有新原生开发或独立确认结果。下一步必须把推理、通信、解析、搜索和完整SAT检查全部计费，并与廉价多次搜索比较。</p></article><article class="panel"><h3>机制假设与审计边界</h3><p>旧训练初始梯度能量中 ${(u.diagnostic_tie_fraction*100).toFixed(1)}% 属于同收益选点组内分量；不等于算力浪费比例。成对损失普遍提高平均收益的预测：${u.predictions.H1?'通过':'未通过'}；更大图网络稳定占优的预测：${u.predictions.H2?'通过':'未通过'}。候选过门不证明唯一根因。</p><p>53,760 标签独立复核；73,728 次验证历史选择重算；3,072 个CPU检查点选择一致。自身进程采样峰值 ${Object.values(u.resources).map(x=>x.process_peak_mib).join('/')} MiB，不报告整卡利用率为本任务贡献。</p><p class="foot">审计读出 SHA256 ${esc(u.sha256)}</p></article>`;
 }
 function renderDecoderUtility(){
  const u=data.decoder_utility,target=document.getElementById('decoder-utility-progress');
@@ -5438,7 +5926,7 @@ function renderHybrid(){
   return `<article class="panel" style="margin-bottom:16px" data-stage="${stage}"><h3>${stage==='dev'?'开发集':'独立确认集'} · ${esc(state)}</h3><p><progress max="${x.target_cells}" value="${x.completed_cells}"></progress> ${x.completed_cells}/${x.target_cells} 单元 · ${x.completed_rows}/${x.target_rows} 完整实例</p><p class="muted">最后进度记录 ${esc(x.observed)}</p>${table}${r?`<p>错误 ${r.errors} · 未佐证 UNSAT ${r.unverified_unsat_cells}；未解实例保持未知。</p>`:''}${comparisons?`<p class="muted">总体主比较同时区间，不随上方规模筛选变化；正值有利于候选。${esc(comparisons)}</p>`:''}<p class="foot">冻结 SHA256 ${esc(x.frozen_sha256)}${r?' · 读出 '+esc(r.sha256):''}</p></article>`;
  }).join('');
 }
-for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale','conservative-scale','cost-aware-scale','structured-scale','resident-scale','decoder-utility-scale'])document.getElementById(id).addEventListener('change',render);
+for(const id of ['filter','group','comparator','cohort','backend','stratum','policy','plan-filter','hybrid-scale','conservative-scale','cost-aware-scale','structured-scale','resident-scale','decoder-utility-scale','stability-scale'])document.getElementById(id).addEventListener('change',render);
 async function refresh(){try{const response=await fetch('status.json?t='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error();const incoming=await response.json();if(incoming.runs&&incoming.results&&incoming.source_sha256){data=incoming;render();}}catch{render();document.getElementById('freshness').textContent+=' · 离线 / 更新失败，显示已有快照';}}
 render();if(location.protocol!=='file:'){refresh();setInterval(refresh,60000);}
 </script></body></html>

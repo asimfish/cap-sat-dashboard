@@ -152,8 +152,12 @@ E36 `#decoder-utility` separates the old32-graph proxy/deployment diagnosis from
 new64-graph selected validation. Three-seed600-step training is complete, but
 the across-seed gate failed: no development, test or solver-speed claim. The
 collector requires matching audited readout identities and consistent per-scale
-counts; the UI preserves the seed43 step0 checkpoint and n48 regression. A14 is
-only planned. Labels, model choices, checkpoints and process identities stay private.
+counts; the UI preserves the seed43 step0 checkpoint and n48 regression. E37/A14
+has a separate `#stability` panel: a frozen four-candidate/three-seed validation
+grid selects the pairwise small policy, but neither native development nor
+independent confirmation has run. Positive training selection cannot upgrade
+the seven scientific gaps. A15 is deployment planning only. Labels, model
+choices, checkpoints and process identities stay private.
 `evidence.html` is a dated, offline evidence summary generated using the
 render-html skill; it is an archival snapshot, not the live exporter.
 

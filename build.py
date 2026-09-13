@@ -618,6 +618,58 @@ def decoder_utility_progress(repo):
                     label_gate=label_gate,training_gate=training_gate,no_dev=True,no_test=True,training_elapsed_s=num(r['training_elapsed_s'],360))
     except (OSError,ValueError,KeyError,TypeError):return None
 
+def stability_progress(repo):
+    """E37 validation gate is not solver performance; export only checked aggregates."""
+    root=repo/'experiments/stability_20260913_e37';candidates=['ce_mlp','pair_mlp','ce_graph','pair_graph']
+    def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+    def num(v,limit=64,integer=False):
+        if type(v) not in (int,float) or (integer and type(v) is not int) or not math.isfinite(v) or not 0<=v<=limit:raise ValueError('stability numeric bound')
+        return v
+    try:
+        r=json.loads((root/'READOUT.json').read_text());a=json.loads((root/'AUDIT.json').read_text());h=digest(root/'READOUT.json');f=digest(root/'READOUT_FROZEN.json')
+        if a['verdict']!='integrity_pass' or a['readout_sha256']!=h or a['frozen_sha256']!=f or r['frozen_sha256']!=f or r['scope']!='factorial_selected_validation_not_solver_performance':raise ValueError('stability audit')
+        if a['cnfs']!=1280 or a['reference_choices']!=53760 or a['cpu_checkpoint_choices']!=3072 or a['validation_history_rechecks']!=73728:raise ValueError('stability audit counts')
+        if any(x[k] is not False for x in [a,r] for k in ['dev_generated','test_generated']) or (root/'dev').exists() or (root/'test').exists():raise ValueError('stability stage')
+        def base(s,count):
+            if s['count']!=count:raise ValueError('stability denominator')
+            return dict(count=count,**{k:num(s[k],count,True) for k in ['baseline_covers','oracle_covers','variable_graphs']},
+                        **{k:num(s[k]) for k in ['baseline_mean','oracle_mean']})
+        baseline=dict(summary=base(r['baseline']['summary'],256),by_scale={str(n):base(r['baseline']['by_scale'][str(n)],64) for n in [24,32,48,64]})
+        b=baseline['summary']
+        if any(sum(s[k] for s in baseline['by_scale'].values())!=b[k] for k in ['baseline_covers','oracle_covers','variable_graphs']):raise ValueError('stability baseline sums')
+        if any(not math.isclose(sum(s[k] for s in baseline['by_scale'].values())/4,b[k],abs_tol=1e-12) for k in ['baseline_mean','oracle_mean']):raise ValueError('stability baseline means')
+        results={}
+        if set(r['results'])!=set(candidates):raise ValueError('stability candidates')
+        for c in candidates:
+            raw=r['results'][c];workers={};params=241 if c.endswith('mlp') else 4641
+            if raw['parameters']!=params or set(raw['workers'])!={'42','43','44'}:raise ValueError('stability structure')
+            for seed in ['42','43','44']:
+                w=raw['workers'][seed]
+                if w['steps']!=600 or w['count']!=256 or w['parameters']!=params:raise ValueError('stability training complete')
+                out=dict(steps=600,count=256,mean_q=num(w['mean_q']),covers=num(w['covers'],256,True),selected_step=num(w['selected_step'],600,True),by_scale={})
+                for n in ['24','32','48','64']:
+                    s=w['by_scale'][n]
+                    if s['count']!=64:raise ValueError('stability scale')
+                    out['by_scale'][n]=dict(count=64,mean_q=num(s['mean_q']),covers=num(s['covers'],64,True))
+                if sum(s['covers'] for s in out['by_scale'].values())!=out['covers'] or not math.isclose(sum(s['mean_q'] for s in out['by_scale'].values())/4,out['mean_q'],abs_tol=1e-12):raise ValueError('stability scale arithmetic')
+                passed=out['mean_q']>=b['baseline_mean']+.02 and out['covers']>=b['baseline_covers']+2 and all(s['mean_q']>=baseline['by_scale'][n]['baseline_mean'] and s['covers']>=baseline['by_scale'][n]['baseline_covers'] for n,s in out['by_scale'].items())
+                if w['passed'] is not passed or w['cpu_choice_disagreements']!=0 or w['cpu_utility_disagreements']!=0:raise ValueError('stability seed gate/parity')
+                out['passed']=passed;workers[seed]=out
+            passed=all(w['passed'] for w in workers.values());score=min(w['mean_q']-b['baseline_mean'] for w in workers.values())-.001*math.log2(params/241)
+            if raw['passed'] is not passed or not math.isclose(raw['selection_score'],score,abs_tol=1e-12):raise ValueError('stability candidate gate')
+            results[c]=dict(parameters=params,workers=workers,passed=passed,selection_score=score)
+        passing=[c for c in candidates if results[c]['passed']];selected=max(passing,key=lambda c:results[c]['selection_score']) if passing else None
+        if r['selected']!=selected or a['selected']!=selected:raise ValueError('stability selection')
+        predictions=dict(H1=all(results['pair_mlp']['workers'][s]['mean_q']-results['ce_mlp']['workers'][s]['mean_q']>=.02 for s in ['42','43','44']),
+            H2=all(results[loss+'_graph']['workers'][s]['mean_q']-results[loss+'_mlp']['workers'][s]['mean_q']>=.02 for s in ['42','43','44'] for loss in ['ce','pair']))
+        if r['predictions']!=predictions:raise ValueError('stability predictions')
+        resources={s:dict(samples=num(r['resources'][s]['samples'],10000,True),process_peak_mib=num(r['resources'][s]['process_peak_mib'],8192,True)) for s in ['42','43','44']}
+        if any(not x['samples'] for x in resources.values()):raise ValueError('stability resource samples')
+        return dict(sha256=h,baseline=baseline,results=results,selected=selected,predictions=predictions,resources=resources,
+            training_elapsed_s=num(r['training_elapsed_s'],1260),diagnostic_tie_fraction=num(r['diagnostic']['initial']['tie_gradient_fraction'],1),
+            no_dev=True,no_test=True,scope=r['scope'],phase='terminal')
+    except (OSError,ValueError,KeyError,TypeError):return None
+
 def load_performance_plan():
     raw=(HERE/'performance_plan.json').read_bytes()
     plan=json.loads(raw)
@@ -697,6 +749,7 @@ def main():
     data['structured_policy']=structured_progress(args.repo.resolve(),small=True)
     data['resident_policy']=resident_progress(args.repo.resolve())
     data['decoder_utility']=decoder_utility_progress(args.repo.resolve())
+    data['stability']=stability_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()
