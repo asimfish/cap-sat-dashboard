@@ -34,7 +34,7 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Ten actions have dependencies, costs, acceptance and stopping rules. Their
+Thirteen actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
@@ -97,8 +97,23 @@ the unchanged workload and samples total GPU process memory by owned PID; its
 sampled peaks are shown separately and do not backfill the missing original
 measurement or count as new independent scientific seeds. Public exports omit process IDs, device
 UUIDs, unrelated process inventories, private paths and model weights. A lower
-validation CSM loss does not upgrade any performance gap. Full-cost solver
-development/confirmation remains a separate, not-yet-run evaluation.
+validation CSM loss does not upgrade any performance gap. Subsequent E33 solver
+development is separate and did not pass; it does not rewrite E32 training results.
+
+E33/E34 (#structured/A10/A11) each completed a DIFFERENT 64-graph development
+panel, three search repetitions and eight arms (1536 cells each). E33 adds feasible
+graph decoding with guarded default fallback; E34 trains a new 113-parameter
+policy directly on independent-set size, not the original CAP objective. Original
+CAP, adapted/new seeds, untrained models and cheap controls remain separate.
+Both failed the prespecified full-cost gates and generated no confirmation set.
+The collector requires a matching terminal audit/readout/selection before ranking,
+and exports only fixed aggregate fields. Tables use milliseconds and original
+graph-vertex counts, not CNF auxiliary-variable counts. SAT witnesses are checked;
+global UNSAT is independently corroborated, not proof-certified. Assumption-UNSAT
+cannot be reported as global UNSAT. Shared-host long tails and component-charged
+resident timing remain limitations. A12 proposes symmetric native/resident
+accounting, but has not implemented or launched it. No scientific gap is promoted
+by validation rewards, new-model inference savings or selected point estimates.
 
 Only complete, error-free 300-row seeds enter metrics. Invalid indices,
 non-finite times, arm errors, conflicting duplicate rows, differing CNF paths,

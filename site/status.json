@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-13T09:50:37.551924+00:00",
+  "generated": "2026-09-13T10:37:21.960715+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3073,15 +3073,17 @@
         "title": "相位质量与最终求解收益脱节",
         "state": "未解决",
         "priority": "高",
-        "progress": "已识别指标错位：SIMON 参考准确率更高仍可求解更慢。E28 已训练短程翻转收益模型：验证预测略好，但新开发集仅解出 5/24，廉价随机修复 14/24；未修复该缺口。等翻转预算训练集诊断也落后，损失不只来自推理开销。",
+        "progress": "已识别指标错位：SIMON 参考准确率更高仍可求解更慢。E28 短程翻转模型未胜廉价控制。E33 诊断发现 E32 损失虽降，三个模型仍为 0/32 完整见证，多数违反覆盖数量上限。E34 已改为直接奖励可行独立集大小，训练三种子小策略；验证略好，新开发完整成本仍未超过廉价控制。",
         "remaining": "还没有经独立测试证明的训练目标或置信度，能可靠预测何种相位会减少求解成本。识别问题不等于修复性能。",
         "directions": [
           "A3",
           "A4",
           "A6",
-          "A7"
+          "A7",
+          "A10",
+          "A11"
         ],
-        "source": "rebuttal 等成本比较与多解参考准确率限制",
+        "source": "rebuttal 等成本比较与多解参考准确率限制；E33/E34 审计",
         "evidence_level": "问题已实测；收益对齐训练为未验证假设"
       },
       {
@@ -3104,14 +3106,16 @@
         "title": "工业及自然问题族迁移",
         "state": "未解决",
         "priority": "高",
-        "progress": "历史 43 例、10 家族测试出现负迁移；九月独立台账中的 19 例切片也未改变缺少正向迁移证据的结论。两套实例不合并。E32 已在正确顶点覆盖编码上完成三种子的 120 轮 CSM-only 适配；验证损失下降，尚无完整求解成本的正向证据。",
+        "progress": "历史 43 例、10 家族和九月 19 例切片的负结果保持，实例不合并。E32 顶点覆盖适配后，E33/E34 各完成 64 新图的完整成本开发对照：保持约束的解码及 113 参数直接收益策略都未通过全部门槛；没有生成确认集，尚无现实任务加速证明。",
         "remaining": "还没有可信的现实任务加速能力。共同监督的编码器对照也不能支持仅靠换大网络即可修复。",
         "directions": [
           "A5",
-          "A9"
+          "A9",
+          "A10",
+          "A11"
         ],
-        "source": "rebuttal 工业/OOD 对照；E18；native_comparison_20260911_v1",
-        "evidence_level": "历史实测负结果；新领域训练完成，求解性能未评测"
+        "source": "rebuttal 工业/OOD 对照；E18；native_comparison_20260911_v1；E33/E34",
+        "evidence_level": "历史负结果；两轮新开发均未过门，不是独立确认"
       },
       {
         "id": "P6",
@@ -3174,9 +3178,9 @@
       {
         "id": "A2",
         "title": "测量并降低单实例预测开销",
-        "priority": "P1 · 可独立准备",
-        "status": "计划中 · 未启动",
-        "cost": "性能剖析；模型压缩需另定预算",
+        "priority": "P1 · 单例成本已测",
+        "status": "E34 新小策略单例预测更便宜 · 净优势未通过",
+        "cost": "新方法 113 参数、CPU 推理；不是原 CAP 等价压缩",
         "depends_on": [],
         "hypothesis": "部分搜索节省被构图、传输和推理吞掉；降低这些成本可能改善实际收益，但不会自动修复搜索退化。",
         "method": "分别测冷启动与驻留模型的构图/传输/推理/求解成本；先排查重复处理，再评估小模型或 CPU 推理。禁止把批处理吞吐量冒充单实例加速。",
@@ -3270,7 +3274,7 @@
         "id": "A9",
         "title": "共享 GPU 真批处理与三种子领域适配",
         "priority": "P1 · 资源与机制并进",
-        "status": "E32 三种子训练完成 · 求解性能尚未验证",
+        "status": "E32 训练完成 · 后续 E33 开发未过门",
         "cost": "GPU 3/2/5 共享，3 种子 × 120 轮首轮约 89 秒；资源复测另用 106 秒、不算新独立种子。约 8 GiB 分配器上限；复测进程总显存采样峰值 928–936 MiB",
         "depends_on": [
           "A5"
@@ -3279,9 +3283,51 @@
         "method": "保持每个公式的特征归一化与等权 CSM 损失，图和特征预缓存；在同卡 8 图基准中核验预测和梯度后比较吞吐。128 个新正确顶点覆盖训练图、32 验证图，三个随机适配种子从同一旧检查点出发，CSM-only、batch 16、120 轮。按余量共享 GPU 3/2/5，不要求整卡空闲；不抢占或终止既有任务。",
         "gate": "报告三种子完成度、显存峰值、吞吐和整卡活跃度，后者不冒充本进程贡献。验证 CSM 改善不能升级为 SAT 加速；完整求解比较须另行冻结默认、原 CAP、廉价控制及同成本基准。",
         "stop": "单任务超 30 分钟、非有限数值、OOM 或整卡剩余显存低于 12 GiB 时只停止自身；无盲目重试。完成训练不自动启动大规模测试或改论文。"
+      },
+      {
+        "id": "A10",
+        "title": "保持硬约束的顶点覆盖解码",
+        "priority": "P1 · 完整开发已验收",
+        "status": "E33 1,536 单元完成 · 工程/学习门均未通过",
+        "cost": "64 新图 × 3 搜索种子 × 8 臂；GPU 单例准备、8 路 CPU，原生评测阶段约 24 秒",
+        "depends_on": [
+          "A9"
+        ],
+        "hypothesis": "平均子句损失可能容忍少数关键约束失败；先保持图边可行性，再验证全局覆盖数量，可能比直接取整更有效。",
+        "method": "原始顶点上构造独立集，做有界一换二修复；只有候选满足覆盖上限后才用假设补全辅助变量，并校验完整 CNF。假设冲突不得误报全局 UNSAT，失败就清空假设并默认回退。旧 CAP、适配三种子、未训练网络均配相同解码，另有默认、随机、动态度数控制。",
+        "gate": "完整成本比默认及随机至少好 5%，各规模无害，才进入新的独立确认；学习门另要求三个适配种子均胜过所有廉价、旧模型及未训练控制。",
+        "stop": "各方法均解完 192 次重复试验。PAR-2 毫秒：默认 76.23，随机 68.48，度数 66.17，适配三种子 140.19–144.91。度数对默认点估计改善约 13%，但未满足对随机 5% 及各规模无害门槛。全部候选停止，未生成确认；不能把共享主机计时点估计当作确认收益。"
+      },
+      {
+        "id": "A11",
+        "title": "直接奖励可行选择，使用 113 参数小策略",
+        "priority": "P1 · 新方法候选已验收",
+        "status": "E34 三种子训练及 1,536 开发单元完成 · 门槛未过",
+        "cost": "GPU 3/2/5 共享训练 3 × 240 步约 22 秒；每个进程总显存采样峰值 532 MiB；另 64 全新开发图",
+        "depends_on": [
+          "A10"
+        ],
+        "hypothesis": "用实际构造的独立集大小直接训练，并在原始图上使用极小策略，可能同时改善目标错位和预测开销。",
+        "method": "五个图结构特征，113 参数网络在静态度数规则上学有界残差；REINFORCE 每图 16 次保持独立集可行性的采样。复用 128 训练/32 验证图，三个种子验证平均独立集大小由 6.531 提升至 6.625–6.656；这不是新确认数据。新开发保留未训练同结构静态度数策略及全部廉价控制，计入 CPU 小模型单例成本。",
+        "gate": "新开发全部三种子在完整成本上超过廉价控制及同结构初始策略，且满足各规模无害；过门才生成独立确认。不把新模型/新目标的结果回写成原 CAP 的等价优化。",
+        "stop": "E34 全部方法解完 192 次重复。PAR-2 毫秒：默认 65.56，度数 54.80，旧 CAP 86.30，未训练小策略 72.54，训练小策略 64.01–67.34。单例预测中位数旧 CAP 24.34 ms、小策略 3.26–3.36 ms，但仍没有胜过廉价规则，且大长尾保留。度数对默认点估计约 16% 改善也受小规模退化否决；两门均未过，无确认集。"
+      },
+      {
+        "id": "A12",
+        "title": "剖析并消除重复解析和进程启动成本",
+        "priority": "P1 · 下一可执行前沿",
+        "status": "计划中 · 未实施",
+        "cost": "先固定现有工作负载做等价性与分项剖析，再决定新数据评测",
+        "depends_on": [
+          "A11"
+        ],
+        "hypothesis": "小策略单例中位数已降低，但 Python 重复解析、跨进程启动及共享主机长尾仍占大量成本；原生驻留实现可能减少这部分部署损耗。",
+        "method": "比较默认和学习策略均使用驻留原生后端的对称实现；CNF 只解析一次，低成本策略原生计算，记录加载、解析、传输、搜索、见证检查和 CPU/墙钟。先证明同参数同输入相位/决定一致；保留静态度数与动态度数两种强廉价对照，不让模型白拿驻留优化。",
+        "gate": "等价性和完整单例成本同时通过，再在新数据上比较；如果学习策略仍与初始规则行为相同或更差，不能称为学习优势。",
+        "stop": "不修改 E33/E34 已冻结协议、数据或计分，不用扣除原开销的重算制造旧正结果；没有可验证机制改善时停止该候选并保留失败证据。"
       }
     ],
-    "sha256": "3a564baa015a83545a1c5b285beaef739ca3b08e57c8e3a59646ebaf54e09e19"
+    "sha256": "9dec443b72c2029b6e09189ef9380eb61beec73e1504098e5f40afdd48495684"
   },
   "pilot": {
     "id": "E26",
@@ -3999,6 +4045,618 @@
           "sampled_total_process_peak_mib": 936
         }
       }
+    }
+  },
+  "structured_decoder": {
+    "small_policy": false,
+    "frozen_sha256": "3f990b97150f94db8ea360ac1537fbe43e7d67f381e82591c7eaa792a60c21b2",
+    "instances": 64,
+    "trials": 192,
+    "target_cells": 1536,
+    "completed_cells": 1536,
+    "phase": "terminal",
+    "observed": "2026-09-13T10:12:59.592144+00:00",
+    "readout": {
+      "sha256": "e8dec2380ad9ddddca2424234aae9d30506b9056fa1e620018bd2ec82339f03b",
+      "summaries": {
+        "stock": {
+          "solved": 192,
+          "sat": 153,
+          "unsat": 39,
+          "candidates": 0,
+          "par2_s": 0.07622589957221255
+        },
+        "random": {
+          "solved": 192,
+          "sat": 153,
+          "unsat": 39,
+          "candidates": 144,
+          "par2_s": 0.06848085717259285
+        },
+        "degree": {
+          "solved": 192,
+          "sat": 153,
+          "unsat": 39,
+          "candidates": 144,
+          "par2_s": 0.0661660559126176
+        },
+        "original": {
+          "solved": 192,
+          "sat": 153,
+          "unsat": 39,
+          "candidates": 128,
+          "par2_s": 0.13749348909186665
+        },
+        "untrained": {
+          "solved": 192,
+          "sat": 153,
+          "unsat": 39,
+          "candidates": 151,
+          "par2_s": 0.12896285526221618
+        },
+        "cap42": {
+          "solved": 192,
+          "sat": 153,
+          "unsat": 39,
+          "candidates": 102,
+          "par2_s": 0.1449071228513882
+        },
+        "cap43": {
+          "solved": 192,
+          "sat": 153,
+          "unsat": 39,
+          "candidates": 97,
+          "par2_s": 0.14018653485497148
+        },
+        "cap44": {
+          "solved": 192,
+          "sat": 153,
+          "unsat": 39,
+          "candidates": 101,
+          "par2_s": 0.14343252380300933
+        }
+      },
+      "by_scale": {
+        "24": {
+          "stock": {
+            "solved": 48,
+            "sat": 42,
+            "unsat": 6,
+            "candidates": 0,
+            "par2_s": 0.05307092622388154
+          },
+          "random": {
+            "solved": 48,
+            "sat": 42,
+            "unsat": 6,
+            "candidates": 42,
+            "par2_s": 0.04950171951592589
+          },
+          "degree": {
+            "solved": 48,
+            "sat": 42,
+            "unsat": 6,
+            "candidates": 39,
+            "par2_s": 0.04983731072085599
+          },
+          "original": {
+            "solved": 48,
+            "sat": 42,
+            "unsat": 6,
+            "candidates": 34,
+            "par2_s": 0.11086052235138293
+          },
+          "untrained": {
+            "solved": 48,
+            "sat": 42,
+            "unsat": 6,
+            "candidates": 42,
+            "par2_s": 0.1075079547202525
+          },
+          "cap42": {
+            "solved": 48,
+            "sat": 42,
+            "unsat": 6,
+            "candidates": 27,
+            "par2_s": 0.10562842063761006
+          },
+          "cap43": {
+            "solved": 48,
+            "sat": 42,
+            "unsat": 6,
+            "candidates": 25,
+            "par2_s": 0.10485770345743124
+          },
+          "cap44": {
+            "solved": 48,
+            "sat": 42,
+            "unsat": 6,
+            "candidates": 27,
+            "par2_s": 0.11561637298048784
+          }
+        },
+        "32": {
+          "stock": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 0,
+            "par2_s": 0.0497592327495416
+          },
+          "random": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 23,
+            "par2_s": 0.05017468176083639
+          },
+          "degree": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 24,
+            "par2_s": 0.053294333668115236
+          },
+          "original": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 23,
+            "par2_s": 0.11887121743833025
+          },
+          "untrained": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 24,
+            "par2_s": 0.10696292175756146
+          },
+          "cap42": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 18,
+            "par2_s": 0.12989996100077406
+          },
+          "cap43": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 18,
+            "par2_s": 0.12328923695410292
+          },
+          "cap44": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 18,
+            "par2_s": 0.11983876044784363
+          }
+        },
+        "48": {
+          "stock": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 0,
+            "par2_s": 0.06957989059931909
+          },
+          "random": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 46,
+            "par2_s": 0.07141857611713931
+          },
+          "degree": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 48,
+            "par2_s": 0.0686659471442302
+          },
+          "original": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 43,
+            "par2_s": 0.14753472455777228
+          },
+          "untrained": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 48,
+            "par2_s": 0.13701824273448437
+          },
+          "cap42": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 39,
+            "par2_s": 0.15660254938605553
+          },
+          "cap43": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 39,
+            "par2_s": 0.12743459523577863
+          },
+          "cap44": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 39,
+            "par2_s": 0.14462268595040464
+          }
+        },
+        "64": {
+          "stock": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 0,
+            "par2_s": 0.132493548716108
+          },
+          "random": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 33,
+            "par2_s": 0.10282845129646982
+          },
+          "degree": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 33,
+            "par2_s": 0.09286663211726894
+          },
+          "original": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 28,
+            "par2_s": 0.17270749201998115
+          },
+          "untrained": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 37,
+            "par2_s": 0.1643623018365664
+          },
+          "cap42": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 18,
+            "par2_s": 0.18749756038111323
+          },
+          "cap43": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 15,
+            "par2_s": 0.20516460377257317
+          },
+          "cap44": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 17,
+            "par2_s": 0.19365227583330125
+          }
+        }
+      },
+      "no_test": true
+    }
+  },
+  "structured_policy": {
+    "small_policy": true,
+    "frozen_sha256": "13eca9c67c95f0239d0ee169ca49d7313e69b0c3d144be1a605595b695fea121",
+    "instances": 64,
+    "trials": 192,
+    "target_cells": 1536,
+    "completed_cells": 1536,
+    "phase": "terminal",
+    "observed": "2026-09-13T10:23:22.507115+00:00",
+    "readout": {
+      "sha256": "0e8dc95104a88633fd6d70fc33bf1de75b929cb39a1249e34e3bab819c5ba524",
+      "summaries": {
+        "stock": {
+          "solved": 192,
+          "sat": 156,
+          "unsat": 36,
+          "candidates": 0,
+          "par2_s": 0.06556276748112093
+        },
+        "random": {
+          "solved": 192,
+          "sat": 156,
+          "unsat": 36,
+          "candidates": 147,
+          "par2_s": 0.05876173075618377
+        },
+        "degree": {
+          "solved": 192,
+          "sat": 156,
+          "unsat": 36,
+          "candidates": 132,
+          "par2_s": 0.054803949693450704
+        },
+        "original": {
+          "solved": 192,
+          "sat": 156,
+          "unsat": 36,
+          "candidates": 138,
+          "par2_s": 0.0862956937829343
+        },
+        "untrained": {
+          "solved": 192,
+          "sat": 156,
+          "unsat": 36,
+          "candidates": 151,
+          "par2_s": 0.0725437551785338
+        },
+        "cap42": {
+          "solved": 192,
+          "sat": 156,
+          "unsat": 36,
+          "candidates": 151,
+          "par2_s": 0.06734384039009456
+        },
+        "cap43": {
+          "solved": 192,
+          "sat": 156,
+          "unsat": 36,
+          "candidates": 151,
+          "par2_s": 0.06400562553123261
+        },
+        "cap44": {
+          "solved": 192,
+          "sat": 156,
+          "unsat": 36,
+          "candidates": 151,
+          "par2_s": 0.0668611752431995
+        }
+      },
+      "by_scale": {
+        "24": {
+          "stock": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 0,
+            "par2_s": 0.04807053419062868
+          },
+          "random": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 39,
+            "par2_s": 0.05152323161019012
+          },
+          "degree": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 39,
+            "par2_s": 0.049038320333541684
+          },
+          "original": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 36,
+            "par2_s": 0.07589715307888885
+          },
+          "untrained": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 39,
+            "par2_s": 0.05626628930137182
+          },
+          "cap42": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 39,
+            "par2_s": 0.05607682138603801
+          },
+          "cap43": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 39,
+            "par2_s": 0.04549832583870739
+          },
+          "cap44": {
+            "solved": 48,
+            "sat": 39,
+            "unsat": 9,
+            "candidates": 39,
+            "par2_s": 0.04946014327773204
+          }
+        },
+        "32": {
+          "stock": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 0,
+            "par2_s": 0.04817479522898793
+          },
+          "random": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 24,
+            "par2_s": 0.04300783919946601
+          },
+          "degree": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 24,
+            "par2_s": 0.03568570374045521
+          },
+          "original": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 24,
+            "par2_s": 0.0729249285068363
+          },
+          "untrained": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 24,
+            "par2_s": 0.05166770030821984
+          },
+          "cap42": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 24,
+            "par2_s": 0.04938144487095997
+          },
+          "cap43": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 24,
+            "par2_s": 0.05797759569638098
+          },
+          "cap44": {
+            "solved": 48,
+            "sat": 24,
+            "unsat": 24,
+            "candidates": 24,
+            "par2_s": 0.058542115963064134
+          }
+        },
+        "48": {
+          "stock": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 0,
+            "par2_s": 0.05912079737754539
+          },
+          "random": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 47,
+            "par2_s": 0.055879139069778226
+          },
+          "degree": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 42,
+            "par2_s": 0.052470512222498655
+          },
+          "original": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 46,
+            "par2_s": 0.08114633369647588
+          },
+          "untrained": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 48,
+            "par2_s": 0.07785639031014095
+          },
+          "cap42": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 48,
+            "par2_s": 0.07007670602373157
+          },
+          "cap43": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 48,
+            "par2_s": 0.06451995172149812
+          },
+          "cap44": {
+            "solved": 48,
+            "sat": 48,
+            "unsat": 0,
+            "candidates": 48,
+            "par2_s": 0.06791137092902015
+          }
+        },
+        "64": {
+          "stock": {
+            "solved": 48,
+            "sat": 45,
+            "unsat": 3,
+            "candidates": 0,
+            "par2_s": 0.1068849431273217
+          },
+          "random": {
+            "solved": 48,
+            "sat": 45,
+            "unsat": 3,
+            "candidates": 37,
+            "par2_s": 0.08463671314530075
+          },
+          "degree": {
+            "solved": 48,
+            "sat": 45,
+            "unsat": 3,
+            "candidates": 27,
+            "par2_s": 0.08202126247730727
+          },
+          "original": {
+            "solved": 48,
+            "sat": 45,
+            "unsat": 3,
+            "candidates": 32,
+            "par2_s": 0.11521435984953617
+          },
+          "untrained": {
+            "solved": 48,
+            "sat": 45,
+            "unsat": 3,
+            "candidates": 40,
+            "par2_s": 0.10438464079440261
+          },
+          "cap42": {
+            "solved": 48,
+            "sat": 45,
+            "unsat": 3,
+            "candidates": 40,
+            "par2_s": 0.09384038927964866
+          },
+          "cap43": {
+            "solved": 48,
+            "sat": 45,
+            "unsat": 3,
+            "candidates": 40,
+            "par2_s": 0.08802662886834393
+          },
+          "cap44": {
+            "solved": 48,
+            "sat": 45,
+            "unsat": 3,
+            "candidates": 40,
+            "par2_s": 0.09153107080298166
+          }
+        }
+      },
+      "no_test": true
     }
   }
 }

@@ -34,6 +34,7 @@ def main():
         same_code = all((dest/n).exists() and (dest/n).read_bytes() == (source/n).read_bytes() for n in ['build.py','template.html','issues.json','performance_plan.json','README.md','publish.py','watch.py','test_build.py','EVIDENCE.md','site/evidence.html','LICENSE','.github/workflows/pages.yml'])
         unchanged = unchanged and old.get('cost_aware') == current.get('cost_aware')
         unchanged = unchanged and old.get('shared_gpu') == current.get('shared_gpu')
+        unchanged = unchanged and old.get('structured_decoder') == current.get('structured_decoder') and old.get('structured_policy') == current.get('structured_policy')
         if unchanged and same_code and age < 3600:
             print('No change; next freshness export within one hour')
             return

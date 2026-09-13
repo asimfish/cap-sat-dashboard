@@ -5,9 +5,27 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress
+from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_structured_panels_require_audited_readout_and_exclude_private_fields(self):
+        arms=['stock','random','degree','original','untrained','cap42','cap43','cap44']
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/phase_budget_20260913_e33';(root/'dev').mkdir(parents=True)
+            cfg=dict(created='2026-09-13T10:00:00Z',rows=[{}]*64,arms=arms,seeds=[42,43,44]);raw=json.dumps(cfg).encode();h=hashlib.sha256(raw).hexdigest()
+            (root/'dev/FROZEN.json').write_bytes(raw)
+            state=dict(observed=cfg['created'],phase='terminal',completed_cells=1536,target_cells=1536,frozen_sha256=h,worker_cpus=[11,12])
+            (root/'dev/STATUS.json').write_text(json.dumps(state));self.assertIsNone(structured_progress(repo)['readout'])
+            totals={a:dict(solved=192,sat=153,unsat=39,candidates=100,par2_s=.05,private_weights=[1,2]) for a in arms}
+            scales={str(n):{a:dict(solved=48,sat=s,unsat=48-s,candidates=25,par2_s=.05) for a in arms} for n,s in zip([24,32,48,64],[39,38,38,38])}
+            r=dict(instances=64,trials=192,cells=1536,errors=[],engineering_pass=False,learning_pass=False,frozen_sha256=h,summaries=totals,by_scale=scales)
+            raw=json.dumps(r).encode();(root/'dev/RESULTS.json').write_bytes(raw);rh=hashlib.sha256(raw).hexdigest()
+            audit=dict(verdict='integrity_pass_development_gates_failed',results_sha256=rh,frozen_sha256=h,test_generated=False)
+            (root/'AUDIT.json').write_text(json.dumps(audit));(root/'SELECTION.json').write_text(json.dumps(dict(engineering=False,learning=False,results_sha256=rh)))
+            out=structured_progress(repo);self.assertEqual(out['readout']['summaries']['degree']['par2_s'],.05)
+            self.assertNotIn('private_weights',json.dumps(out));self.assertNotIn('worker_cpus',json.dumps(out))
+            (root/'test').mkdir();self.assertIsNone(structured_progress(repo))
+
     def test_gpu_supervisor_requires_all_zero_exits_and_matching_artifacts(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/shared_gpu_20260913_e32';root.mkdir(parents=True)
@@ -116,7 +134,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),10)
+        self.assertEqual(len(plan['actions']),13)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -126,7 +144,11 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('E29',actions['A7']['status'])
         self.assertIn('E30',actions['A8']['status'])
         self.assertIn('E31',actions['A5']['status'])
-        self.assertTrue(all(actions[a]['status']=='计划中 · 未启动' for a in ['A1','A2']))
+        self.assertEqual(actions['A1']['status'],'计划中 · 未启动')
+        self.assertIn('E34',actions['A2']['status'])
+        self.assertIn('E33',actions['A10']['status'])
+        self.assertIn('E34',actions['A11']['status'])
+        self.assertEqual(actions['A12']['status'],'计划中 · 未实施')
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:

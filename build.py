@@ -484,6 +484,42 @@ def shared_gpu_progress(repo):
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
+def structured_progress(repo, small=False):
+    """Audited E33/E34 aggregates; never publish weights, priors or raw paths."""
+    root=repo/'experiments'/('structured_policy_20260913_e34' if small else 'phase_budget_20260913_e33')
+    try:
+        if not (root/'dev/FROZEN.json').exists():return None
+        raw=(root/'dev/FROZEN.json').read_bytes();cfg=json.loads(raw);h=hashlib.sha256(raw).hexdigest()
+        if len(cfg['rows'])!=64 or cfg['arms']!=['stock','random','degree','original','untrained','cap42','cap43','cap44'] or cfg['seeds']!=[42,43,44]:raise ValueError('structured panel identity')
+        result={'small_policy':small,'frozen_sha256':h,'instances':64,'trials':192,'target_cells':1536,'completed_cells':0,'phase':'preparing','observed':cfg['created'],'readout':None}
+        if (root/'dev/STATUS.json').exists():
+            s=json.loads((root/'dev/STATUS.json').read_text())
+            if s['frozen_sha256']!=h or s['target_cells']!=1536 or type(s['completed_cells']) is not int or not 0<=s['completed_cells']<=1536:raise ValueError('structured progress')
+            if s['phase'] not in ['running','terminal','failed']:raise ValueError('structured phase')
+            result.update(phase='awaiting_audit' if s['phase']=='terminal' else s['phase'],completed_cells=s['completed_cells'],observed=s['observed'])
+        if (root/'AUDIT.json').exists():
+            audit=json.loads((root/'AUDIT.json').read_text());rr=(root/'dev/RESULTS.json').read_bytes();r=json.loads(rr)
+            if audit['results_sha256']!=hashlib.sha256(rr).hexdigest() or audit['frozen_sha256']!=h or audit['verdict']!='integrity_pass_development_gates_failed' or audit['test_generated'] is not False:raise ValueError('structured audit')
+            if r['cells']!=1536 or r['trials']!=192 or r['instances']!=64 or r['errors'] or r['engineering_pass'] or r['learning_pass'] or r['frozen_sha256']!=h:raise ValueError('structured readout')
+            choice=json.loads((root/'SELECTION.json').read_text())
+            if choice['engineering'] or choice['learning'] or choice['results_sha256']!=audit['results_sha256'] or (root/'test').exists():raise ValueError('structured stop')
+            if result['completed_cells']!=1536 or result['phase']!='awaiting_audit':raise ValueError('structured incomplete stage')
+            def summaries(values,limit=192):
+                if set(values)!=set(cfg['arms']):raise ValueError('structured arms')
+                out={}
+                for a,v in values.items():
+                    if any(type(v[k]) is not int or not 0<=v[k]<=limit for k in ['solved','sat','unsat','candidates']):raise ValueError('structured counts')
+                    if not isinstance(v['par2_s'],(int,float)) or not math.isfinite(v['par2_s']) or not 0<=v['par2_s']<=2 or v['solved']!=v['sat']+v['unsat']:raise ValueError('structured time')
+                    out[a]={k:v[k] for k in ['solved','sat','unsat','candidates','par2_s']}
+                return out
+            result.update(phase='terminal',readout={'sha256':audit['results_sha256'],'summaries':summaries(r['summaries']),
+                'by_scale':{str(n):summaries(r['by_scale'][str(n)],48) for n in [24,32,48,64]},'no_test':True})
+            for a,v in result['readout']['summaries'].items():
+                parts=[s[a] for s in result['readout']['by_scale'].values()]
+                if any(sum(p[k] for p in parts)!=v[k] for k in ['solved','sat','unsat','candidates']) or not math.isclose(sum(p['par2_s'] for p in parts)/4,v['par2_s'],abs_tol=1e-12):raise ValueError('structured scale reconciliation')
+        return result
+    except (OSError,ValueError,KeyError,TypeError):return None
+
 def load_performance_plan():
     raw=(HERE/'performance_plan.json').read_bytes()
     plan=json.loads(raw)
@@ -559,6 +595,8 @@ def main():
     data['conservative']=conservative_progress(args.repo.resolve())
     data['cost_aware']=conservative_progress(args.repo.resolve(),cost_aware=True)
     data['shared_gpu']=shared_gpu_progress(args.repo.resolve())
+    data['structured_decoder']=structured_progress(args.repo.resolve())
+    data['structured_policy']=structured_progress(args.repo.resolve(),small=True)
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()
