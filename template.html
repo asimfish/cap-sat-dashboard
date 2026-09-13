@@ -23,7 +23,8 @@
 <section id="structured"><h2>E33 / E34 · 约束解码与直接训练可行选择</h2><p class="alert">E32 验证集诊断：平均子句错误下降，但三个模型直接取整均为 0/32 完整见证，且多数超过覆盖数量上限。E33 加入保持图边约束的解码；E34 改用 113 参数小策略，直接奖励可行独立集大小。两者都必须通过完整成本与廉价控制比较。</p><p class="muted">两批开发数据分别为 64 个独立图 × 3 个搜索种子 × 8 臂，每臂 1 秒；不合并成同一面板。图顶点 n24/32/48/64，不是 CNF 总变量数。所有 SAT 赋值检查原 CNF；UNSAT 获独立求解器一致结论、不是证明认证。全成本包含实测单例预测、传输、序列化、进程启动、原生搜索及 SAT 见证检查；驻留加载/预热另列。共享主机长尾仍限制延迟推断。</p><div class="toolbar"><label for="structured-scale">图顶点规模</label><select id="structured-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A10">E33 计划 ↗</a><a href="#action-A11">E34 计划 ↗</a></div><div id="structured-progress"></div></section>
 <section id="resident"><h2>E35 · 原生常驻路径：调用降本与学习优势分开验收</h2><p class="alert">同一 E34 小策略、相同输入的调用路径已提速。新的开发比较仍未建立净胜廉价基线的学习优势；不是原 CAP 已修复。</p><p class="muted">配对降本测试使用 8 个既有验证图，每图 10 次重复，三条路径 × 两种策略；不是新确认。下方开发另用 64 个新独立图 × 3 个搜索种子 × 8 臂，所有对照都使用同一常驻接口。每请求重新解析 CNF、构建图与求解器，模型加载/子进程启动和预热单列，完整单例成本包括请求/响应、解析、推理、搜索及原生 SAT 检查。共享主机长尾仍存在。</p><div id="resident-benchmark"></div><div class="toolbar"><label for="resident-scale">开发图顶点规模</label><select id="resident-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A12">E35 实施与门槛 ↗</a><a href="#action-A13">后续机制计划 ↗</a></div><div id="resident-development"></div></section>
 <section id="decoder-utility"><h2>E36 · 学习解码后的收益：有局部信号，稳定性仍不足</h2><p class="alert">这里展示选过检查点的验证结果，不是 SAT 求解数、端到端加速或独立确认。全部训练种子保留，不能只挑最好的一次。</p><p class="muted">先复核旧 E34 的训练/部署差距；另生成 256 训练 + 64 验证图，均含 n24/32/48/64。首步选点后以动态度数和交换完成独立集，直接学习完成后大小。新241参数模型，不是原 CAP 的等价优化。</p><div class="toolbar"><label for="decoder-utility-scale">验证图顶点规模</label><select id="decoder-utility-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A13">E36 实施与停止条件 ↗</a><a href="#action-A14">稳定性下一步 ↗</a></div><div id="decoder-utility-progress"></div></section>
-<section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，尚未进行新原生开发。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
+<section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
+<section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{{DATA}}</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
 const names={frozen:'E17 · Frozen',small:'E19S · 500 train',large:'E19L · 2,000 train'};
@@ -38,6 +39,7 @@ function render(){
  renderResident();
  renderDecoderUtility();
  renderStability();
+ renderNativeFirst();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -87,6 +89,12 @@ function render(){
  const acceptance=Object.entries(n.acceptance||{}).map(([k,v])=>`${k.startsWith('rlaf')?'RLAF':'NeuroBack'}：${esc(accepted[v]||v)}`).join(' · ');
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
+}
+function renderNativeFirst(){
+ const u=data.native_first,target=document.getElementById('native-first-progress');
+ if(!u){target.textContent='E38 尚无可验证的终态汇总。';return;}
+ const labels={stock:'默认',degree32:'度数32首步',random32:'随机32首步',pair42:'成对 seed42',pair43:'成对 seed43',pair44:'成对 seed44'};
+ target.innerHTML=Object.entries(u.regimes).map(([reg,arms])=>`<article class="panel" style="margin-bottom:14px"><h3>${reg==='cold'?'冷启动全成本':'驻留全成本'} · ${u.trials} 次策略试验</h3><div class="table"><table><thead><tr><th>策略</th><th>PAR-2 ms ↓</th><th>求解数</th><th>SAT / UNSAT</th></tr></thead><tbody>${Object.entries(arms).map(([a,v])=>`<tr><td>${labels[a]}</td><td class="number">${v.par2_ms.toFixed(3)}</td><td>${v.solved}/${u.trials}</td><td>${v.sat} / ${v.unsat}</td></tr>`).join('')}</tbody></table></div><p class="muted">每个策略均含加载、预热、序列化、解析、特征/前向、完成、SAT 检查；三种成对模型均未通过全成本门。</p></article>`).join('')+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。廉价32首步预测得到支持，但 n24 退化，因此不生成确认集。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
 }
 function renderStability(){
  const u=data.stability,target=document.getElementById('stability-progress');

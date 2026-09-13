@@ -670,6 +670,32 @@ def stability_progress(repo):
             no_dev=True,no_test=True,scope=r['scope'],phase='terminal')
     except (OSError,ValueError,KeyError,TypeError):return None
 
+def native_first_progress(repo):
+    """E38 native/full-cost aggregate; never export raw requests, paths or PIDs."""
+    root=repo/'experiments/native_first_20260913_e38';dev=root/'dev'
+    try:
+        if not dev.exists() or (root/'test').exists(): return None
+        r=json.loads((dev/'RESULTS.json').read_text());cfg=json.loads((dev/'FROZEN.json').read_text());st=json.loads((dev/'STATUS.json').read_text())
+        h=hashlib.sha256((dev/'RESULTS.json').read_bytes()).hexdigest();fh=hashlib.sha256((dev/'FROZEN.json').read_bytes()).hexdigest()
+        if st['phase']!='terminal' or st['completed_cells']!=7680 or r['cells']!=7680 or r['trials']!=384 or r['frozen_sha256']!=fh:raise ValueError('native E38 identity')
+        if set(r['summaries'])!={'cold','resident'} or r['learning_pass'] is not False or r['Hcheap_prediction_pass'] is not True:raise ValueError('native E38 gate')
+        def n(v,limit=100000):
+            if type(v) not in (int,float) or isinstance(v,bool) or not math.isfinite(v) or not 0<=v<=limit:raise ValueError('native E38 numeric')
+            return v
+        arms=['stock','degree32','random32','pair42','pair43','pair44'];out={}
+        for regime in ['cold','resident']:
+            out[regime]={}
+            for arm in arms:
+                v=r['summaries'][regime][arm];out[regime][arm]=dict(par2_ms=n(v['par2_s']*1000),solved=n(v['solved'],384),sat=n(v['sat'],384),unsat=n(v['unsat'],384),timeouts=n(v['timeouts'],384))
+        scale={}
+        for regime in ['cold','resident']:
+            scale[regime]={}
+            for size,vv in r['by_scale'][regime].items():
+                scale[regime][size]={a:dict(par2_ms=n(vv[a]['par2_s']*1000),solved=n(vv[a]['solved'],96)) for a in arms}
+        return dict(sha256=h,frozen_sha256=fh,phase='terminal',instances=128,trials=384,cells=7680,target_cells=7680,
+                    regimes=out,by_scale=scale,learning_pass=False,cheap_prediction=True,compute_median_gain_pct=n(json.loads((root/'COMPAT.json').read_text())['core_median_gain']*100,100),scope='E38 native full-cost development; validation-only model selection excluded')
+    except (OSError,ValueError,KeyError,TypeError):return None
+
 def load_performance_plan():
     raw=(HERE/'performance_plan.json').read_bytes()
     plan=json.loads(raw)
@@ -750,6 +776,7 @@ def main():
     data['resident_policy']=resident_progress(args.repo.resolve())
     data['decoder_utility']=decoder_utility_progress(args.repo.resolve())
     data['stability']=stability_progress(args.repo.resolve())
+    data['native_first']=native_first_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()
