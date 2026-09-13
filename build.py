@@ -761,6 +761,14 @@ def native_first_progress(repo):
             for regime in ['cold','resident']:
                 rv[regime]={a:dict(par2_ms=n(rr['summaries'][regime][a]['par2_s']*1000),solved=n(rr['summaries'][regime][a]['solved'],384)) for a in ['stock','degree32','random32','runtime_tail']}
             result['runtime_followup']=dict(sha256=hashlib.sha256(runtime.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=rv,learning_pass=False,cheap_prediction=True,scope='E46 deduplicated runtime-tail development; no confirmation')
+        wide=repo/'experiments/native_first_20260913_e47/dev/RESULTS.json'
+        if wide.exists() and not (repo/'experiments/native_first_20260913_e47/test').exists():
+            wr=json.loads(wide.read_text())
+            if wr.get('cells')!=6144 or wr.get('trials')!=384 or wr.get('learning_pass') is not False:raise ValueError('native E47 gate')
+            wv={}
+            for regime in ['cold','resident']:
+                wv[regime]={a:dict(par2_ms=n(wr['summaries'][regime][a]['par2_s']*1000),solved=n(wr['summaries'][regime][a]['solved'],384)) for a in ['stock','degree32','random32','pair42wide']}
+            result['wide_followup']=dict(sha256=hashlib.sha256(wide.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=wv,learning_pass=False,cheap_prediction=True,scope='E47 equal-budget learned ranking development; no confirmation')
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
