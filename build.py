@@ -694,6 +694,13 @@ def native_first_progress(repo):
                 scale[regime][size]={a:dict(par2_ms=n(vv[a]['par2_s']*1000),solved=n(vv[a]['solved'],96)) for a in arms}
         result=dict(sha256=h,frozen_sha256=fh,phase='terminal',instances=128,trials=384,cells=7680,target_cells=7680,
                     regimes=out,by_scale=scale,learning_pass=False,cheap_prediction=True,compute_median_gain_pct=n(json.loads((root/'COMPAT.json').read_text())['core_median_gain']*100,100),scope='E38 native full-cost development; validation-only model selection excluded')
+        prior_digest={}
+        for e in range(38,46):
+            fp=repo/f'experiments/native_first_20260913_e{e}/dev/FROZEN.json'
+            if fp.exists():
+                prior_digest[e]={x['sha256'] for x in json.loads(fp.read_text()).get('rows',[])}
+        if all(e in prior_digest for e in range(38,46)) and all(prior_digest[e]==prior_digest[38] for e in range(39,46)):
+            result['cohort_correction']='E39–E45 reused the E38 128-instance cohort; these are repeated measurements, not independent samples.'
         follow=repo/'experiments/native_first_20260913_e39/dev/RESULTS.json'
         if follow.exists() and not (repo/'experiments/native_first_20260913_e39/test').exists():
             fr=json.loads(follow.read_text());
@@ -746,6 +753,14 @@ def native_first_progress(repo):
             for regime in ['cold','resident']:
                 cv[regime]={a:dict(par2_ms=n(cr['summaries'][regime][a]['par2_s']*1000),solved=n(cr['summaries'][regime][a]['solved'],384)) for a in ['stock','degree32','random32','conditional_tail']}
             result['conditional_followup']=dict(sha256=hashlib.sha256(conditional.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=cv,learning_pass=False,cheap_prediction=True,scope='E45 conditional solver-tail development; no confirmation')
+        runtime=repo/'experiments/native_first_20260913_e46/dev/RESULTS.json'
+        if runtime.exists() and not (repo/'experiments/native_first_20260913_e46/test').exists():
+            rr=json.loads(runtime.read_text())
+            if rr.get('cells')!=6144 or rr.get('trials')!=384 or rr.get('learning_pass') is not False:raise ValueError('native E46 gate')
+            rv={}
+            for regime in ['cold','resident']:
+                rv[regime]={a:dict(par2_ms=n(rr['summaries'][regime][a]['par2_s']*1000),solved=n(rr['summaries'][regime][a]['solved'],384)) for a in ['stock','degree32','random32','runtime_tail']}
+            result['runtime_followup']=dict(sha256=hashlib.sha256(runtime.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=rv,learning_pass=False,cheap_prediction=True,scope='E46 deduplicated runtime-tail development; no confirmation')
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
