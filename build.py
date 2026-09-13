@@ -721,6 +721,15 @@ def native_first_progress(repo):
                 gout[regime]={a:dict(par2_ms=n(graw['summaries'][regime][a]['par2_s']*1000),solved=n(graw['summaries'][regime][a]['solved'],384)) for a in arms}
             result['gate_followup']=dict(sha256=hashlib.sha256(gate.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,
                                          regimes=gout,learning_pass=False,cheap_prediction=True,scope='E41 zero-extra-process feature gate; no confirmation')
+        for key, folder_name, arm_name, scope_name in [('phase_followup','native_first_20260913_e42','phase42','E42 solver phase-hint development'),('one_followup','native_first_20260913_e43','phase42one','E43 single-phase-hint development')]:
+            p=repo/f'experiments/{folder_name}/dev/RESULTS.json'
+            if p.exists() and not (repo/f'experiments/{folder_name}/test').exists():
+                rr=json.loads(p.read_text())
+                if rr.get('cells')!=6144 or rr.get('trials')!=384 or rr.get('learning_pass') is not False:raise ValueError('native followup gate')
+                vals={}
+                for regime in ['cold','resident']:
+                    vals[regime]={a:dict(par2_ms=n(rr['summaries'][regime][a]['par2_s']*1000),solved=n(rr['summaries'][regime][a]['solved'],384)) for a in ['stock','degree32','random32',arm_name]}
+                result[key]=dict(sha256=hashlib.sha256(p.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=vals,learning_pass=False,cheap_prediction=True,scope=scope_name+'; no confirmation')
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
