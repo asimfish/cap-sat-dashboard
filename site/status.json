@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-14T18:53:20.571241+00:00",
+  "generated": "2026-09-14T19:18:21.169717+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3364,18 +3364,18 @@
         "id": "A15",
         "title": "把通过验证门的小策略转为可计费的原生求解路径",
         "priority": "P1 · 执行路径审计中，尚无有效优势证据",
-        "status": "E55 解析缓存中间收益已证实，端到端待完整复测",
-        "cost": "E38/E46/E47/E48/E49/E50/E51/E52/E53/E54九批独立图；E55为1,152×2亲和性诊断；E39–E45为同 cohort 复测",
+        "status": "E55 亲和性复测：驻留缓存降解析成本，但全成本学习门未通过",
+        "cost": "E38/E46/E47/E48/E49/E50/E51/E52/E53/E54/E55十批独立图；E55为2,304个冷/驻留全成本单元；E39–E45为同 cohort 复测",
         "depends_on": [
           "A14"
         ],
         "hypothesis": "保持所学首步及完成/交换语义，同时原生实现241参数推理，可能把验证中的可行覆盖改善转成搜索节省；尚无净收益证据。",
         "method": "所有臂共用有界常驻接口和完整SAT检查。保留默认、动态度数、随机多次搜索、匹配首步的静态/随机/未训练控制。冷启动总成本包含加载与预热；驻留成本按预先冻结的实例数摊销，不得另列后排除。单例预测、解析、通信、解码、搜索和最终检查全部计费。新开发前锁定廉价多次搜索预算、排序并列规则及超时计分；确认前冻结实例级多重比较区间。先冻结实现和新数据，再评测三个固定检查点，不得复用E37验证挑部署预算。",
         "gate": "三个训练种子均在完整PAR-2上至少胜过全部廉价控制5%，求解数不减且各规模无害；过开发门才生成独立确认。正确性、超时回退与CPU/原生一致性必须先通过。",
-        "stop": "E38 廉价32首步总体更快但n24退化；E39–E45 是同 cohort 复测且均未过门；E46–E48 保留为有效负结果。E49 因 cache hit=0、E50 因 probe 超预算、E51–E53 因 piggyback 执行路径偏离预注册语义，均不能作为算法结论。E54 修正后 fallback 0/384、与 random32 等价。E55 证实解析成本可降99%以上，但native端到端波动尚不足以过门；下一步做完整亲和性 factorial，不宣称优势。"
+        "stop": "E38 廉价32首步总体更快但n24退化；E39–E45 是同 cohort 复测且均未过门；E46–E48 保留为有效负结果。E49 因 cache hit=0、E50 因 probe 超预算、E51–E53 因 piggyback 执行路径偏离预注册语义，均不能作为算法结论。E54 修正后 fallback 0/384、与 random32 等价。E55 在128张去重图、2,304个冷/驻留单元上固定 graph→worker，驻留缓存命中256/384次；解析中位数从约1.158ms降至0.002ms，但cache_pair42的全成本门失败（冷24.528ms，未过random32的5%优势；驻留9.133ms，在n64输给cache_random32的26.916ms），不生成确认集。下一步只做低风险缓存工程化或转向候选质量，不宣称端到端优势。"
       }
     ],
-    "sha256": "57b856e006f324a2767d1aa76896120a12e30525c9c9152cfcd6d8d02a528bdf"
+    "sha256": "eeee89505a02ec00fe1e92faa739d2b325e3508afd79f9fc8abaf900d9b325c6"
   },
   "pilot": {
     "id": "E26",
@@ -6749,45 +6749,58 @@
       "cheap_prediction": true,
       "scope": "E54 corrected piggyback semantics; no fallback triggered"
     },
-    "hybrid55_followup": {
-      "sha256": "5ccbace9b0788975ef7cd039e49a878cf29020da3738678063c78b812a0bb04e",
+    "affinity_followup": {
+      "sha256": "c737d963dd5dfe927ddb5f1612e07272f8287953f931de00be97bd0313ee783e",
       "phase": "terminal",
       "instances": 128,
       "trials": 384,
-      "cells": 6144,
+      "cells": 2304,
       "regimes": {
         "cold": {
           "random32": {
-            "par2_ms": 25.220800896931905,
-            "solved": 384
+            "par2_ms": 24.97514899732778,
+            "solved": 384,
+            "candidates": 310,
+            "parse_median_ms": 1.139393076305
           },
-          "hybrid55": {
-            "par2_ms": 25.58351079642307,
-            "solved": 384
+          "cache_random32": {
+            "par2_ms": 24.286698183762685,
+            "solved": 384,
+            "candidates": 310,
+            "parse_median_ms": 1.157691236585
           },
-          "pair42": {
-            "par2_ms": 27.332651991552364,
-            "solved": 384
+          "cache_pair42": {
+            "par2_ms": 24.527621336649947,
+            "solved": 384,
+            "candidates": 309,
+            "parse_median_ms": 1.181366853415
           }
         },
         "resident": {
           "random32": {
-            "par2_ms": 10.075154132209718,
-            "solved": 384
+            "par2_ms": 10.276151750683008,
+            "solved": 384,
+            "candidates": 310,
+            "parse_median_ms": 1.157522667195
           },
-          "hybrid55": {
-            "par2_ms": 10.523724571006218,
-            "solved": 384
+          "cache_random32": {
+            "par2_ms": 9.718458585363502,
+            "solved": 384,
+            "candidates": 310,
+            "parse_median_ms": 0.00223657116294
           },
-          "pair42": {
-            "par2_ms": 12.055597129801754,
-            "solved": 384
+          "cache_pair42": {
+            "par2_ms": 9.1333025629865,
+            "solved": 384,
+            "candidates": 309,
+            "parse_median_ms": 0.0022887252271149997
           }
         }
       },
       "learning_pass": false,
       "cheap_prediction": true,
-      "scope": "E55 hybrid candidate ranking development; no confirmation"
+      "resident_cache_hit_requests": 256,
+      "scope": "E55 graph-to-worker affinity factorial; parse cache confirmed but learned ranking gate failed"
     },
     "affinity_probe": {
       "sha256": "c9424ce6f5f007d23c3df1d8c0a6379718c4d3b907440e6f683b0497bd919a38",

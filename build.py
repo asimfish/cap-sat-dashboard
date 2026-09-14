@@ -823,12 +823,12 @@ def native_first_progress(repo):
             if xr.get('cells')!=6144 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E54 gate')
             xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384)) for a in ['random32','piggyback_pair']} for regime in ['cold','resident']}
             result['corrected_followup']=dict(sha256=hashlib.sha256(corr.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=xv,learning_pass=False,cheap_prediction=True,scope='E54 corrected piggyback semantics; no fallback triggered')
-        hyb=repo/'experiments/native_first_20260913_e55/dev/RESULTS.json'
-        if hyb.exists() and not (repo/'experiments/native_first_20260913_e55/test').exists():
-            xr=json.loads(hyb.read_text())
-            if xr.get('cells')!=6144 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E55 gate')
-            xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384)) for a in ['random32','hybrid55','pair42']} for regime in ['cold','resident']}
-            result['hybrid55_followup']=dict(sha256=hashlib.sha256(hyb.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=xv,learning_pass=False,cheap_prediction=True,scope='E55 hybrid candidate ranking development; no confirmation')
+        affinity=repo/'experiments/native_first_20260915_e55/dev/RESULTS.json'
+        if affinity.exists() and not (repo/'experiments/native_first_20260915_e55/test').exists():
+            xr=json.loads(affinity.read_text())
+            if xr.get('cells')!=2304 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E55 affinity gate')
+            xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384),parse_median_ms=n(xr['summaries'][regime][a]['components']['parse_s']['median']*1000)) for a in ['random32','cache_random32','cache_pair42']} for regime in ['cold','resident']}
+            result['affinity_followup']=dict(sha256=hashlib.sha256(affinity.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=2304,regimes=xv,learning_pass=False,cheap_prediction=True,resident_cache_hit_requests=256,scope='E55 graph-to-worker affinity factorial; parse cache confirmed but learned ranking gate failed')
         ap=repo/'experiments/native_first_20260915_cache_affinity_probe.json'
         if ap.exists():
             ar=json.loads(ap.read_text())

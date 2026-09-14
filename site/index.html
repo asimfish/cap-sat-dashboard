@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-14T18:53:20.571241+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-14T19:18:21.169717+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -26,7 +26,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-14T18:53:20.571241+00:00",
+  "generated": "2026-09-14T19:18:21.169717+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3391,18 +3391,18 @@
         "id": "A15",
         "title": "把通过验证门的小策略转为可计费的原生求解路径",
         "priority": "P1 · 执行路径审计中，尚无有效优势证据",
-        "status": "E55 解析缓存中间收益已证实，端到端待完整复测",
-        "cost": "E38/E46/E47/E48/E49/E50/E51/E52/E53/E54九批独立图；E55为1,152×2亲和性诊断；E39–E45为同 cohort 复测",
+        "status": "E55 亲和性复测：驻留缓存降解析成本，但全成本学习门未通过",
+        "cost": "E38/E46/E47/E48/E49/E50/E51/E52/E53/E54/E55十批独立图；E55为2,304个冷/驻留全成本单元；E39–E45为同 cohort 复测",
         "depends_on": [
           "A14"
         ],
         "hypothesis": "保持所学首步及完成/交换语义，同时原生实现241参数推理，可能把验证中的可行覆盖改善转成搜索节省；尚无净收益证据。",
         "method": "所有臂共用有界常驻接口和完整SAT检查。保留默认、动态度数、随机多次搜索、匹配首步的静态/随机/未训练控制。冷启动总成本包含加载与预热；驻留成本按预先冻结的实例数摊销，不得另列后排除。单例预测、解析、通信、解码、搜索和最终检查全部计费。新开发前锁定廉价多次搜索预算、排序并列规则及超时计分；确认前冻结实例级多重比较区间。先冻结实现和新数据，再评测三个固定检查点，不得复用E37验证挑部署预算。",
         "gate": "三个训练种子均在完整PAR-2上至少胜过全部廉价控制5%，求解数不减且各规模无害；过开发门才生成独立确认。正确性、超时回退与CPU/原生一致性必须先通过。",
-        "stop": "E38 廉价32首步总体更快但n24退化；E39–E45 是同 cohort 复测且均未过门；E46–E48 保留为有效负结果。E49 因 cache hit=0、E50 因 probe 超预算、E51–E53 因 piggyback 执行路径偏离预注册语义，均不能作为算法结论。E54 修正后 fallback 0/384、与 random32 等价。E55 证实解析成本可降99%以上，但native端到端波动尚不足以过门；下一步做完整亲和性 factorial，不宣称优势。"
+        "stop": "E38 廉价32首步总体更快但n24退化；E39–E45 是同 cohort 复测且均未过门；E46–E48 保留为有效负结果。E49 因 cache hit=0、E50 因 probe 超预算、E51–E53 因 piggyback 执行路径偏离预注册语义，均不能作为算法结论。E54 修正后 fallback 0/384、与 random32 等价。E55 在128张去重图、2,304个冷/驻留单元上固定 graph→worker，驻留缓存命中256/384次；解析中位数从约1.158ms降至0.002ms，但cache_pair42的全成本门失败（冷24.528ms，未过random32的5%优势；驻留9.133ms，在n64输给cache_random32的26.916ms），不生成确认集。下一步只做低风险缓存工程化或转向候选质量，不宣称端到端优势。"
       }
     ],
-    "sha256": "57b856e006f324a2767d1aa76896120a12e30525c9c9152cfcd6d8d02a528bdf"
+    "sha256": "eeee89505a02ec00fe1e92faa739d2b325e3508afd79f9fc8abaf900d9b325c6"
   },
   "pilot": {
     "id": "E26",
@@ -6776,45 +6776,58 @@
       "cheap_prediction": true,
       "scope": "E54 corrected piggyback semantics; no fallback triggered"
     },
-    "hybrid55_followup": {
-      "sha256": "5ccbace9b0788975ef7cd039e49a878cf29020da3738678063c78b812a0bb04e",
+    "affinity_followup": {
+      "sha256": "c737d963dd5dfe927ddb5f1612e07272f8287953f931de00be97bd0313ee783e",
       "phase": "terminal",
       "instances": 128,
       "trials": 384,
-      "cells": 6144,
+      "cells": 2304,
       "regimes": {
         "cold": {
           "random32": {
-            "par2_ms": 25.220800896931905,
-            "solved": 384
+            "par2_ms": 24.97514899732778,
+            "solved": 384,
+            "candidates": 310,
+            "parse_median_ms": 1.139393076305
           },
-          "hybrid55": {
-            "par2_ms": 25.58351079642307,
-            "solved": 384
+          "cache_random32": {
+            "par2_ms": 24.286698183762685,
+            "solved": 384,
+            "candidates": 310,
+            "parse_median_ms": 1.157691236585
           },
-          "pair42": {
-            "par2_ms": 27.332651991552364,
-            "solved": 384
+          "cache_pair42": {
+            "par2_ms": 24.527621336649947,
+            "solved": 384,
+            "candidates": 309,
+            "parse_median_ms": 1.181366853415
           }
         },
         "resident": {
           "random32": {
-            "par2_ms": 10.075154132209718,
-            "solved": 384
+            "par2_ms": 10.276151750683008,
+            "solved": 384,
+            "candidates": 310,
+            "parse_median_ms": 1.157522667195
           },
-          "hybrid55": {
-            "par2_ms": 10.523724571006218,
-            "solved": 384
+          "cache_random32": {
+            "par2_ms": 9.718458585363502,
+            "solved": 384,
+            "candidates": 310,
+            "parse_median_ms": 0.00223657116294
           },
-          "pair42": {
-            "par2_ms": 12.055597129801754,
-            "solved": 384
+          "cache_pair42": {
+            "par2_ms": 9.1333025629865,
+            "solved": 384,
+            "candidates": 309,
+            "parse_median_ms": 0.0022887252271149997
           }
         }
       },
       "learning_pass": false,
       "cheap_prediction": true,
-      "scope": "E55 hybrid candidate ranking development; no confirmation"
+      "resident_cache_hit_requests": 256,
+      "scope": "E55 graph-to-worker affinity factorial; parse cache confirmed but learned ranking gate failed"
     },
     "affinity_probe": {
       "sha256": "c9424ce6f5f007d23c3df1d8c0a6379718c4d3b907440e6f683b0497bd919a38",
@@ -6919,7 +6932,8 @@ function renderNativeFirst(){
  const oneshot=u.oneshot_followup?`<article class="panel alert"><h3>E53 执行路径审计：不生成性能结论</h3><p>E53 仍使用未修正的 piggyback 实现，不能据此关闭运行时路线。E51–E53 全部降级为无效工程试跑；下一步先修复并验证首轮预算、solver 触发和 fallback 语义，再决定是否重跑。</p></article>`:'';
  const corr=u.corrected_followup?`<article class="panel"><h3>E54 corrected piggyback · fallback 零触发</h3><p>修复后首轮候选与 random32 均为 309/384，首轮 solver 全部在截止时间前返回，learned fallback 触发 0 次；结果与 random32 等价，当前 workload 没有可利用的未决尾部。</p></article>`:'';
  const affinity=u.affinity_probe?`<article class="panel"><h3>E55 cache affinity diagnostic · 解析成本明确下降，端到端待验证</h3><p>固定 graph→worker 后得到 768 个可审计 cache hit；cache_random32 的解析均值 ${u.affinity_probe.cache_random32.parse_mean_ms.toFixed(3)} ms，而未缓存 random32 为 ${u.affinity_probe.random32.parse_mean_ms.toFixed(3)} ms（下降超过 99%）。native 总耗时受 solver 波动影响，当前诊断不足以宣称端到端优势；下一步需用完整冷/驻留 factorial 重跑。</p></article>`:'';
- target.innerHTML=base+correction+next+online+gate+phase+one+tail+conditional+runtime+wide+portfolio+cache+gate50+pig+lazy+oneshot+corr+affinity+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
+ const affinityFull=u.affinity_followup?`<article class="panel"><h3>E55 graph→worker affinity factorial · 缓存命中但未形成算法优势</h3><p>128 张去重图、384 trials、2,304 个冷/驻留全成本单元；驻留同图三 seed 固定到同一 worker，审计得到 ${u.affinity_followup.resident_cache_hit_requests} 个 cache hit。冷启动 random32 / cache_random32 / cache_pair42 的 PAR-2 为 ${u.affinity_followup.regimes.cold.random32.par2_ms.toFixed(3)} / ${u.affinity_followup.regimes.cold.cache_random32.par2_ms.toFixed(3)} / ${u.affinity_followup.regimes.cold.cache_pair42.par2_ms.toFixed(3)} ms；驻留为 ${u.affinity_followup.regimes.resident.random32.par2_ms.toFixed(3)} / ${u.affinity_followup.regimes.resident.cache_random32.par2_ms.toFixed(3)} / ${u.affinity_followup.regimes.resident.cache_pair42.par2_ms.toFixed(3)} ms。缓存降低驻留解析中位数，但 cache_pair42 未同时胜过 random32 与 cache_random32，学习门未通过，不生成确认集。</p></article>`:'';
+ target.innerHTML=base+correction+next+online+gate+phase+one+tail+conditional+runtime+wide+portfolio+cache+gate50+pig+lazy+oneshot+corr+affinity+affinityFull+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
 }
 function renderStability(){
  const u=data.stability,target=document.getElementById('stability-progress');
