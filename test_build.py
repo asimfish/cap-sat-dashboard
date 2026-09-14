@@ -419,5 +419,41 @@ class CollectorTests(unittest.TestCase):
         self.assertNotIn('private',json.dumps(result))
         self.assertNotIn('pid',json.dumps(result))
 
+class CacheAffinityV2Tests(unittest.TestCase):
+    def test_audit_identity_denominators_negative_results_and_privacy(self):
+        from build import cache_affinity_v2_progress
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/cache_affinity_20260915_v2/dev';root.mkdir(parents=True)
+            frozen=b'{"private_path":"/private/checkpoint"}'
+            (root/'FROZEN.json').write_bytes(frozen)
+            fh=hashlib.sha256(frozen).hexdigest()
+            def sm(cost,cells,hits):
+                return dict(par2_ms=cost,cells=cells,solved=cells,timeouts=0,cache_hits=hits,assignment=[1],pid=42)
+            r=dict(cells=4608,independent_graphs=128,repeats=3,frozen_sha256=fh,learned_advantage=False,
+                source_integrity=True,summaries={},by_scale={},contrasts={},gates={'cold':False,'resident':True},all_lifecycles_pass=False)
+            for reg,costs in [('cold',(12,12.1)),('resident',(6,5))]:
+                r['summaries'][reg]={arm:sm(cost,1152,768 if reg=='resident' and arm=='cache_random32' else 0) for arm,cost in zip(('random32','cache_random32'),costs)}
+                r['by_scale'][reg]={str(n):{arm:sm(cost,288,192 if reg=='resident' and arm=='cache_random32' else 0) for arm,cost in zip(('random32','cache_random32'),costs)} for n in (24,32,48,64)}
+                gain=costs[0]-costs[1]
+                r['contrasts'][reg]=dict(gain_ms=gain,lower_ms=gain-.2,upper_ms=gain+.2,independent_graphs=128)
+            def save():
+                raw=json.dumps(r).encode();(root/'RESULTS.json').write_bytes(raw)
+                (root/'AUDIT.json').write_text(json.dumps(dict(verdict='integrity_pass',results_sha256=hashlib.sha256(raw).hexdigest(),frozen_sha256=fh,
+                    cells=4608,graphs=128,reference_agreements=4608,cache_hits=768,gates=r['gates'])))
+            self.assertIsNone(cache_affinity_v2_progress(repo));save()
+            out=cache_affinity_v2_progress(repo)
+            self.assertTrue(out['gates']['resident']);self.assertFalse(out['gates']['cold'])
+            self.assertFalse(out['learning_pass'])
+            for word in ('private','assignment','pid','checkpoint'):
+                self.assertNotIn(word,json.dumps(out))
+            r['gates']['cold']=True;save();self.assertIsNone(cache_affinity_v2_progress(repo));r['gates']['cold']=False
+            r['summaries']['resident']['cache_random32']['cache_hits']=767;save();self.assertIsNone(cache_affinity_v2_progress(repo));r['summaries']['resident']['cache_random32']['cache_hits']=768
+            r['contrasts']['resident']['lower_ms']=float('nan');save();self.assertIsNone(cache_affinity_v2_progress(repo));r['contrasts']['resident']['lower_ms']=.8
+            r['by_scale']['resident']['24']['random32']['par2_ms']=7;save();self.assertIsNone(cache_affinity_v2_progress(repo));r['by_scale']['resident']['24']['random32']['par2_ms']=6
+            r['summaries']['cold']['random32']['solved']=1151.5;save();self.assertIsNone(cache_affinity_v2_progress(repo));r['summaries']['cold']['random32']['solved']=1152
+            r['learned_advantage']=True;save();self.assertIsNone(cache_affinity_v2_progress(repo));r['learned_advantage']=False;save()
+            (root/'RESULTS.json').write_text('{}');self.assertIsNone(cache_affinity_v2_progress(repo));save()
+            (root/'FROZEN.json').write_text('{}');self.assertIsNone(cache_affinity_v2_progress(repo))
+
 if __name__=='__main__':
     unittest.main()

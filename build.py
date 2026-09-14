@@ -720,6 +720,67 @@ def paired_launch_progress(repo):
         return None
 
 
+def cache_affinity_v2_progress(repo):
+    """Allowlist an audited independent cache replication, including negative gates."""
+    folder=repo/'experiments/cache_affinity_20260915_v2/dev'
+    try:
+        raw=(folder/'RESULTS.json').read_bytes();r=json.loads(raw)
+        a=json.loads((folder/'AUDIT.json').read_text())
+        fh=hashlib.sha256((folder/'FROZEN.json').read_bytes()).hexdigest()
+        h=hashlib.sha256(raw).hexdigest()
+        if a.get('verdict')!='integrity_pass' or a.get('results_sha256')!=h:
+            return None
+        if r.get('frozen_sha256')!=fh or a.get('frozen_sha256')!=fh:
+            return None
+        if (r.get('cells'),r.get('independent_graphs'),r.get('repeats'))!=(4608,128,3):
+            return None
+        if (a.get('cells'),a.get('graphs'),a.get('reference_agreements'),a.get('cache_hits'))!=(4608,128,4608,768):
+            return None
+        if r.get('learned_advantage') is not False or r.get('source_integrity') is not True:
+            return None
+        def number(x,negative=False):
+            if type(x) not in (int,float) or not math.isfinite(x) or abs(x)>100000 or (x<0 and not negative):
+                raise ValueError('cache affinity numeric field')
+            return x
+        def summary(s,cells,hits):
+            if s['cells']!=cells or s['cache_hits']!=hits:
+                raise ValueError('cache affinity denominators/hits')
+            for k in ('solved','timeouts'):
+                if type(s[k]) is not int or not 0<=s[k]<=cells:
+                    raise ValueError('cache affinity counts')
+            return dict(par2_ms=number(s['par2_ms']),solved=s['solved'],timeouts=s['timeouts'],cells=cells,cache_hits=hits)
+        arms=('random32','cache_random32');regimes=('cold','resident')
+        if set(r['summaries'])!=set(regimes) or set(r['by_scale'])!=set(regimes):
+            return None
+        sm={};scales={};ci={};gates={}
+        for reg in regimes:
+            if set(r['summaries'][reg])!=set(arms) or set(r['by_scale'][reg])!={'24','32','48','64'}:
+                return None
+            sm[reg]={arm:summary(r['summaries'][reg][arm],1152,768 if reg=='resident' and arm=='cache_random32' else 0) for arm in arms}
+            scales[reg]={n:{arm:summary(v[arm],288,192 if reg=='resident' and arm=='cache_random32' else 0) for arm in arms} for n,v in r['by_scale'][reg].items()}
+            for arm in arms:
+                if sum(v[arm]['solved'] for v in scales[reg].values())!=sm[reg][arm]['solved']:
+                    return None
+                if not math.isclose(statistics.mean(v[arm]['par2_ms'] for v in scales[reg].values()),sm[reg][arm]['par2_ms'],abs_tol=1e-9):
+                    return None
+            c=r['contrasts'][reg]
+            if c['independent_graphs']!=128:
+                return None
+            ci[reg]={k:number(c[k],True) for k in ('gain_ms','lower_ms','upper_ms')}
+            base,cached=(sm[reg][arm] for arm in arms)
+            if not math.isclose(ci[reg]['gain_ms'],base['par2_ms']-cached['par2_ms'],abs_tol=1e-9) or ci[reg]['lower_ms']>ci[reg]['upper_ms']:
+                return None
+            gates[reg]=bool(cached['par2_ms']<=.95*base['par2_ms'] and cached['solved']>=base['solved'] and ci[reg]['lower_ms']>0 and all(
+                v['cache_random32']['par2_ms']<=v['random32']['par2_ms'] and v['cache_random32']['solved']>=v['random32']['solved'] for v in scales[reg].values()))
+        if r['gates']!=gates or a['gates']!=gates or r['all_lifecycles_pass'] is not all(gates.values()):
+            return None
+        return dict(sha256=h,frozen_sha256=fh,phase='terminal',cells=4608,graphs=128,repeats=3,
+                    regimes=sm,by_scale=scales,contrasts=ci,gates=gates,learning_pass=False,
+                    scope='Fresh graphs; repeated-CNF infrastructure only; not learned-policy confirmation')
+    except (OSError,ValueError,KeyError,TypeError):
+        return None
+
+
 def native_first_progress(repo):
     """E38 native/full-cost aggregate; never export raw requests, paths or PIDs."""
     root=repo/'experiments/native_first_20260913_e38';dev=root/'dev'
@@ -872,7 +933,7 @@ def native_first_progress(repo):
             xr=json.loads(corr.read_text());
             if xr.get('cells')!=6144 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E54 gate')
             xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384)) for a in ['random32','piggyback_pair']} for regime in ['cold','resident']}
-            result['corrected_followup']=dict(sha256=hashlib.sha256(corr.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=xv,learning_pass=False,cheap_prediction=True,scope='E54 corrected piggyback semantics; no fallback triggered')
+            result['corrected_followup']=dict(sha256=hashlib.sha256(corr.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=xv,learning_pass=False,cheap_prediction=True,scope='E54 corrected first-pass budget; fallback telemetry serialized too early to establish execution count')
         affinity=repo/'experiments/native_first_20260915_e55/dev/RESULTS.json'
         if affinity.exists() and not (repo/'experiments/native_first_20260915_e55/test').exists():
             xr=json.loads(affinity.read_text())
@@ -899,6 +960,9 @@ def native_first_progress(repo):
         paired = paired_launch_progress(repo)
         if paired is not None:
             result['paired_launch_followup'] = paired
+        affinity_v2 = cache_affinity_v2_progress(repo)
+        if affinity_v2 is not None:
+            result['affinity_v2'] = affinity_v2
         ap=repo/'experiments/native_first_20260915_cache_affinity_probe.json'
         if ap.exists():
             ar=json.loads(ap.read_text())

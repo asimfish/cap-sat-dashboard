@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-14T21:12:53.429326+00:00",
+  "generated": "2026-09-14T21:19:49.072222+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3363,19 +3363,19 @@
       {
         "id": "A15",
         "title": "把通过验证门的小策略转为可计费的原生求解路径",
-        "priority": "P1 · 冷启动工程改善已验证，模型优势未建立",
+        "priority": "P1 · 冷启动和驻留工程改善分别验证，模型优势未建立",
         "status": "E60 同图同核冷启动快27.4%；模型优势仍未建立",
-        "cost": "E55为2,304、E56/E59各1,536个单元；E60复用E59全部128图，3,456次配对工程测量，不新增独立样本",
+        "cost": "E55为2,304、E56/E59各1,536个单元；E60复用E59全部128图，3,456次配对工程测量，不新增独立样本；Affinity-v2另用128新图、3轮共4,608次计费复测",
         "depends_on": [
           "A14"
         ],
         "hypothesis": "保持所学首步及完成/交换语义，同时原生实现241参数推理，可能把验证中的可行覆盖改善转成搜索节省；尚无净收益证据。",
         "method": "所有臂共用有界常驻接口和完整SAT检查。保留默认、动态度数、随机多次搜索、匹配首步的静态/随机/未训练控制。冷启动总成本包含加载与预热；驻留成本按预先冻结的实例数摊销，不得另列后排除。单例预测、解析、通信、解码、搜索和最终检查全部计费。新开发前锁定廉价多次搜索预算、排序并列规则及超时计分；确认前冻结实例级多重比较区间。先冻结实现和新数据，再评测三个固定检查点，不得复用E37验证挑部署预算。",
         "gate": "三个训练种子均在完整PAR-2上至少胜过全部廉价控制5%，求解数不减且各规模无害；过开发门才生成独立确认。正确性、超时回退与CPU/原生一致性必须先通过。",
-        "stop": "E39–E45同cohort复测不能累加独立样本；E49缓存调度、E50预算、E51–E53执行路径缺陷使算法结论不可用；E54修正后fallback零触发。E55/E56证实驻留缓存工程信号，未建立学习优势。E57仅n24单轮且漏计退出，撤回约3请求回本；E56与E59跨cohort差额不支持37%因果收益，分层路由未上线。E60同图、同核、同策略、同二进制的3轮配对：启动全流程17.802→12.921ms，快27.4%；节省4.880ms的同时95%区间[4.558,5.212]，全部求解且候选/赋值/冲突数一致。仅新增可复用实验启动器，不修改冻结旧结果；下一步所有对照共同使用该基础设施，再测完整队列生命周期和三训练种子的学习净收益。确认集与论文优势结论仍未建立。"
+        "stop": "E39–E45同cohort复测不能累加独立样本；E49缓存调度、E50预算、E51–E53执行路径缺陷使算法结论不可用；E54的learned_candidate在fallback前序列化，不能据此断言零触发。E55/E56证实驻留缓存工程信号，未建立学习优势。E57仅n24单轮且漏计退出，撤回约3请求回本；E56与E59跨cohort差额不支持37%因果收益，分层路由未上线。E60同图、同核、同策略、同二进制的3轮配对：启动全流程17.802→12.921ms，快27.4%；节省4.880ms的同时95%区间[4.558,5.212]，全部求解且候选/赋值/冲突数一致。Affinity-v2修复错误二进制导入和漏计冷启动/退出后，在128新图上完成4,608次；真实驻留命中768/1,152，全成本5.993→5.240ms，改善12.6%，节省区间[0.590,0.901]ms，三轮及四规模均改善。冷启动11.648→11.686ms未过门，不把3轮当384独立图。下一步所有对照共用已验证基础设施，冻结首次/重复请求混合队列及完整生命周期，再测三训练种子的学习净收益；该混合队列尚未运行。确认集与论文优势结论仍未建立。"
       }
     ],
-    "sha256": "dffe46469d07f18c66e6d3200e16b6f4bc82164f6d5022c1237b4f62849f1bc5"
+    "sha256": "e691955e32d532f5491b972abcadf2b95caf5e71db7396d83bd0b27542af9aee"
   },
   "pilot": {
     "id": "E26",
@@ -6747,7 +6747,7 @@
       },
       "learning_pass": false,
       "cheap_prediction": true,
-      "scope": "E54 corrected piggyback semantics; no fallback triggered"
+      "scope": "E54 corrected first-pass budget; fallback telemetry serialized too early to establish execution count"
     },
     "affinity_followup": {
       "sha256": "c737d963dd5dfe927ddb5f1612e07272f8287953f931de00be97bd0313ee783e",
@@ -6973,6 +6973,200 @@
       },
       "output_mismatches": 0,
       "scope": "同图同核配对工程复测；非独立确认、非模型优势"
+    },
+    "affinity_v2": {
+      "sha256": "085d9b114e8c8446d748f72a2892ba0a7cdc803f80f3c0792cac2e5c4777e2ab",
+      "frozen_sha256": "59f57c3756418dbc02ed96753081bf1e56fcc72c3d38d9a3fcb1c1732fd72355",
+      "phase": "terminal",
+      "cells": 4608,
+      "graphs": 128,
+      "repeats": 3,
+      "regimes": {
+        "cold": {
+          "random32": {
+            "par2_ms": 11.647767324272232,
+            "solved": 1152,
+            "timeouts": 0,
+            "cells": 1152,
+            "cache_hits": 0
+          },
+          "cache_random32": {
+            "par2_ms": 11.685558348997601,
+            "solved": 1152,
+            "timeouts": 0,
+            "cells": 1152,
+            "cache_hits": 0
+          }
+        },
+        "resident": {
+          "random32": {
+            "par2_ms": 5.992676890552199,
+            "solved": 1152,
+            "timeouts": 0,
+            "cells": 1152,
+            "cache_hits": 0
+          },
+          "cache_random32": {
+            "par2_ms": 5.240393758059427,
+            "solved": 1152,
+            "timeouts": 0,
+            "cells": 1152,
+            "cache_hits": 768
+          }
+        }
+      },
+      "by_scale": {
+        "cold": {
+          "24": {
+            "random32": {
+              "par2_ms": 8.939991785963583,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            },
+            "cache_random32": {
+              "par2_ms": 8.919813198089185,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            }
+          },
+          "32": {
+            "random32": {
+              "par2_ms": 9.6589362494544,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            },
+            "cache_random32": {
+              "par2_ms": 9.630206836542735,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            }
+          },
+          "48": {
+            "random32": {
+              "par2_ms": 10.523321097328639,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            },
+            "cache_random32": {
+              "par2_ms": 10.959020253115645,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            }
+          },
+          "64": {
+            "random32": {
+              "par2_ms": 17.468820164342308,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            },
+            "cache_random32": {
+              "par2_ms": 17.233193108242833,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            }
+          }
+        },
+        "resident": {
+          "24": {
+            "random32": {
+              "par2_ms": 2.8206809260559065,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            },
+            "cache_random32": {
+              "par2_ms": 2.409211898338981,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 192
+            }
+          },
+          "32": {
+            "random32": {
+              "par2_ms": 4.347126467716104,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            },
+            "cache_random32": {
+              "par2_ms": 3.77077714236091,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 192
+            }
+          },
+          "48": {
+            "random32": {
+              "par2_ms": 4.989103578231556,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            },
+            "cache_random32": {
+              "par2_ms": 4.254757231036718,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 192
+            }
+          },
+          "64": {
+            "random32": {
+              "par2_ms": 11.81379659020523,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 0
+            },
+            "cache_random32": {
+              "par2_ms": 10.526828760501102,
+              "solved": 288,
+              "timeouts": 0,
+              "cells": 288,
+              "cache_hits": 192
+            }
+          }
+        }
+      },
+      "contrasts": {
+        "cold": {
+          "gain_ms": -0.03779102472536679,
+          "lower_ms": -0.5091230833386362,
+          "upper_ms": 0.3897675152479174
+        },
+        "resident": {
+          "gain_ms": 0.7522831324927715,
+          "lower_ms": 0.5903820890624603,
+          "upper_ms": 0.9007380517200798
+        }
+      },
+      "gates": {
+        "cold": false,
+        "resident": true
+      },
+      "learning_pass": false,
+      "scope": "Fresh graphs; repeated-CNF infrastructure only; not learned-policy confirmation"
     },
     "affinity_probe": {
       "sha256": "c9424ce6f5f007d23c3df1d8c0a6379718c4d3b907440e6f683b0497bd919a38",
