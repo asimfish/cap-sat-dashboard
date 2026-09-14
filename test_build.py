@@ -231,7 +231,7 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('E35',actions['A12']['status'])
         self.assertEqual(actions['A13']['status'],'E36 局部信号 · 三种子门未过')
         self.assertEqual(actions['A14']['status'],'E37 成对小网络通过训练门')
-        self.assertEqual(actions['A15']['status'],'E49–E53 测量需先修正并回归验证')
+        self.assertEqual(actions['A15']['status'],'E54 修正复测无 fallback 触发，转向候选质量')
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:
