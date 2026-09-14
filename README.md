@@ -1,5 +1,7 @@
 # CAP-SAT Rebuttal Dashboard
 
+Latest audited native-first update: corrected E54 piggyback semantics are included in the progress export.
+
 Open-source, dependency-free research progress dashboard. MIT licensed.
 
 [Live dashboard](https://asimfish.github.io/cap-sat-dashboard/)
