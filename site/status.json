@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-14T21:43:51.606367+00:00",
+  "generated": "2026-09-14T21:59:03.270147+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -7200,29 +7200,29 @@
   },
   "overnight": {
     "phase": "running",
-    "observed": "2026-09-14T21:43:52.649218+00:00",
+    "observed": "2026-09-14T21:59:01.924680+00:00",
     "started_at": "2026-09-14T21:36:07.945367+00:00",
-    "active_s": 464.68159819580615,
+    "active_s": 1342.4897829331458,
     "target_active_s": 28800,
     "counts": {
-      "cpu_jobs": 192,
-      "training_jobs": 50,
-      "cells": 221184,
-      "training_steps": 176500
+      "cpu_jobs": 563,
+      "training_jobs": 140,
+      "cells": 648576,
+      "training_steps": 644750
     },
     "running": {
-      "cpu": 6,
+      "cpu": 8,
       "train": 3,
       "data": 0
     },
-    "failed_jobs": 0,
+    "failed_jobs": 22,
     "training_queue": 432,
     "cpu_slots": 8,
     "gpu_slots": 3,
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": true,
-    "earliest_target_at": "2026-09-15T05:36:07.986323+00:00",
+    "earliest_target_at": "2026-09-15T05:36:42.134163+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   }
 }
