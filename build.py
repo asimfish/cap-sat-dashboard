@@ -835,6 +835,11 @@ def native_first_progress(repo):
             if xr.get('cells')!=1536 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E56 gate')
             xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384),parse_median_ms=n(xr['summaries'][regime][a]['components']['parse_s']['median']*1000)) for a in ['random32','cache_random32']} for regime in ['cold','resident']}
             result['cache_only_followup']=dict(sha256=hashlib.sha256(cache_only.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=1536,regimes=xv,learning_pass=False,resident_gate=bool(xr['gates']['resident']['cache_random32']),cold_gate=bool(xr['gates']['cold']['cache_random32']),resident_cache_hit_requests=256,scope='E56 independent cache-only replication; resident gate passes, cold lifecycle gate fails')
+        pool=repo/'experiments/native_first_20260915_e57_pool_break_even.json'
+        if pool.exists():
+            xr=json.loads(pool.read_text());
+            if set(xr.get('arms',{}))!={'random32','cache_random32'} or not {'3','9','27','81'}<=set(xr['arms']['random32']):raise ValueError('native E57 pool diagnostic')
+            result['pool_break_even']=dict(sha256=hashlib.sha256(pool.read_bytes()).hexdigest(),scope='E57 E56-row persistent-worker amortization diagnostic; not independent confirmation',batch_sizes=[3,9,27,81],random32={k:n(v['charged_mean_ms']) for k,v in xr['arms']['random32'].items()},cache_random32={k:n(v['charged_mean_ms']) for k,v in xr['arms']['cache_random32'].items()})
         ap=repo/'experiments/native_first_20260915_cache_affinity_probe.json'
         if ap.exists():
             ar=json.loads(ap.read_text())
