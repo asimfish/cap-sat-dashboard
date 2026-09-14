@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-14T12:30:28.625194+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-14T12:49:19.493193+00:00">
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
@@ -26,7 +26,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-14T12:30:28.625194+00:00",
+  "generated": "2026-09-14T12:49:19.493193+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3391,18 +3391,18 @@
         "id": "A15",
         "title": "把通过验证门的小策略转为可计费的原生求解路径",
         "priority": "P1 · 工程复测中，尚无有效优势证据",
-        "status": "E52 修复预算污染后仍未过门",
-        "cost": "E38/E46/E47/E48/E49/E50/E51/E52七批独立图；E39–E45为同 cohort 复测；累计94,464个计费单元（E49/E50部分无效）",
+        "status": "E53 piggyback 路线停止，转向候选质量",
+        "cost": "E38/E46/E47/E48/E49/E50/E51/E52/E53八批独立图；E39–E45为同 cohort 复测；累计100,608个计费单元（E49/E50部分无效）",
         "depends_on": [
           "A14"
         ],
         "hypothesis": "保持所学首步及完成/交换语义，同时原生实现241参数推理，可能把验证中的可行覆盖改善转成搜索节省；尚无净收益证据。",
         "method": "所有臂共用有界常驻接口和完整SAT检查。保留默认、动态度数、随机多次搜索、匹配首步的静态/随机/未训练控制。冷启动总成本包含加载与预热；驻留成本按预先冻结的实例数摊销，不得另列后排除。单例预测、解析、通信、解码、搜索和最终检查全部计费。新开发前锁定廉价多次搜索预算、排序并列规则及超时计分；确认前冻结实例级多重比较区间。先冻结实现和新数据，再评测三个固定检查点，不得复用E37验证挑部署预算。",
         "gate": "三个训练种子均在完整PAR-2上至少胜过全部廉价控制5%，求解数不减且各规模无害；过开发门才生成独立确认。正确性、超时回退与CPU/原生一致性必须先通过。",
-        "stop": "E38 廉价32首步总体更快但n24退化；E39–E45 是同 cohort 复测且均未过门；E46 运行时重试慢于 random32，E47 等预算学习排序仅接近基线，E48 生命周期 portfolio 冷启动退化。E49 因 cache hit=0、E50 因 probe 超预算均不能作为有效结论。E51 的驻留优势来自候选预算污染，E52 惰性修复后冷启动仅快1.7%、驻留慢2.3%，仍未过全成本门。"
+        "stop": "E38 廉价32首步总体更快但n24退化；E39–E45 是同 cohort 复测且均未过门；E46 运行时重试慢于 random32，E47 等预算学习排序仅接近基线，E48 生命周期 portfolio 冷启动退化。E49 因 cache hit=0、E50 因 probe 超预算均不能作为有效结论。E51 的驻留优势来自候选预算污染，E52 惰性修复后无稳定收益，E53 单次 fallback 反而退化。piggyback 变体停止，下一阶段只改候选质量并重新定义可通过门。"
       }
     ],
-    "sha256": "188451b77b6bf4a65515f89ce3c6833657ead2db4a7bededb740906b959a513b"
+    "sha256": "a4471dd1429123677c3fbd9a8757905819e83a05204606b290ea4f0a9a430c2f"
   },
   "pilot": {
     "id": "E26",
@@ -6739,6 +6739,52 @@
       "learning_pass": false,
       "cheap_prediction": true,
       "scope": "E52 lazy piggyback runtime fallback development; no confirmation"
+    },
+    "oneshot_followup": {
+      "sha256": "9f0fcc0cd1d37d3499184084dfabd4e1259461d9da5c4ff41d989cdda4d02bd5",
+      "phase": "terminal",
+      "instances": 128,
+      "trials": 384,
+      "cells": 6144,
+      "regimes": {
+        "cold": {
+          "random32": {
+            "par2_ms": 24.920791814414162,
+            "solved": 384,
+            "candidates": 315
+          },
+          "piggyback_pair": {
+            "par2_ms": 26.95682566021181,
+            "solved": 384,
+            "candidates": 176
+          },
+          "pair42": {
+            "par2_ms": 27.492191625545576,
+            "solved": 384,
+            "candidates": 228
+          }
+        },
+        "resident": {
+          "random32": {
+            "par2_ms": 6.343566955668696,
+            "solved": 384,
+            "candidates": 315
+          },
+          "piggyback_pair": {
+            "par2_ms": 9.57210987204841,
+            "solved": 384,
+            "candidates": 176
+          },
+          "pair42": {
+            "par2_ms": 9.620870521757752,
+            "solved": 384,
+            "candidates": 228
+          }
+        }
+      },
+      "learning_pass": false,
+      "cheap_prediction": true,
+      "scope": "E53 one-shot lazy piggyback development; no confirmation"
     }
   }
 }</script><script>
@@ -6826,7 +6872,8 @@ function renderNativeFirst(){
  const gate50=u.runtime_gate_followup?`<article class="panel alert"><h3>E50 运行时门控测量更正 · probe 超出候选预算</h3><p>E50 的 0.15 ms probe 被计入 1 ms graph budget，导致 runtime_gate 在 cold 346/384、resident 323/384 次 rollouts=0；这是预算实现失败，不是否定运行时信号。下一步改为复用同一 solver 的已支付状态，禁止独立 probe。</p></article>`:'';
  const pig=u.piggyback_followup?`<article class="panel"><h3>E51 piggyback runtime fallback · 驻留有信号但候选覆盖不足</h3><p>首轮 random32 solver 未解决时才在同一 solver 上尝试 learned pair42，无独立 probe。冷启动 ${u.piggyback_followup.regimes.cold.piggyback_pair.par2_ms.toFixed(3)} ms（random32 ${u.piggyback_followup.regimes.cold.random32.par2_ms.toFixed(3)}），驻留 ${u.piggyback_followup.regimes.resident.piggyback_pair.par2_ms.toFixed(3)} ms（random32 ${u.piggyback_followup.regimes.resident.random32.par2_ms.toFixed(3)}）；驻留约快 15.5%，但候选完成 ${u.piggyback_followup.regimes.resident.piggyback_pair.candidates}/${u.piggyback_followup.regimes.resident.random32.candidates}，未通过跨规模/生命周期全成本门。</p></article>`:'';
  const lazy=u.lazy_followup?`<article class="panel"><h3>E52 lazy piggyback · 修复预算污染后优势消失</h3><p>learned 候选改为首轮未解决后才惰性生成，首轮 random32 覆盖不再被挤占。冷启动 ${u.lazy_followup.regimes.cold.piggyback_pair.par2_ms.toFixed(3)} ms（random32 ${u.lazy_followup.regimes.cold.random32.par2_ms.toFixed(3)}），驻留 ${u.lazy_followup.regimes.resident.piggyback_pair.par2_ms.toFixed(3)} ms（random32 ${u.lazy_followup.regimes.resident.random32.par2_ms.toFixed(3)}）；冷启动仅约 1.7% 改善、驻留反而约慢 2.3%，全成本门失败。</p></article>`:'';
- target.innerHTML=base+correction+next+online+gate+phase+one+tail+conditional+runtime+wide+portfolio+cache+gate50+pig+lazy+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
+ const oneshot=u.oneshot_followup?`<article class="panel"><h3>E53 one-shot fallback · 仍然退化，停止同类堆叠</h3><p>只生成一个 learned completion 以压低 fallback 成本，冷启动 ${u.oneshot_followup.regimes.cold.piggyback_pair.par2_ms.toFixed(3)} ms、驻留 ${u.oneshot_followup.regimes.resident.piggyback_pair.par2_ms.toFixed(3)} ms，均慢于 random32 ${u.oneshot_followup.regimes.cold.random32.par2_ms.toFixed(3)} / ${u.oneshot_followup.regimes.resident.random32.par2_ms.toFixed(3)} ms。piggyback 路线在 E52/E53 均未过门，后续转向候选质量而非继续调 fallback 次数。</p></article>`:'';
+ target.innerHTML=base+correction+next+online+gate+phase+one+tail+conditional+runtime+wide+portfolio+cache+gate50+pig+lazy+oneshot+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
 }
 function renderStability(){
  const u=data.stability,target=document.getElementById('stability-progress');

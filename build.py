@@ -809,6 +809,14 @@ def native_first_progress(repo):
             for regime in ['cold','resident']:
                 xv[regime]={a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384)) for a in ['random32','piggyback_pair','pair42']}
             result['lazy_followup']=dict(sha256=hashlib.sha256(lazy.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=xv,learning_pass=False,cheap_prediction=True,scope='E52 lazy piggyback runtime fallback development; no confirmation')
+        one=repo/'experiments/native_first_20260913_e53/dev/RESULTS.json'
+        if one.exists() and not (repo/'experiments/native_first_20260913_e53/test').exists():
+            xr=json.loads(one.read_text())
+            if xr.get('cells')!=6144 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E53 gate')
+            xv={}
+            for regime in ['cold','resident']:
+                xv[regime]={a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384)) for a in ['random32','piggyback_pair','pair42']}
+            result['oneshot_followup']=dict(sha256=hashlib.sha256(one.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=xv,learning_pass=False,cheap_prediction=True,scope='E53 one-shot lazy piggyback development; no confirmation')
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
