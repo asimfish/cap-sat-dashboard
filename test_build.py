@@ -249,7 +249,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),16)
+        self.assertEqual(len(plan['actions']),17)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -267,6 +267,9 @@ class CollectorTests(unittest.TestCase):
         self.assertEqual(actions['A13']['status'],'E36 局部信号 · 三种子门未过')
         self.assertEqual(actions['A14']['status'],'E37 成对小网络通过训练门')
         self.assertEqual(actions['A15']['status'],'E60 同图同核冷启动快27.4%；模型优势仍未建立')
+        self.assertIn('E61',actions['A16']['status'])
+        self.assertIn('需另做全成本评估',actions['A16']['gate'])
+        self.assertIn('不足8小时',actions['A16']['stop'])
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:

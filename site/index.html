@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-14T21:37:20.756693+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-14T21:40:58.572866+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -28,7 +28,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-14T21:37:20.756693+00:00",
+  "generated": "2026-09-14T21:40:58.572866+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3079,7 +3079,8 @@
           "A8",
           "A12",
           "A13",
-          "A15"
+          "A15",
+          "A16"
         ],
         "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35",
         "evidence_level": "历史报告 + 后续局部审计；不是普遍加速"
@@ -3402,9 +3403,23 @@
         "method": "所有臂共用有界常驻接口和完整SAT检查。保留默认、动态度数、随机多次搜索、匹配首步的静态/随机/未训练控制。冷启动总成本包含加载与预热；驻留成本按预先冻结的实例数摊销，不得另列后排除。单例预测、解析、通信、解码、搜索和最终检查全部计费。新开发前锁定廉价多次搜索预算、排序并列规则及超时计分；确认前冻结实例级多重比较区间。先冻结实现和新数据，再评测三个固定检查点，不得复用E37验证挑部署预算。",
         "gate": "三个训练种子均在完整PAR-2上至少胜过全部廉价控制5%，求解数不减且各规模无害；过开发门才生成独立确认。正确性、超时回退与CPU/原生一致性必须先通过。",
         "stop": "E39–E45同cohort复测不能累加独立样本；E49缓存调度、E50预算、E51–E53执行路径缺陷使算法结论不可用；E54的learned_candidate在fallback前序列化，不能据此断言零触发。E55/E56证实驻留缓存工程信号，未建立学习优势。E57仅n24单轮且漏计退出，撤回约3请求回本；E56与E59跨cohort差额不支持37%因果收益，分层路由未上线。E60同图、同核、同策略、同二进制的3轮配对：启动全流程17.802→12.921ms，快27.4%；节省4.880ms的同时95%区间[4.558,5.212]，全部求解且候选/赋值/冲突数一致。Affinity-v2修复错误二进制导入和漏计冷启动/退出后，在128新图上完成4,608次；真实驻留命中768/1,152，全成本5.993→5.240ms，改善12.6%，节省区间[0.590,0.901]ms，三轮及四规模均改善。冷启动11.648→11.686ms未过门，不把3轮当384独立图。下一步所有对照共用已验证基础设施，冻结首次/重复请求混合队列及完整生命周期，再测三训练种子的学习净收益；该混合队列尚未运行。确认集与论文优势结论仍未建立。"
+      },
+      {
+        "id": "A16",
+        "title": "E61：八小时全成本队列与多目标候选训练",
+        "priority": "P1 · 已下发持续探索",
+        "status": "调度器已启动；运行状态与计数见页面上方 E61",
+        "cost": "累计8小时有效实验墙钟，8路CPU评测、3路共享GPU、最多4核数据准备；预定义432项训练，是否完成以实测计数为准",
+        "depends_on": [
+          "A15"
+        ],
+        "hypothesis": "统一已验证的启动和缓存路径后，扩大困难图、批生命周期及预算覆盖；更直接的可行性/成对收益监督可能减少无效首步尝试，但不预设会改善全成本。",
+        "method": "CPU四类队列：n24/32/48/64匹配分布、困难n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算；所有控制及三个既有模型均用同一启动器、缓存语义和32首步上限。另用8份新训练/验证数据，2模型×3损失×3学习率×3种子共432项GPU候选。每项最多12000步，连续8次验证不改善则早停；全部结果保留，不挑训练种子。",
+        "gate": "首先验收有效运行时长、可复核结果与完整成本账目。新训练权重仅导出候选，需另做全成本评估；验证进步、队列跑满、工程降本均不等于学习或论文端到端优势。",
+        "stop": "累计有实验执行达到8小时后停止派发并收尾；资源安全暂停不冒充有效运行，10小时墙钟上限或人工STOP会如实记录不足8小时。GPU候选提前跑完不做无意义空转，CPU新图评测继续。数据与代码哈希漂移、显存/磁盘风险和连续失败触发保护，不终止其他用户任务。"
       }
     ],
-    "sha256": "e691955e32d532f5491b972abcadf2b95caf5e71db7396d83bd0b27542af9aee"
+    "sha256": "d4a0fbc73eeee963b3296288256140dde4e063d5fd8167a5eee0e7dffad109b6"
   },
   "pilot": {
     "id": "E26",
@@ -7214,20 +7229,20 @@
   },
   "overnight": {
     "phase": "running",
-    "observed": "2026-09-14T21:37:18.682671+00:00",
+    "observed": "2026-09-14T21:40:55.689788+00:00",
     "started_at": "2026-09-14T21:36:07.945367+00:00",
-    "active_s": 70.60167679004371,
+    "active_s": 287.676906099543,
     "target_active_s": 28800,
     "counts": {
-      "cpu_jobs": 26,
-      "training_jobs": 5,
-      "cells": 29952,
-      "training_steps": 15250
+      "cpu_jobs": 117,
+      "training_jobs": 33,
+      "cells": 134784,
+      "training_steps": 100000
     },
     "running": {
       "cpu": 8,
       "train": 3,
-      "data": 1
+      "data": 0
     },
     "failed_jobs": 0,
     "training_queue": 432,
@@ -7236,7 +7251,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": true,
-    "earliest_target_at": "2026-09-15T05:36:11.480168+00:00",
+    "earliest_target_at": "2026-09-15T05:36:12.111475+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   }
 }</script><script>
