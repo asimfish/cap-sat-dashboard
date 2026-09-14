@@ -1032,6 +1032,62 @@ def collect(repo):
         r['updated'] = dt.datetime.fromtimestamp(r['updated'], dt.timezone.utc).isoformat() if r['updated'] else None
     return {'generated':dt.datetime.now(dt.timezone.utc).isoformat(), 'source_sha256':digest.hexdigest(), 'source':'E17/E19 n350 solve_row records', 'runs':runs, 'results':results, 'truth':{g:sum(truth.get(i,'UNKNOWN') == g for i in range(300)) for g in ['SAT','UNSAT','UNKNOWN']}, 'issues':json.loads((HERE / 'issues.json').read_text()), 'native':native_progress(repo)}
 
+def overnight_progress(repo, now=None):
+    """E61 duration/throughput only; never export job arguments or performance claims."""
+    root=repo/'experiments/overnight_20260915_e61'
+    try:
+        frozen=(root/'CAMPAIGN.json').read_bytes();cfg=json.loads(frozen)
+        state=json.loads((root/'STATUS.json').read_text())
+        digest=hashlib.sha256(frozen).hexdigest()
+        if state['frozen_sha256']!=digest or cfg['target_active_s']!=28800:
+            return None
+        def number(v):
+            if type(v) not in (int,float) or not math.isfinite(v) or v<0:
+                raise ValueError('invalid duration/count')
+            return v
+        def date(v):
+            d=dt.datetime.fromisoformat(v)
+            if d.tzinfo is None:raise ValueError('timestamp must include timezone')
+            return d
+        started=date(state['started_at']);observed=date(state['observed'])
+        now=now or dt.datetime.now(dt.timezone.utc)
+        age=(now-observed).total_seconds()
+        active=number(state['active_s'])
+        if active>(observed-started).total_seconds()+2:return None
+        phases={'starting','running','paused_resources','draining','complete','stopped_incomplete'}
+        if state['phase'] not in phases:return None
+        if state['phase']=='complete' and active<cfg['target_active_s']:return None
+        counts=dict(cpu_jobs=0,training_jobs=0,cells=0,training_steps=0)
+        seen=set()
+        for row in state['completed']:
+            if row['id'] in seen:raise ValueError('duplicate completed job')
+            seen.add(row['id'])
+            folder=(root/row['job_path']).resolve().parent
+            if not folder.is_relative_to(root.resolve()):raise ValueError('out of scope receipt')
+            body=(folder/'RESULTS.json').read_bytes()
+            if hashlib.sha256(body).hexdigest()!=row['result_sha256']:return None
+            result=json.loads(body)
+            if result['phase']!='terminal' or row['kind']!=result['kind']:return None
+            if row['kind']=='cpu':
+                counts['cpu_jobs']+=1;counts['cells']+=number(result['cells'])
+            if row['kind']=='train':
+                counts['training_jobs']+=1;counts['training_steps']+=number(result['steps'])
+        running={kind:sum(r['kind']==kind for r in state['running']) for kind in ['cpu','train','data']}
+        phase=state['phase']
+        fresh=-5<=age<=120
+        if not fresh and phase not in ['complete','stopped_incomplete']:phase='stale'
+        return dict(phase=phase,observed=observed.isoformat(),started_at=started.isoformat(),
+            active_s=active,target_active_s=cfg['target_active_s'],counts=counts,
+            running=running,failed_jobs=len(state['failed']),training_queue=len(cfg['training_jobs']),
+            cpu_slots=cfg['cpu_workers'],gpu_slots=len(cfg['gpus']),frozen_sha256=digest,
+            duration_target_met=state['phase']=='complete' and active>=cfg['target_active_s'],
+            heartbeat_fresh_at_build=fresh,
+            earliest_target_at=(now+dt.timedelta(seconds=max(0,cfg['target_active_s']-active))).isoformat(),
+            scope='探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立')
+    except (OSError,ValueError,KeyError,TypeError,AttributeError):
+        return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1052,6 +1108,7 @@ def main():
     data['decoder_utility']=decoder_utility_progress(args.repo.resolve())
     data['stability']=stability_progress(args.repo.resolve())
     data['native_first']=native_first_progress(args.repo.resolve())
+    data['overnight']=overnight_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

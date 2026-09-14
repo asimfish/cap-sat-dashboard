@@ -4,11 +4,46 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from build import stability_progress
+from build import stability_progress, overnight_progress
 from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_overnight_requires_frozen_config_and_excludes_private_process_data(self):
+        import datetime as dt
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/overnight_20260915_e61';root.mkdir(parents=True)
+            cfg=dict(target_active_s=28800,training_jobs=[{}]*432,cpu_workers=8,
+                     gpus=[{'uuid':'PRIVATE_GPU'}]*3,hashes={'PRIVATE_PATH':'PRIVATE_HASH'})
+            raw=json.dumps(cfg).encode();(root/'CAMPAIGN.json').write_bytes(raw)
+            state=dict(frozen_sha256=hashlib.sha256(raw).hexdigest(),phase='running',
+                started_at='2026-09-15T00:00:00+00:00',observed='2026-09-15T00:01:00+00:00',active_s=50,
+                completed=[],failed=[],running=[dict(kind='train',pid=999,job_path='PRIVATE_JOB')])
+            def save(): (root/'STATUS.json').write_text(json.dumps(state))
+            save();now=dt.datetime.fromisoformat(state['observed'])
+            out=overnight_progress(repo,now)
+            self.assertEqual(out['phase'],'running');self.assertEqual(out['running']['train'],1)
+            for word in ['PRIVATE','pid','uuid','job_path']:self.assertNotIn(word,json.dumps(out))
+            self.assertEqual(overnight_progress(repo,now+dt.timedelta(minutes=3))['phase'],'stale')
+            state['phase']='complete';save();self.assertIsNone(overnight_progress(repo,now))
+            state['phase']='running';state['active_s']=999;save();self.assertIsNone(overnight_progress(repo,now))
+            state['active_s']=50;state['frozen_sha256']='wrong';save();self.assertIsNone(overnight_progress(repo,now))
+
+    def test_overnight_counts_only_hash_bound_terminal_job_receipts(self):
+        import datetime as dt
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/overnight_20260915_e61';folder=root/'jobs/cpu-1/attempt-1';folder.mkdir(parents=True)
+            cfg=dict(target_active_s=28800,training_jobs=[],cpu_workers=8,gpus=[{}]*3)
+            frozen=json.dumps(cfg).encode();(root/'CAMPAIGN.json').write_bytes(frozen)
+            body=json.dumps(dict(phase='terminal',kind='cpu',cells=1152)).encode();(folder/'RESULTS.json').write_bytes(body)
+            receipt=dict(id='cpu-1',kind='cpu',job_path='jobs/cpu-1/attempt-1/JOB.json',result_sha256=hashlib.sha256(body).hexdigest())
+            state=dict(phase='running',frozen_sha256=hashlib.sha256(frozen).hexdigest(),active_s=50,
+                started_at='2026-09-15T00:00:00+00:00',observed='2026-09-15T00:01:00+00:00',
+                completed=[receipt],running=[],failed=[])
+            (root/'STATUS.json').write_text(json.dumps(state));now=dt.datetime.fromisoformat(state['observed'])
+            self.assertEqual(overnight_progress(repo,now)['counts']['cells'],1152)
+            (folder/'RESULTS.json').write_text('{}');self.assertIsNone(overnight_progress(repo,now))
+
     def test_stability_selection_requires_all_seeds_scales_and_safe_aggregates(self):
         import math
         with tempfile.TemporaryDirectory() as d:
