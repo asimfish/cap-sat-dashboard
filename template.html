@@ -112,7 +112,8 @@ function renderNativeFirst(){
  const lazy=u.lazy_followup?`<article class="panel alert"><h3>E52 执行路径审计：同一缺陷延续</h3><p>E52 虽声明惰性 fallback，但仍继承了 piggyback 首轮只允许 1 次 completion 的实现；当前 26.034/5.383 ms 数据不能证明算法收益或退化。需要先补路径回归测试。</p></article>`:'';
  const oneshot=u.oneshot_followup?`<article class="panel alert"><h3>E53 执行路径审计：不生成性能结论</h3><p>E53 仍使用未修正的 piggyback 实现，不能据此关闭运行时路线。E51–E53 全部降级为无效工程试跑；下一步先修复并验证首轮预算、solver 触发和 fallback 语义，再决定是否重跑。</p></article>`:'';
  const corr=u.corrected_followup?`<article class="panel"><h3>E54 corrected piggyback · fallback 零触发</h3><p>修复后首轮候选与 random32 均为 309/384，首轮 solver 全部在截止时间前返回，learned fallback 触发 0 次；结果与 random32 等价，当前 workload 没有可利用的未决尾部。</p></article>`:'';
- target.innerHTML=base+correction+next+online+gate+phase+one+tail+conditional+runtime+wide+portfolio+cache+gate50+pig+lazy+oneshot+corr+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
+ const affinity=u.affinity_probe?`<article class="panel"><h3>E55 cache affinity diagnostic · 解析成本明确下降，端到端待验证</h3><p>固定 graph→worker 后得到 768 个可审计 cache hit；cache_random32 的解析均值 ${u.affinity_probe.cache_random32.parse_mean_ms.toFixed(3)} ms，而未缓存 random32 为 ${u.affinity_probe.random32.parse_mean_ms.toFixed(3)} ms（下降超过 99%）。native 总耗时受 solver 波动影响，当前诊断不足以宣称端到端优势；下一步需用完整冷/驻留 factorial 重跑。</p></article>`:'';
+ target.innerHTML=base+correction+next+online+gate+phase+one+tail+conditional+runtime+wide+portfolio+cache+gate50+pig+lazy+oneshot+corr+affinity+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
 }
 function renderStability(){
  const u=data.stability,target=document.getElementById('stability-progress');

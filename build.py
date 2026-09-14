@@ -823,6 +823,17 @@ def native_first_progress(repo):
             if xr.get('cells')!=6144 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E54 gate')
             xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384)) for a in ['random32','piggyback_pair']} for regime in ['cold','resident']}
             result['corrected_followup']=dict(sha256=hashlib.sha256(corr.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=xv,learning_pass=False,cheap_prediction=True,scope='E54 corrected piggyback semantics; no fallback triggered')
+        hyb=repo/'experiments/native_first_20260913_e55/dev/RESULTS.json'
+        if hyb.exists() and not (repo/'experiments/native_first_20260913_e55/test').exists():
+            xr=json.loads(hyb.read_text())
+            if xr.get('cells')!=6144 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E55 gate')
+            xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384)) for a in ['random32','hybrid55','pair42']} for regime in ['cold','resident']}
+            result['hybrid55_followup']=dict(sha256=hashlib.sha256(hyb.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=xv,learning_pass=False,cheap_prediction=True,scope='E55 hybrid candidate ranking development; no confirmation')
+        ap=repo/'experiments/native_first_20260915_cache_affinity_probe.json'
+        if ap.exists():
+            ar=json.loads(ap.read_text())
+            if ar.get('cache_hit_cells')!=768 or ar.get('cache_random32',{}).get('cells')!=1152 or ar.get('random32',{}).get('cells')!=1152:raise ValueError('cache affinity probe')
+            result['affinity_probe']=dict(sha256=hashlib.sha256(ap.read_bytes()).hexdigest(),cells=1152,cache_hit_cells=768,random32=dict(parse_mean_ms=n(ar['random32']['parse_mean_ms']),native_mean_ms=n(ar['random32']['native_mean_ms'])),cache_random32=dict(parse_mean_ms=n(ar['cache_random32']['parse_mean_ms']),native_mean_ms=n(ar['cache_random32']['native_mean_ms'])),scope='E55 affinity-corrected cache diagnostic; not full-cost confirmation')
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
