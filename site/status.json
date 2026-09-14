@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-14T20:33:14.812353+00:00",
+  "generated": "2026-09-14T21:12:53.429326+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3363,19 +3363,19 @@
       {
         "id": "A15",
         "title": "把通过验证门的小策略转为可计费的原生求解路径",
-        "priority": "P1 · 执行路径审计中，尚无有效优势证据",
-        "status": "E59 cold 去绑核降37%；分层路由可避免启动回归",
-        "cost": "E38/E46/E47/E48/E49/E50/E51/E52/E53/E54/E55/E56/E59十二批独立图；E55为2,304、E56/E59各1,536个冷/驻留全成本单元；E57/E58为工程诊断；E39–E45为同 cohort 复测",
+        "priority": "P1 · 冷启动工程改善已验证，模型优势未建立",
+        "status": "E60 同图同核冷启动快27.4%；模型优势仍未建立",
+        "cost": "E55为2,304、E56/E59各1,536个单元；E60复用E59全部128图，3,456次配对工程测量，不新增独立样本",
         "depends_on": [
           "A14"
         ],
         "hypothesis": "保持所学首步及完成/交换语义，同时原生实现241参数推理，可能把验证中的可行覆盖改善转成搜索节省；尚无净收益证据。",
         "method": "所有臂共用有界常驻接口和完整SAT检查。保留默认、动态度数、随机多次搜索、匹配首步的静态/随机/未训练控制。冷启动总成本包含加载与预热；驻留成本按预先冻结的实例数摊销，不得另列后排除。单例预测、解析、通信、解码、搜索和最终检查全部计费。新开发前锁定廉价多次搜索预算、排序并列规则及超时计分；确认前冻结实例级多重比较区间。先冻结实现和新数据，再评测三个固定检查点，不得复用E37验证挑部署预算。",
         "gate": "三个训练种子均在完整PAR-2上至少胜过全部廉价控制5%，求解数不减且各规模无害；过开发门才生成独立确认。正确性、超时回退与CPU/原生一致性必须先通过。",
-        "stop": "E38 廉价32首步总体更快但n24退化；E39–E45 是同 cohort 复测且均未过门；E46–E48 保留为有效负结果。E49 因 cache hit=0、E50 因 probe 超预算、E51–E53 因 piggyback 执行路径偏离预注册语义，均不能作为算法结论。E54 修正后 fallback 0/384、与 random32 等价。E55 在128张去重图、2,304个冷/驻留单元上固定 graph→worker，驻留缓存命中256/384次；解析中位数从约1.158ms降至0.002ms，但cache_pair42全成本门失败。E56 在全新128张图、1,536个单元上只比较缓存基础设施，驻留门通过、cold门失败。E57 诊断显示持久 worker 约3个请求开始回本。E59 在全新128张图、1,536个单元上移除cold taskset，random32从约17.689ms降至11.158ms（约37%），但cache_random32仍慢4.8%；因此采用cold=random32、resident=cache_random32的分层路由，避免启动回归。该分层策略改善实际部署，但仍不是单一臂跨生命周期5%优势，不生成确认集。"
+        "stop": "E39–E45同cohort复测不能累加独立样本；E49缓存调度、E50预算、E51–E53执行路径缺陷使算法结论不可用；E54修正后fallback零触发。E55/E56证实驻留缓存工程信号，未建立学习优势。E57仅n24单轮且漏计退出，撤回约3请求回本；E56与E59跨cohort差额不支持37%因果收益，分层路由未上线。E60同图、同核、同策略、同二进制的3轮配对：启动全流程17.802→12.921ms，快27.4%；节省4.880ms的同时95%区间[4.558,5.212]，全部求解且候选/赋值/冲突数一致。仅新增可复用实验启动器，不修改冻结旧结果；下一步所有对照共同使用该基础设施，再测完整队列生命周期和三训练种子的学习净收益。确认集与论文优势结论仍未建立。"
       }
     ],
-    "sha256": "206298d428b22f3e27c5621aec0398d27a373d76d5f55e6e0d49c431ca8e0c25"
+    "sha256": "dffe46469d07f18c66e6d3200e16b6f4bc82164f6d5022c1237b4f62849f1bc5"
   },
   "pilot": {
     "id": "E26",
@@ -6799,7 +6799,7 @@
       },
       "learning_pass": false,
       "cheap_prediction": true,
-      "resident_cache_hit_requests": 256,
+      "resident_repeat_reuse_requests": 256,
       "scope": "E55 graph-to-worker affinity factorial; parse cache confirmed but learned ranking gate failed"
     },
     "cache_only_followup": {
@@ -6841,7 +6841,7 @@
       "learning_pass": false,
       "resident_gate": true,
       "cold_gate": false,
-      "resident_cache_hit_requests": 256,
+      "resident_repeat_reuse_requests": 256,
       "scope": "E56 independent cache-only replication; resident gate passes, cold lifecycle gate fails"
     },
     "pool_break_even": {
@@ -6910,6 +6910,69 @@
       "resident_gate": true,
       "cold_gate": false,
       "scope": "E59 cold taskset removal; cold should route random32, resident can route cache_random32"
+    },
+    "paired_launch_followup": {
+      "sha256": "fdc608c15dff4f1d2a5a22686ff730294aa1fab31632b0adb92d1afca106b593",
+      "phase": "terminal",
+      "graphs": 128,
+      "cells": 3456,
+      "trials_per_arm": 1152,
+      "regimes": {
+        "taskset": {
+          "par2_ms": 17.801524458465995,
+          "median_ms": 15.924814622849226,
+          "setup_mean_ms": 11.25334571002491,
+          "native_mean_ms": 4.214736962038038,
+          "audited_total_ms": 19.771975308281576,
+          "solved": 1152
+        },
+        "inherited": {
+          "par2_ms": 12.92141736970128,
+          "median_ms": 11.076286435127258,
+          "setup_mean_ms": 6.461068996739211,
+          "native_mean_ms": 4.203417713547544,
+          "audited_total_ms": 14.84342369723082,
+          "solved": 1152
+        },
+        "unbound": {
+          "par2_ms": 10.826049545559927,
+          "median_ms": 8.752101566642523,
+          "setup_mean_ms": 5.319337772056719,
+          "native_mean_ms": 3.13600278847536,
+          "audited_total_ms": 12.831598742599859,
+          "solved": 1152
+        }
+      },
+      "comparison": {
+        "gain_ms": 4.880107088764715,
+        "gain_pct": 27.413984123386967,
+        "simultaneous95_lower_ms": 4.558106079700034,
+        "simultaneous95_upper_ms": 5.21230611363232
+      },
+      "by_scale": {
+        "24": {
+          "taskset": 13.93688693901317,
+          "inherited": 9.478683201854842,
+          "unbound": 8.427141635264787
+        },
+        "32": {
+          "taskset": 15.391872975871793,
+          "inherited": 10.674468416254967,
+          "unbound": 8.765421865973622
+        },
+        "48": {
+          "taskset": 17.481473423281894,
+          "inherited": 12.231787954482975,
+          "unbound": 10.781349061289802
+        },
+        "64": {
+          "taskset": 24.395864495697122,
+          "inherited": 19.30072990621233,
+          "unbound": 15.330285619711503
+        }
+      },
+      "output_mismatches": 0,
+      "scope": "同图同核配对工程复测；非独立确认、非模型优势"
     },
     "affinity_probe": {
       "sha256": "c9424ce6f5f007d23c3df1d8c0a6379718c4d3b907440e6f683b0497bd919a38",

@@ -670,6 +670,56 @@ def stability_progress(repo):
             no_dev=True,no_test=True,scope=r['scope'],phase='terminal')
     except (OSError,ValueError,KeyError,TypeError):return None
 
+def paired_launch_progress(repo):
+    """E60 is a paired engineering replay, never a learned-policy win."""
+    folder = repo / 'experiments/native_first_20260915_e60/run'
+    try:
+        raw = (folder / 'RESULTS.json').read_bytes()
+        r = json.loads(raw)
+        audit = json.loads((folder / 'AUDIT.json').read_bytes())
+        fh = hashlib.sha256((folder / 'FROZEN.json').read_bytes()).hexdigest()
+        digest = hashlib.sha256(raw).hexdigest()
+        if audit.get('verdict') != 'integrity_pass' or audit.get('results_sha256') != digest:
+            return None
+        if r.get('frozen_sha256') != fh or audit.get('frozen_sha256') != fh:
+            return None
+        if (r.get('cells'), r.get('graphs'), r.get('trials_per_arm'), r.get('repeats')) != (3456,128,1152,3):
+            return None
+        if audit.get('cells') != 3456 or audit.get('checked_masks') != 3456:
+            return None
+        if r.get('output_mismatches') != 0 or audit.get('output_mismatches') != 0:
+            return None
+        if r.get('independent_confirmation') is not False or r.get('learned_policy_advantage') is not False:
+            return None
+        arms = ['taskset','inherited','unbound']
+        if set(r['summaries']) != set(arms):
+            return None
+        def finite(x):
+            if type(x) not in (int,float) or not math.isfinite(x) or x < 0:
+                raise ValueError('invalid launch cost')
+            return x
+        regimes = {}
+        for a in arms:
+            s = r['summaries'][a]
+            if (s['count'],s['solved'],s['errors']) != (1152,1152,0):
+                return None
+            regimes[a] = dict(par2_ms=finite(s['par2_ms']),median_ms=finite(s['raw_s']['median']),
+                setup_mean_ms=finite(s['setup_s']['mean']),native_mean_ms=finite(s['native_wall_ms']['mean']),
+                audited_total_ms=finite(s['audited_total_s']['mean']),solved=s['solved'])
+        c = r['contrasts']['inherited_vs_taskset']
+        comparison = {k: finite(c[k]) for k in ['gain_ms','gain_pct','simultaneous95_lower_ms','simultaneous95_upper_ms']}
+        if not comparison['simultaneous95_lower_ms'] <= comparison['gain_ms'] <= comparison['simultaneous95_upper_ms']:
+            return None
+        if set(r['by_scale']) != {'24','32','48','64'}:
+            return None
+        scales = {k: {a: finite(v[a]['par2_ms']) for a in arms} for k,v in r['by_scale'].items()}
+        return dict(sha256=digest,phase='terminal',graphs=128,cells=3456,trials_per_arm=1152,
+                    regimes=regimes,comparison=comparison,by_scale=scales,output_mismatches=0,
+                    scope='同图同核配对工程复测；非独立确认、非模型优势')
+    except (OSError,ValueError,KeyError,TypeError):
+        return None
+
+
 def native_first_progress(repo):
     """E38 native/full-cost aggregate; never export raw requests, paths or PIDs."""
     root=repo/'experiments/native_first_20260913_e38';dev=root/'dev'
@@ -828,13 +878,13 @@ def native_first_progress(repo):
             xr=json.loads(affinity.read_text())
             if xr.get('cells')!=2304 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E55 affinity gate')
             xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384),parse_median_ms=n(xr['summaries'][regime][a]['components']['parse_s']['median']*1000)) for a in ['random32','cache_random32','cache_pair42']} for regime in ['cold','resident']}
-            result['affinity_followup']=dict(sha256=hashlib.sha256(affinity.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=2304,regimes=xv,learning_pass=False,cheap_prediction=True,resident_cache_hit_requests=256,scope='E55 graph-to-worker affinity factorial; parse cache confirmed but learned ranking gate failed')
+            result['affinity_followup']=dict(sha256=hashlib.sha256(affinity.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=2304,regimes=xv,learning_pass=False,cheap_prediction=True,resident_repeat_reuse_requests=256,scope='E55 graph-to-worker affinity factorial; parse cache confirmed but learned ranking gate failed')
         cache_only=repo/'experiments/native_first_20260915_e56/dev/RESULTS.json'
         if cache_only.exists() and not (repo/'experiments/native_first_20260915_e56/test').exists():
             xr=json.loads(cache_only.read_text())
             if xr.get('cells')!=1536 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E56 gate')
             xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384),parse_median_ms=n(xr['summaries'][regime][a]['components']['parse_s']['median']*1000)) for a in ['random32','cache_random32']} for regime in ['cold','resident']}
-            result['cache_only_followup']=dict(sha256=hashlib.sha256(cache_only.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=1536,regimes=xv,learning_pass=False,resident_gate=bool(xr['gates']['resident']['cache_random32']),cold_gate=bool(xr['gates']['cold']['cache_random32']),resident_cache_hit_requests=256,scope='E56 independent cache-only replication; resident gate passes, cold lifecycle gate fails')
+            result['cache_only_followup']=dict(sha256=hashlib.sha256(cache_only.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=1536,regimes=xv,learning_pass=False,resident_gate=bool(xr['gates']['resident']['cache_random32']),cold_gate=bool(xr['gates']['cold']['cache_random32']),resident_repeat_reuse_requests=256,scope='E56 independent cache-only replication; resident gate passes, cold lifecycle gate fails')
         pool=repo/'experiments/native_first_20260915_e57_pool_break_even.json'
         if pool.exists():
             xr=json.loads(pool.read_text());
@@ -846,6 +896,9 @@ def native_first_progress(repo):
             if xr.get('cells')!=1536 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E59 gate')
             xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384),parse_median_ms=n(xr['summaries'][regime][a]['components']['parse_s']['median']*1000)) for a in ['random32','cache_random32']} for regime in ['cold','resident']}
             result['affinity_fix_followup']=dict(sha256=hashlib.sha256(affinity_fix.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=1536,regimes=xv,learning_pass=False,resident_gate=bool(xr['gates']['resident']['cache_random32']),cold_gate=bool(xr['gates']['cold']['cache_random32']),scope='E59 cold taskset removal; cold should route random32, resident can route cache_random32')
+        paired = paired_launch_progress(repo)
+        if paired is not None:
+            result['paired_launch_followup'] = paired
         ap=repo/'experiments/native_first_20260915_cache_affinity_probe.json'
         if ap.exists():
             ar=json.loads(ap.read_text())
