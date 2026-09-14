@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-14T19:20:50.080928+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-14T19:30:06.221213+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -27,7 +27,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-14T19:20:50.080928+00:00",
+  "generated": "2026-09-14T19:30:06.221213+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3392,18 +3392,18 @@
         "id": "A15",
         "title": "把通过验证门的小策略转为可计费的原生求解路径",
         "priority": "P1 · 执行路径审计中，尚无有效优势证据",
-        "status": "E55 亲和性复测：驻留缓存降解析成本，但全成本学习门未通过",
-        "cost": "E38/E46/E47/E48/E49/E50/E51/E52/E53/E54/E55十批独立图；E55为2,304个冷/驻留全成本单元；E39–E45为同 cohort 复测",
+        "status": "E56 驻留缓存独立复测通过，冷启动生命周期门未通过",
+        "cost": "E38/E46/E47/E48/E49/E50/E51/E52/E53/E54/E55/E56十一批独立图；E55为2,304、E56为1,536个冷/驻留全成本单元；E39–E45为同 cohort 复测",
         "depends_on": [
           "A14"
         ],
         "hypothesis": "保持所学首步及完成/交换语义，同时原生实现241参数推理，可能把验证中的可行覆盖改善转成搜索节省；尚无净收益证据。",
         "method": "所有臂共用有界常驻接口和完整SAT检查。保留默认、动态度数、随机多次搜索、匹配首步的静态/随机/未训练控制。冷启动总成本包含加载与预热；驻留成本按预先冻结的实例数摊销，不得另列后排除。单例预测、解析、通信、解码、搜索和最终检查全部计费。新开发前锁定廉价多次搜索预算、排序并列规则及超时计分；确认前冻结实例级多重比较区间。先冻结实现和新数据，再评测三个固定检查点，不得复用E37验证挑部署预算。",
         "gate": "三个训练种子均在完整PAR-2上至少胜过全部廉价控制5%，求解数不减且各规模无害；过开发门才生成独立确认。正确性、超时回退与CPU/原生一致性必须先通过。",
-        "stop": "E38 廉价32首步总体更快但n24退化；E39–E45 是同 cohort 复测且均未过门；E46–E48 保留为有效负结果。E49 因 cache hit=0、E50 因 probe 超预算、E51–E53 因 piggyback 执行路径偏离预注册语义，均不能作为算法结论。E54 修正后 fallback 0/384、与 random32 等价。E55 在128张去重图、2,304个冷/驻留单元上固定 graph→worker，驻留缓存命中256/384次；解析中位数从约1.158ms降至0.002ms，但cache_pair42的全成本门失败（冷24.528ms，未过random32的5%优势；驻留9.133ms，在n64输给cache_random32的26.916ms），不生成确认集。下一步只做低风险缓存工程化或转向候选质量，不宣称端到端优势。"
+        "stop": "E38 廉价32首步总体更快但n24退化；E39–E45 是同 cohort 复测且均未过门；E46–E48 保留为有效负结果。E49 因 cache hit=0、E50 因 probe 超预算、E51–E53 因 piggyback 执行路径偏离预注册语义，均不能作为算法结论。E54 修正后 fallback 0/384、与 random32 等价。E55 在128张去重图、2,304个冷/驻留单元上固定 graph→worker，驻留缓存命中256/384次；解析中位数从约1.158ms降至0.002ms，但cache_pair42全成本门失败。E56 在全新128张图、1,536个单元上只比较缓存基础设施：驻留random32/cache_random32为4.457/3.566ms，四规模驻留门通过；冷启动17.689/18.500ms，生命周期门失败。缓存工程收益已独立复现，但尚未形成跨生命周期端到端优势，不生成确认集。"
       }
     ],
-    "sha256": "eeee89505a02ec00fe1e92faa739d2b325e3508afd79f9fc8abaf900d9b325c6"
+    "sha256": "1b663e3dfe6484625b77a8e4a3a5dda1f1c3a351f165ca9d760f15a2dac3a07e"
   },
   "pilot": {
     "id": "E26",
@@ -6830,6 +6830,48 @@
       "resident_cache_hit_requests": 256,
       "scope": "E55 graph-to-worker affinity factorial; parse cache confirmed but learned ranking gate failed"
     },
+    "cache_only_followup": {
+      "sha256": "314e7c5ffe1ed30997a58206419af9c89f05a0ecc0782eac317062c91872f5d8",
+      "phase": "terminal",
+      "instances": 128,
+      "trials": 384,
+      "cells": 1536,
+      "regimes": {
+        "cold": {
+          "random32": {
+            "par2_ms": 17.688661411132973,
+            "solved": 384,
+            "candidates": 319,
+            "parse_median_ms": 1.2071039527649998
+          },
+          "cache_random32": {
+            "par2_ms": 18.49995641047523,
+            "solved": 384,
+            "candidates": 319,
+            "parse_median_ms": 1.206100918355
+          }
+        },
+        "resident": {
+          "random32": {
+            "par2_ms": 4.456500646483619,
+            "solved": 384,
+            "candidates": 319,
+            "parse_median_ms": 1.2059328146250001
+          },
+          "cache_random32": {
+            "par2_ms": 3.566198555442194,
+            "solved": 384,
+            "candidates": 319,
+            "parse_median_ms": 0.0022612512111649997
+          }
+        }
+      },
+      "learning_pass": false,
+      "resident_gate": true,
+      "cold_gate": false,
+      "resident_cache_hit_requests": 256,
+      "scope": "E56 independent cache-only replication; resident gate passes, cold lifecycle gate fails"
+    },
     "affinity_probe": {
       "sha256": "c9424ce6f5f007d23c3df1d8c0a6379718c4d3b907440e6f683b0497bd919a38",
       "cells": 1152,
@@ -6934,7 +6976,8 @@ function renderNativeFirst(){
  const corr=u.corrected_followup?`<article class="panel"><h3>E54 corrected piggyback · fallback 零触发</h3><p>修复后首轮候选与 random32 均为 309/384，首轮 solver 全部在截止时间前返回，learned fallback 触发 0 次；结果与 random32 等价，当前 workload 没有可利用的未决尾部。</p></article>`:'';
  const affinity=u.affinity_probe?`<article class="panel"><h3>E55 cache affinity diagnostic · 解析成本明确下降，端到端待验证</h3><p>固定 graph→worker 后得到 768 个可审计 cache hit；cache_random32 的解析均值 ${u.affinity_probe.cache_random32.parse_mean_ms.toFixed(3)} ms，而未缓存 random32 为 ${u.affinity_probe.random32.parse_mean_ms.toFixed(3)} ms（下降超过 99%）。native 总耗时受 solver 波动影响，当前诊断不足以宣称端到端优势；下一步需用完整冷/驻留 factorial 重跑。</p></article>`:'';
  const affinityFull=u.affinity_followup?`<article class="panel"><h3>E55 graph→worker affinity factorial · 缓存命中但未形成算法优势</h3><p>128 张去重图、384 trials、2,304 个冷/驻留全成本单元；驻留同图三 seed 固定到同一 worker，审计得到 ${u.affinity_followup.resident_cache_hit_requests} 个 cache hit。冷启动 random32 / cache_random32 / cache_pair42 的 PAR-2 为 ${u.affinity_followup.regimes.cold.random32.par2_ms.toFixed(3)} / ${u.affinity_followup.regimes.cold.cache_random32.par2_ms.toFixed(3)} / ${u.affinity_followup.regimes.cold.cache_pair42.par2_ms.toFixed(3)} ms；驻留为 ${u.affinity_followup.regimes.resident.random32.par2_ms.toFixed(3)} / ${u.affinity_followup.regimes.resident.cache_random32.par2_ms.toFixed(3)} / ${u.affinity_followup.regimes.resident.cache_pair42.par2_ms.toFixed(3)} ms。缓存降低驻留解析中位数，但 cache_pair42 未同时胜过 random32 与 cache_random32，学习门未通过，不生成确认集。</p></article>`:'';
- target.innerHTML=base+correction+next+online+gate+phase+one+tail+conditional+runtime+wide+portfolio+cache+gate50+pig+lazy+oneshot+corr+affinity+affinityFull+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
+ const cacheOnly=u.cache_only_followup?`<article class="panel"><h3>E56 cache-only replication · 驻留基础设施门通过，冷启动门失败</h3><p>新鲜去重 128 张图、1,536 个全成本单元；同图三 seed 固定到同一 worker。resident random32 / cache_random32 的 PAR-2 为 ${u.cache_only_followup.regimes.resident.random32.par2_ms.toFixed(3)} / ${u.cache_only_followup.regimes.resident.cache_random32.par2_ms.toFixed(3)} ms，四个规模均通过驻留门；冷启动为 ${u.cache_only_followup.regimes.cold.random32.par2_ms.toFixed(3)} / ${u.cache_only_followup.regimes.cold.cache_random32.par2_ms.toFixed(3)} ms，冷生命周期门未通过。结论是驻留缓存有独立工程收益，不是 learned policy 的端到端确认。</p></article>`:'';
+ target.innerHTML=base+correction+next+online+gate+phase+one+tail+conditional+runtime+wide+portfolio+cache+gate50+pig+lazy+oneshot+corr+affinity+affinityFull+cacheOnly+`<p>原生计算段中位数降低 ${u.compute_median_gain_pct.toFixed(2)}%；这不是端到端求解加速。</p><p class="foot">审计 SHA256 ${esc(u.sha256)}</p>`;
 }
 function renderStability(){
  const u=data.stability,target=document.getElementById('stability-progress');

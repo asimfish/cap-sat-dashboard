@@ -829,6 +829,12 @@ def native_first_progress(repo):
             if xr.get('cells')!=2304 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E55 affinity gate')
             xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384),parse_median_ms=n(xr['summaries'][regime][a]['components']['parse_s']['median']*1000)) for a in ['random32','cache_random32','cache_pair42']} for regime in ['cold','resident']}
             result['affinity_followup']=dict(sha256=hashlib.sha256(affinity.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=2304,regimes=xv,learning_pass=False,cheap_prediction=True,resident_cache_hit_requests=256,scope='E55 graph-to-worker affinity factorial; parse cache confirmed but learned ranking gate failed')
+        cache_only=repo/'experiments/native_first_20260915_e56/dev/RESULTS.json'
+        if cache_only.exists() and not (repo/'experiments/native_first_20260915_e56/test').exists():
+            xr=json.loads(cache_only.read_text())
+            if xr.get('cells')!=1536 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E56 gate')
+            xv={regime:{a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384),candidates=n(xr['summaries'][regime][a]['candidates'],384),parse_median_ms=n(xr['summaries'][regime][a]['components']['parse_s']['median']*1000)) for a in ['random32','cache_random32']} for regime in ['cold','resident']}
+            result['cache_only_followup']=dict(sha256=hashlib.sha256(cache_only.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=1536,regimes=xv,learning_pass=False,resident_gate=bool(xr['gates']['resident']['cache_random32']),cold_gate=bool(xr['gates']['cold']['cache_random32']),resident_cache_hit_requests=256,scope='E56 independent cache-only replication; resident gate passes, cold lifecycle gate fails')
         ap=repo/'experiments/native_first_20260915_cache_affinity_probe.json'
         if ap.exists():
             ar=json.loads(ap.read_text())
