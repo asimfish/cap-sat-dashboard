@@ -785,6 +785,14 @@ def native_first_progress(repo):
             for regime in ['cold','resident']:
                 xv[regime]={a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384)) for a in ['random32','cache_random32','cache_pair42']}
             result['cache_followup']=dict(sha256=hashlib.sha256(cache.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6912,regimes=xv,learning_pass=False,cheap_prediction=True,scope='E49 same-process CNF parse-cache development; no confirmation')
+        gate50=repo/'experiments/native_first_20260913_e50/dev/RESULTS.json'
+        if gate50.exists() and not (repo/'experiments/native_first_20260913_e50/test').exists():
+            xr=json.loads(gate50.read_text())
+            if xr.get('cells')!=6144 or xr.get('trials')!=384 or xr.get('learning_pass') is not False:raise ValueError('native E50 gate')
+            xv={}
+            for regime in ['cold','resident']:
+                xv[regime]={a:dict(par2_ms=n(xr['summaries'][regime][a]['par2_s']*1000),solved=n(xr['summaries'][regime][a]['solved'],384)) for a in ['random32','runtime_gate','pair42']}
+            result['runtime_gate_followup']=dict(sha256=hashlib.sha256(gate50.read_bytes()).hexdigest(),phase='terminal',instances=128,trials=384,cells=6144,regimes=xv,learning_pass=False,cheap_prediction=True,scope='E50 runtime conflict probe gate development; no confirmation')
         return result
     except (OSError,ValueError,KeyError,TypeError):return None
 
