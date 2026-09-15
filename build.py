@@ -1201,6 +1201,82 @@ def exact_search_progress(repo):
     except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
 
 
+def confirmation_progress(repo):
+    """E65: one audited export bundle, three separate panels, recomputed gates."""
+    root=repo/'experiments/confirm_20260915_e65'
+    try:
+        def read(name):return json.loads((root/name).read_text())
+        audit=read('AUDIT.json');raw=read('RESULTS.json');state=read('STATUS.json')
+        if audit['verdict']!='full_replay_pass' or state['phase']!='terminal':return None
+        h=hashlib.sha256()
+        for name in ['FROZEN.json','POOL.json','RECEIPT.json','RESULTS.json','raw.jsonl.gz','charged.jsonl.gz']:
+            body=(root/name).read_bytes();label=name.encode()
+            h.update(len(label).to_bytes(8,'big'));h.update(label);h.update(len(body).to_bytes(8,'big'));h.update(body)
+        if audit['export_identity']!={'kind':'bundle_digest','value':h.hexdigest(),'scope':'release'}:return None
+        if raw['input_identity']!=audit['input_identity'] or state['input_identity']!=raw['input_identity']:return None
+        if raw['cells']!=19968 or audit['cells']!=19968 or raw['learned_advantage'] is not False:return None
+        def number(v):
+            if type(v) not in (float,int) or not math.isfinite(v):raise ValueError('invalid statistic')
+            return v
+        def summary(v,count=None):
+            n=v['count'];s=v['solved']
+            if type(n) is not int or n<0 or (count is not None and n!=count):raise ValueError('bad denominator')
+            if type(s) is not int or not 0<=s<=n:raise ValueError('bad solved count')
+            out=dict(count=n,solved=s)
+            for k in ['par2_ms','median_ms','stdev_ms']:
+                out[k]=None if n==0 else number(v[k])
+                if n and out[k]<0:raise ValueError('negative statistic')
+                if not n and v[k] is not None:raise ValueError('nonempty zero-count statistic')
+            return out
+        totals={};contrasts={};arms=['stock','degree32','random32','witness32','exact','pair42','pair43','pair44']
+        for panel in ['confirm','fallback','stress']:
+            count=1152 if panel=='confirm' else 96
+            for regime in ['cold','resident']:
+                for arm in arms if panel=='confirm' else ['stock','degree32','witness32','exact']:
+                    key=f'{panel}/{regime}/{arm}';v=raw['totals'][key];out=summary(v,count)
+                    out['truth']={t:summary(v['truth'][t]) for t in ['0','10','20']}
+                    ns=['48','64'] if panel=='stress' else ['24','32','48','64']
+                    out['scales']={n:summary(v['scales'][n],count//len(ns)) for n in ns}
+                    if sum(x['count'] for x in out['truth'].values())!=count:return None
+                    if sum(x['solved'] for x in out['truth'].values())!=out['solved']:return None
+                    if sum(x['solved'] for x in out['scales'].values())!=out['solved']:return None
+                    for k in ['recognized','graph_unknown']:
+                        if type(v[k]) is not int or not 0<=v[k]<=count:return None
+                        out[k]=v[k]
+                    allowed=['legacy','no_response','exact_sat','exact_unsat','witness_sat','fallback']
+                    out['routes']={k:v['routes'].get(k,0) for k in allowed}
+                    if any(type(x) is not int or x<0 for x in out['routes'].values()) or sum(out['routes'].values())!=count:return None
+                    totals[key]=out
+        for regime in ['cold','resident']:
+            keys=[f'confirm/{regime}/{c}' for c in ['stock','degree32','random32','witness32']]+[f'unsat/{regime}',f'fallback/{regime}']
+            for key in keys:
+                v=raw['contrasts'][key]
+                expected=32 if key.startswith('fallback/') else totals[f'confirm/{regime}/exact']['truth']['20']['count']//9 if key.startswith('unsat/') else 128
+                if type(v['graphs']) is not int or v['graphs']!=expected:return None
+                contrasts[key]={'graphs':expected}
+                for k in ['mean_ms','lower_ms','upper_ms']:
+                    contrasts[key][k]=number(v[k]) if expected else None
+                if expected and contrasts[key]['lower_ms']>contrasts[key]['upper_ms']:return None
+            a=totals[f'confirm/{regime}/exact'];expected=True
+            for c in ['stock','degree32','random32','witness32']:
+                key=f'confirm/{regime}/{c}';b=totals[key]
+                expected &= a['par2_ms']<=.9*b['par2_ms'] and a['solved']>=b['solved'] and contrasts[key]['lower_ms']>0
+                expected &= all(a['scales'][n]['par2_ms']<=b['scales'][n]['par2_ms'] and a['scales'][n]['solved']>=b['scales'][n]['solved'] for n in a['scales'])
+            if raw['confirmation_gates'][regime] is not bool(expected):return None
+            a=totals[f'confirm/{regime}/exact']['truth']['20'];b=totals[f'confirm/{regime}/witness32']['truth']['20']
+            expected=bool(a['count'] and a['par2_ms']<=.9*b['par2_ms'] and a['solved']>=b['solved'] and contrasts[f'unsat/{regime}']['lower_ms']>0)
+            if raw['unsat_mechanism_gates'][regime] is not expected:return None
+            a=totals[f'fallback/{regime}/exact'];b=totals[f'fallback/{regime}/stock']
+            expected=bool(a['recognized']==0 and a['solved']>=b['solved'] and contrasts[f'fallback/{regime}']['upper_ms']<=.05*b['par2_ms'])
+            if raw['fallback_noninferiority_gates'][regime] is not expected:return None
+        return dict(run_id='E65',cells=19968,totals=totals,contrasts=contrasts,learned_advantage=False,
+                    confirmation_gates={r:raw['confirmation_gates'][r] for r in ['cold','resident']},
+                    unsat_mechanism_gates={r:raw['unsat_mechanism_gates'][r] for r in ['cold','resident']},
+                    fallback_noninferiority_gates={r:raw['fallback_noninferiority_gates'][r] for r in ['cold','resident']},
+                    scope='同主机新数据固定候选确认；压力/回退组分开，非学习或外部独立复现')
+    except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1224,6 +1300,7 @@ def main():
     data['overnight']=overnight_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
+    data['confirmation']=confirmation_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

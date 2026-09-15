@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-15T12:13:15.850499+00:00",
+  "generated": "2026-09-15T12:22:12.949353+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3053,10 +3053,11 @@
           "A15",
           "A16",
           "A17",
-          "A18"
+          "A18",
+          "A19"
         ],
-        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35；E64",
-        "evidence_level": "历史报告 + 后续局部审计；不是普遍加速"
+        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35；E64；E65",
+        "evidence_level": "历史报告 + 后续局部审计；E65同主机新数据复现对原廉价基线的收益，但包含新SAT补全对照的更强确认门未过；不是普遍加速"
       },
       {
         "id": "P2",
@@ -3418,9 +3419,23 @@
         "method": "实现有截止时间的完整分支搜索；只有受信seqcounter模板与图边严格匹配才启用，编码不匹配或未决回退CaDiCaL。SAT完整见证在native、Python及事后全部重放中验证。所有对照共用相同二进制、POPCNT、加载/退出规则与1ms图预算；用仅直接补全SAT的对照分离UNSAT搜索收益。",
         "gate": "工程门：完整生命周期PAR-2比stock/degree32/random32均降低至少10%，八项比较校正后的图聚类下界为正，求解数不减、各规模无退化。UNSAT机制门独立对比仅补全SAT。两生命周期、两类门均通过；每臂1152/1152求解，未声称学习优势或独立确认。",
         "stop": "相对原有廉价对照中最快者：冷启动14.471→10.874ms，降低24.9%；驻留5.649→1.906ms，降低66.3%。相对新增SAT补全对照，全图冷/驻留成本也分别低19.2%/59.5%。UNSAT驻留相对仅补全SAT的对照14.911→0.729ms，减少95.1%。18432单元和14832个SAT见证全部审计。保留为新的非学习强基线，下一步应冻结新确认图并做独立复测，再检查更难/不同分布；不能把受限编码收益扩写为通用SAT、工业泛化或原论文学习优势。未导出独立认证UNSAT证明证书，未切换生产路由，旧训练网格保持停止。"
+      },
+      {
+        "id": "A19",
+        "title": "E65：冻结算法的新数据确认与回退边界",
+        "priority": "P1 · 已完成，保留未过门结果",
+        "status": "原基线收益复现；更强整体确认门未通过",
+        "cost": "保持E64二进制/模型/算法/1ms图预算不变；128确认图+32重排图+32压力图，共19968次，约200秒，未新增GPU训练",
+        "depends_on": [
+          "A18"
+        ],
+        "hypothesis": "受限任务上的原有收益应在不调参的新数据上复现；加入仅补全SAT的强对照后，要求各规模无退化。另检查等价编码重排后回退增量不超过5%，压力组单独观察。",
+        "method": "确认组3搜索种子×3轮×8臂×冷/驻留，1s总截止时间。重排组32图保持CNF语义，刻意拒绝规范编码识别；压力组32个n48/64不同密度图采用100ms截止时间，不与主组混算。完整生命周期计费，超时保留；全部账目和15984个SAT见证重放。",
+        "gate": "12项图聚类校正比较。相对stock/degree32/random32的收益复现；加入witness32后，确认门两生命周期均失败：n48均值退化，冷启动对witness32的同时下界为-0.274ms。UNSAT机制门、相对stock回退的5%非劣门均通过。",
+        "stop": "确认组相对原有最快廉价基线：冷13.075→10.569ms(-19.2%)，驻留4.456→1.925ms(-56.8%)；不能写成最强对照全面确认。n48全部SAT，驻留多5.385微秒；冷启动173/82/48ms三个长尾大部分在native请求之外，不能无证据归因于调度。重排回退全解；压力组exact96/96、其他对照93/96，差异是同一张图的3次重复。下一步另建版本分解启动/通信/Python检查/退出，研究先直接补全再对残差精确搜索及等价编码识别；不改本次算法或删除确认失败样本。无学习优势、外部独立复现或生产切换。"
       }
     ],
-    "sha256": "0d75c66f36a9d73968aa2467916a0ed9f9e875da83c7163aff8fa91c75ee5b3e"
+    "sha256": "bc082776b2aee3157843d17bc1ffc9032f08e3ce96df93d51507d786dfd7231c"
   },
   "pilot": {
     "id": "E26",
@@ -7252,7 +7267,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-15T19:29:34.354890+00:00",
+    "earliest_target_at": "2026-09-15T19:38:31.491065+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "targeted": {
@@ -8417,5 +8432,2227 @@
     "learned_advantage": false,
     "sha256": "a3c57bb3ad925f372fd88599e7b69b8fa52d648cf7f62c0b3f512cc96b4a4745",
     "scope": "受限图编码的非学习精确搜索开发结果；不是独立确认、通用SAT或学习优势"
+  },
+  "confirmation": {
+    "run_id": "E65",
+    "cells": 19968,
+    "totals": {
+      "confirm/cold/stock": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 19.306728874249124,
+        "median_ms": 11.974952649325132,
+        "stdev_ms": 23.952694559605167,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 19.65863802642734,
+            "median_ms": 12.374990619719028,
+            "stdev_ms": 22.523930239771186
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 17.700187092565972,
+            "median_ms": 11.223477311432362,
+            "stdev_ms": 29.62522021432009
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.083986381586227,
+            "median_ms": 9.976297616958618,
+            "stdev_ms": 0.6109459858521865
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.529512855405402,
+            "median_ms": 11.212291661649942,
+            "stdev_ms": 2.1877569459449706
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 14.181041119930645,
+            "median_ms": 12.807539198547602,
+            "stdev_ms": 7.650843877769661
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 41.43237514007423,
+            "median_ms": 23.01231399178505,
+            "stdev_ms": 39.66816348176769
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/cold/degree32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 13.074768661883557,
+        "median_ms": 11.708341538906097,
+        "stdev_ms": 13.381924535844862,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 12.042361259381607,
+            "median_ms": 11.775461956858635,
+            "stdev_ms": 4.150603780681457
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 17.7879328906968,
+            "median_ms": 11.32483221590519,
+            "stdev_ms": 29.90665668075946
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.441002840202096,
+            "median_ms": 9.928601328283548,
+            "stdev_ms": 6.7116349836751645
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.197947638316286,
+            "median_ms": 10.915359482169151,
+            "stdev_ms": 1.1927442004099065
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.040806475043711,
+            "median_ms": 11.92878047004342,
+            "stdev_ms": 0.6489713724783915
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 18.619317693972132,
+            "median_ms": 13.937439303845167,
+            "stdev_ms": 25.077242261279405
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/cold/random32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 13.364073866493223,
+        "median_ms": 11.678001843392849,
+        "stdev_ms": 13.881329513662363,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 12.336845413126328,
+            "median_ms": 11.84090692549944,
+            "stdev_ms": 5.827093987112498
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 18.053595066646448,
+            "median_ms": 11.347833089530468,
+            "stdev_ms": 29.90151539280646
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.030042292783037,
+            "median_ms": 9.91258816793561,
+            "stdev_ms": 0.6893861480200385
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.436982306703511,
+            "median_ms": 11.068860068917274,
+            "stdev_ms": 3.537193314380809
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.160139721042166,
+            "median_ms": 12.027039658278227,
+            "stdev_ms": 1.1248211133829782
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 19.82913114544418,
+            "median_ms": 14.003129675984383,
+            "stdev_ms": 26.462218205971713
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/cold/witness32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 11.912191898671962,
+        "median_ms": 10.78179245814681,
+        "stdev_ms": 12.844771725190148,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 10.631329579052156,
+            "median_ms": 10.549848899245262,
+            "stdev_ms": 1.4472013552178575
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 17.75960683606673,
+            "median_ms": 11.325015686452389,
+            "stdev_ms": 29.502023475396445
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 9.248113903191147,
+            "median_ms": 9.060984943062067,
+            "stdev_ms": 0.7935197646742046
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.701368786006546,
+            "median_ms": 10.48282440751791,
+            "stdev_ms": 1.5322107872193305
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.819616982997912,
+            "median_ms": 10.747827123850584,
+            "stdev_ms": 0.5912409500180961
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 16.879667922492242,
+            "median_ms": 12.395848985761404,
+            "stdev_ms": 24.97593703260203
+          }
+        },
+        "recognized": 1152,
+        "graph_unknown": 207,
+        "routes": {
+          "legacy": 0,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 945,
+          "fallback": 207
+        }
+      },
+      "confirm/cold/exact": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 10.56886034509969,
+        "median_ms": 10.155863594263792,
+        "stdev_ms": 5.5709764524677965,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 10.940772069312592,
+            "median_ms": 10.569254867732525,
+            "stdev_ms": 6.081610909326945
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 8.871002473692963,
+            "median_ms": 8.777527138590813,
+            "stdev_ms": 0.6230652507786795
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 8.926001801026157,
+            "median_ms": 8.871471509337425,
+            "stdev_ms": 0.5284813911071711
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 9.30864353884115,
+            "median_ms": 9.205128066241741,
+            "stdev_ms": 1.0559560163242894
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.703757300791848,
+            "median_ms": 10.724787600338459,
+            "stdev_ms": 10.67116415667802
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.337038739739606,
+            "median_ms": 12.364798691123724,
+            "stdev_ms": 0.683779628610424
+          }
+        },
+        "recognized": 1152,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 0,
+          "no_response": 0,
+          "exact_sat": 945,
+          "exact_unsat": 207,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/cold/pair42": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 12.986216291513605,
+        "median_ms": 11.727555189281702,
+        "stdev_ms": 12.927863145245805,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 11.930655251459154,
+            "median_ms": 11.873075738549232,
+            "stdev_ms": 1.8422101920219565
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 17.805081909153486,
+            "median_ms": 11.396503075957298,
+            "stdev_ms": 29.82983795623721
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 9.969548969012168,
+            "median_ms": 9.851285256445408,
+            "stdev_ms": 0.5996137035152578
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.211950386900249,
+            "median_ms": 10.938774328678846,
+            "stdev_ms": 1.1804587989546154
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.136652199034062,
+            "median_ms": 12.058802880346775,
+            "stdev_ms": 0.6161470869452494
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 18.62671361110794,
+            "median_ms": 14.034300576895475,
+            "stdev_ms": 24.963805966890398
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/cold/pair43": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 13.173093156688587,
+        "median_ms": 11.692555621266365,
+        "stdev_ms": 13.580732587647145,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 12.16469620349546,
+            "median_ms": 11.830986477434635,
+            "stdev_ms": 5.032123490286868
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 17.776644464744173,
+            "median_ms": 11.284667998552322,
+            "stdev_ms": 29.807972485692606
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 9.991991395104883,
+            "median_ms": 9.901539422571659,
+            "stdev_ms": 0.6234810392707197
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.225842861070609,
+            "median_ms": 11.027863714843988,
+            "stdev_ms": 1.1223300161600256
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.404785740525565,
+            "median_ms": 12.007523328065872,
+            "stdev_ms": 4.874105857956494
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 19.069752630053294,
+            "median_ms": 14.02759738266468,
+            "stdev_ms": 25.784182627044284
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/cold/pair44": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 13.200384189581705,
+        "median_ms": 11.681607458740473,
+        "stdev_ms": 13.14571796802927,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 12.06330165720333,
+            "median_ms": 11.809620074927807,
+            "stdev_ms": 2.870515245991778
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 18.39141314174386,
+            "median_ms": 11.304205283522606,
+            "stdev_ms": 29.912975910626418
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.100129985302273,
+            "median_ms": 9.94505686685443,
+            "stdev_ms": 1.3131933769975073
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.823912914324966,
+            "median_ms": 11.028690729290247,
+            "stdev_ms": 5.175631224041249
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.127455291596966,
+            "median_ms": 11.94320386275649,
+            "stdev_ms": 1.1038592530072033
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 18.750038567102617,
+            "median_ms": 13.970730360597372,
+            "stdev_ms": 24.893941708955072
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/resident/stock": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 10.639417421771213,
+        "median_ms": 3.577287077253762,
+        "stdev_ms": 22.978852249569947,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 10.88436841732199,
+            "median_ms": 4.0744099945489625,
+            "stdev_ms": 21.316431733159543
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 9.521162876865494,
+            "median_ms": 3.0074533254567846,
+            "stdev_ms": 29.436443445380572
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.1091931315216548,
+            "median_ms": 2.0359311808230514,
+            "stdev_ms": 0.42857050791331863
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.294268165417533,
+            "median_ms": 3.0691234872695836,
+            "stdev_ms": 1.0738202729409188
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 5.313686342560686,
+            "median_ms": 4.543750974941455,
+            "stdev_ms": 2.7165745933458627
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 31.84052204758498,
+            "median_ms": 13.870994172369441,
+            "stdev_ms": 38.75875152927218
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/resident/degree32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 4.455513797034251,
+        "median_ms": 3.003008918312844,
+        "stdev_ms": 12.73326971117836,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 3.360601083171325,
+            "median_ms": 3.0044346907137274,
+            "stdev_ms": 1.4644696721344554
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 9.454028360321521,
+            "median_ms": 2.997895874917352,
+            "stdev_ms": 29.41907807727111
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 1.9528254253802717,
+            "median_ms": 1.8481810669375893,
+            "stdev_ms": 0.4243923121207167
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.9617962370846525,
+            "median_ms": 2.8110788189223967,
+            "stdev_ms": 1.1450233520414481
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.495087000677207,
+            "median_ms": 3.1347328889144896,
+            "stdev_ms": 0.7846289540352908
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 9.412346524994872,
+            "median_ms": 4.392884960301065,
+            "stdev_ms": 24.779566768733858
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/resident/random32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 4.669674972117516,
+        "median_ms": 3.0267575699933027,
+        "stdev_ms": 13.266528958263109,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 3.6297062344842335,
+            "median_ms": 3.0272473474421226,
+            "stdev_ms": 4.848885447071222
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 9.417358339573807,
+            "median_ms": 2.9725355464809886,
+            "stdev_ms": 29.120934737915867
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.01029253286025,
+            "median_ms": 1.805096481499883,
+            "stdev_ms": 0.5643551396967892
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.9761272671748884,
+            "median_ms": 2.8140942934745303,
+            "stdev_ms": 1.127164928362339
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.474098892992414,
+            "median_ms": 3.109807166765677,
+            "stdev_ms": 0.7393214965045792
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.218181195442513,
+            "median_ms": 4.393330327729927,
+            "stdev_ms": 25.717789013984348
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/resident/witness32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 3.482008795900684,
+        "median_ms": 2.083890331656827,
+        "stdev_ms": 12.720614080883195,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 2.183811437131014,
+            "median_ms": 1.839115284383297,
+            "stdev_ms": 1.2073528768693025
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 9.408561955501352,
+            "median_ms": 3.016855882985207,
+            "stdev_ms": 29.230301774205405
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 1.2619507890324004,
+            "median_ms": 0.9120190855658923,
+            "stdev_ms": 0.6295768920560026
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.469775239458411,
+            "median_ms": 2.2704388999651806,
+            "stdev_ms": 1.418684999922405
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.272072857724399,
+            "median_ms": 1.8634987063705921,
+            "stdev_ms": 0.707465545235458
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 7.924236297387526,
+            "median_ms": 2.882322296500206,
+            "stdev_ms": 24.875545794618603
+          }
+        },
+        "recognized": 1152,
+        "graph_unknown": 207,
+        "routes": {
+          "legacy": 0,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 945,
+          "fallback": 207
+        }
+      },
+      "confirm/resident/exact": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 1.924589184151652,
+        "median_ms": 1.7020019683210799,
+        "stdev_ms": 1.2556081408320388,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 2.1931000603775606,
+            "median_ms": 1.8743018105548497,
+            "stdev_ms": 1.210509960709944
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 0.6987786622507641,
+            "median_ms": 0.3877474931262744,
+            "stdev_ms": 0.5032044029221547
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 0.945269067112046,
+            "median_ms": 0.8071667471085675,
+            "stdev_ms": 0.3991071524902723
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 1.0630218457663432,
+            "median_ms": 1.0739005823173406,
+            "stdev_ms": 0.6058107713780627
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.2774582014082827,
+            "median_ms": 1.879903925631273,
+            "stdev_ms": 0.6982240960139184
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.412607622319936,
+            "median_ms": 2.860463196460235,
+            "stdev_ms": 1.120142055957932
+          }
+        },
+        "recognized": 1152,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 0,
+          "no_response": 0,
+          "exact_sat": 945,
+          "exact_unsat": 207,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/resident/pair42": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 4.454569729407215,
+        "median_ms": 2.9885007340150573,
+        "stdev_ms": 12.702150318411483,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 3.3655736259774245,
+            "median_ms": 2.985134929379759,
+            "stdev_ms": 1.4431036794024905
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 9.42607367984756,
+            "median_ms": 3.016124692900727,
+            "stdev_ms": 29.354286055178083
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 1.977394254936371,
+            "median_ms": 1.873748601307549,
+            "stdev_ms": 0.4632506727529802
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.9690489310370243,
+            "median_ms": 2.867413893303213,
+            "stdev_ms": 1.0875777711308607
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.4800439744786775,
+            "median_ms": 3.068736031612692,
+            "stdev_ms": 0.7912836310303694
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 9.391791757176785,
+            "median_ms": 4.435436077377138,
+            "stdev_ms": 24.723574129793118
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/resident/pair43": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 4.472916529468623,
+        "median_ms": 3.016706444517088,
+        "stdev_ms": 12.725756119407682,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 3.3797342883498116,
+            "median_ms": 3.0298165462833517,
+            "stdev_ms": 1.4620316473067516
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 9.463531108489283,
+            "median_ms": 2.9944700606089705,
+            "stdev_ms": 29.403107233959364
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 1.9749532140041184,
+            "median_ms": 1.858000688419755,
+            "stdev_ms": 0.5161041747018137
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.9738082974088482,
+            "median_ms": 2.812970035544519,
+            "stdev_ms": 1.0994116615389853
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.4967746905749664,
+            "median_ms": 3.0926620371853155,
+            "stdev_ms": 0.7806115496742759
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 9.446129915886559,
+            "median_ms": 4.453186299845887,
+            "stdev_ms": 24.760774123163827
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "confirm/resident/pair44": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 4.488774103972698,
+        "median_ms": 3.0360146483872086,
+        "stdev_ms": 12.731659072501031,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 945,
+            "solved": 945,
+            "par2_ms": 3.395883190056319,
+            "median_ms": 3.035657195141539,
+            "stdev_ms": 1.4425841943598463
+          },
+          "20": {
+            "count": 207,
+            "solved": 207,
+            "par2_ms": 9.478058710982259,
+            "median_ms": 3.041490155737847,
+            "stdev_ms": 29.42205747536627
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.001348714758125,
+            "median_ms": 1.8672648875508457,
+            "stdev_ms": 0.4924408144051331
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.0202790803741664,
+            "median_ms": 2.8576764452736825,
+            "stdev_ms": 1.1460156376369626
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.505412337189126,
+            "median_ms": 3.158200444886461,
+            "stdev_ms": 0.7648972600456058
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 9.428056283569378,
+            "median_ms": 4.449160973308608,
+            "stdev_ms": 24.781228968671645
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 1152,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "fallback/cold/stock": {
+        "count": 96,
+        "solved": 96,
+        "par2_ms": 18.64445478228542,
+        "median_ms": 11.534717865288258,
+        "stdev_ms": 27.57426286810403,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 81,
+            "solved": 81,
+            "par2_ms": 14.455367615561427,
+            "median_ms": 11.454520747065544,
+            "stdev_ms": 11.055993602482971
+          },
+          "20": {
+            "count": 15,
+            "solved": 15,
+            "par2_ms": 41.26552548259497,
+            "median_ms": 11.633042246103287,
+            "stdev_ms": 61.73467461433683
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 9.838858852162957,
+            "median_ms": 9.665434248745441,
+            "stdev_ms": 0.5045750857125996
+          },
+          "32": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 11.02334629589071,
+            "median_ms": 11.018297169357538,
+            "stdev_ms": 0.6903059072002227
+          },
+          "48": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 12.549365366188189,
+            "median_ms": 12.184757739305496,
+            "stdev_ms": 1.1690374352568815
+          },
+          "64": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 41.166248614899814,
+            "median_ms": 17.01334584504366,
+            "stdev_ms": 49.28357241604659
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 96,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "fallback/cold/degree32": {
+        "count": 96,
+        "solved": 96,
+        "par2_ms": 16.088482972312097,
+        "median_ms": 11.299521662294865,
+        "stdev_ms": 25.803164143515534,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 81,
+            "solved": 81,
+            "par2_ms": 11.481108707318336,
+            "median_ms": 11.260413564741611,
+            "stdev_ms": 1.8031259959423267
+          },
+          "20": {
+            "count": 15,
+            "solved": 15,
+            "par2_ms": 40.96830400327841,
+            "median_ms": 11.556529439985752,
+            "stdev_ms": 60.937127076676056
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 9.648140636272728,
+            "median_ms": 9.612066205590963,
+            "stdev_ms": 0.4184930537727831
+          },
+          "32": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 10.966625957128903,
+            "median_ms": 10.915117803961039,
+            "stdev_ms": 0.7545195732322503
+          },
+          "48": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 11.621029232628644,
+            "median_ms": 11.467908043414354,
+            "stdev_ms": 0.4596784810443938
+          },
+          "64": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 32.11813606321812,
+            "median_ms": 14.030883088707924,
+            "stdev_ms": 48.882496713967036
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 96,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "fallback/cold/witness32": {
+        "count": 96,
+        "solved": 96,
+        "par2_ms": 18.69342746795155,
+        "median_ms": 11.563701555132866,
+        "stdev_ms": 27.51527331634209,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 81,
+            "solved": 81,
+            "par2_ms": 14.524435061087578,
+            "median_ms": 11.505115777254105,
+            "stdev_ms": 11.360955963884445
+          },
+          "20": {
+            "count": 15,
+            "solved": 15,
+            "par2_ms": 41.205986465017,
+            "median_ms": 11.858796700835228,
+            "stdev_ms": 61.288439602166065
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 9.955254422190288,
+            "median_ms": 9.944217279553413,
+            "stdev_ms": 0.5940540702034052
+          },
+          "32": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 11.101737113979956,
+            "median_ms": 11.137302033603191,
+            "stdev_ms": 0.8172648564282281
+          },
+          "48": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 12.361984932795167,
+            "median_ms": 12.021112721413374,
+            "stdev_ms": 0.9567380278895319
+          },
+          "64": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 41.35473340284079,
+            "median_ms": 17.085994593799114,
+            "stdev_ms": 49.067996375194774
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 96,
+        "routes": {
+          "legacy": 0,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 96
+        }
+      },
+      "fallback/cold/exact": {
+        "count": 96,
+        "solved": 96,
+        "par2_ms": 18.75417348734724,
+        "median_ms": 11.596163734793663,
+        "stdev_ms": 27.455979664081752,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 81,
+            "solved": 81,
+            "par2_ms": 14.590315635741494,
+            "median_ms": 11.58146746456623,
+            "stdev_ms": 11.048967005383039
+          },
+          "20": {
+            "count": 15,
+            "solved": 15,
+            "par2_ms": 41.239005886018276,
+            "median_ms": 12.06353772431612,
+            "stdev_ms": 61.44665751409782
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 9.909593228561183,
+            "median_ms": 9.820433333516121,
+            "stdev_ms": 0.5683677276154635
+          },
+          "32": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 11.186748277395964,
+            "median_ms": 11.116867884993553,
+            "stdev_ms": 0.6390772140261497
+          },
+          "48": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 12.433895414384702,
+            "median_ms": 11.948417406529188,
+            "stdev_ms": 1.0429966538401327
+          },
+          "64": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 41.48645702904711,
+            "median_ms": 18.035677261650562,
+            "stdev_ms": 48.88291252606092
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 96,
+        "routes": {
+          "legacy": 0,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 96
+        }
+      },
+      "fallback/resident/stock": {
+        "count": 96,
+        "solved": 96,
+        "par2_ms": 11.99791116717582,
+        "median_ms": 5.007537576602772,
+        "stdev_ms": 27.372078272984,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 81,
+            "solved": 81,
+            "par2_ms": 7.8495182643104116,
+            "median_ms": 5.035123671405017,
+            "stdev_ms": 10.934094970158858
+          },
+          "20": {
+            "count": 15,
+            "solved": 15,
+            "par2_ms": 34.39923284264902,
+            "median_ms": 4.707230138592422,
+            "stdev_ms": 61.34872712504646
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 3.3133551866436997,
+            "median_ms": 3.243123210268095,
+            "stdev_ms": 0.4163869131615338
+          },
+          "32": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 4.303019183377425,
+            "median_ms": 4.266556847142056,
+            "stdev_ms": 0.5928107676591907
+          },
+          "48": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 5.955868323023121,
+            "median_ms": 5.46239226241596,
+            "stdev_ms": 1.1022922874847894
+          },
+          "64": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 34.419401975659035,
+            "median_ms": 10.829466889845207,
+            "stdev_ms": 48.88504671019023
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 96,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "fallback/resident/degree32": {
+        "count": 96,
+        "solved": 96,
+        "par2_ms": 9.372592176077887,
+        "median_ms": 4.748035105876625,
+        "stdev_ms": 25.849112054417976,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 81,
+            "solved": 81,
+            "par2_ms": 4.772227606736124,
+            "median_ms": 4.834560852032155,
+            "stdev_ms": 1.6712751026766692
+          },
+          "20": {
+            "count": 15,
+            "solved": 15,
+            "par2_ms": 34.21456085052341,
+            "median_ms": 4.669046844355762,
+            "stdev_ms": 61.11011185352165
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 3.033198144597312,
+            "median_ms": 2.967091859318316,
+            "stdev_ms": 0.3945555608900163
+          },
+          "32": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 4.204817931167781,
+            "median_ms": 4.309531184844673,
+            "stdev_ms": 0.5987309173347207
+          },
+          "48": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 4.967994793939094,
+            "median_ms": 4.9689906009007245,
+            "stdev_ms": 0.18928233833038952
+          },
+          "64": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 25.284357834607363,
+            "median_ms": 6.926254805875942,
+            "stdev_ms": 49.04152683672018
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 96,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "fallback/resident/witness32": {
+        "count": 96,
+        "solved": 96,
+        "par2_ms": 12.015581266799321,
+        "median_ms": 5.037518887547776,
+        "stdev_ms": 27.479462749891685,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 81,
+            "solved": 81,
+            "par2_ms": 7.8726200218726365,
+            "median_ms": 5.089927726658061,
+            "stdev_ms": 11.293091941006741
+          },
+          "20": {
+            "count": 15,
+            "solved": 15,
+            "par2_ms": 34.38757198940342,
+            "median_ms": 4.600937623763457,
+            "stdev_ms": 61.31644209618899
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 3.143278823699802,
+            "median_ms": 3.089574005571194,
+            "stdev_ms": 0.3272173621853251
+          },
+          "32": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 4.3494007356154425,
+            "median_ms": 4.352452073362656,
+            "stdev_ms": 0.5701842245709848
+          },
+          "48": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 5.807932136425127,
+            "median_ms": 5.4813257593195885,
+            "stdev_ms": 0.8058280909283198
+          },
+          "64": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 34.76171337145691,
+            "median_ms": 10.681559113436379,
+            "stdev_ms": 48.93197555112826
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 96,
+        "routes": {
+          "legacy": 0,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 96
+        }
+      },
+      "fallback/resident/exact": {
+        "count": 96,
+        "solved": 96,
+        "par2_ms": 11.868757923366502,
+        "median_ms": 4.995532013708726,
+        "stdev_ms": 27.29175814481004,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 81,
+            "solved": 81,
+            "par2_ms": 7.730323695548937,
+            "median_ms": 5.04851050209254,
+            "stdev_ms": 10.95946134125561
+          },
+          "20": {
+            "count": 15,
+            "solved": 15,
+            "par2_ms": 34.21630275358135,
+            "median_ms": 4.665028071030974,
+            "stdev_ms": 61.104461757536704
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 3.1574124198717377,
+            "median_ms": 3.120455250609666,
+            "stdev_ms": 0.40445831634817847
+          },
+          "32": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 4.243443429004401,
+            "median_ms": 4.127836466068402,
+            "stdev_ms": 0.5831245839807674
+          },
+          "48": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 5.832302869142343,
+            "median_ms": 5.4934071958996356,
+            "stdev_ms": 0.8517380847165738
+          },
+          "64": {
+            "count": 24,
+            "solved": 24,
+            "par2_ms": 34.24187297544753,
+            "median_ms": 10.598499531624839,
+            "stdev_ms": 48.734803411619595
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 96,
+        "routes": {
+          "legacy": 0,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 96
+        }
+      },
+      "stress/cold/stock": {
+        "count": 96,
+        "solved": 93,
+        "par2_ms": 27.32079835453381,
+        "median_ms": 18.51767487823963,
+        "stdev_ms": 32.86793845343887,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 27,
+            "solved": 27,
+            "par2_ms": 15.042048223592618,
+            "median_ms": 14.889517799019814,
+            "stdev_ms": 2.9274154947256656
+          },
+          "20": {
+            "count": 69,
+            "solved": 66,
+            "par2_ms": 32.125526666641235,
+            "median_ms": 20.500966347754,
+            "stdev_ms": 37.71842183769418
+          }
+        },
+        "scales": {
+          "48": {
+            "count": 48,
+            "solved": 48,
+            "par2_ms": 17.120564201225836,
+            "median_ms": 15.495853964239359,
+            "stdev_ms": 5.582114320867061
+          },
+          "64": {
+            "count": 48,
+            "solved": 45,
+            "par2_ms": 37.52103250784179,
+            "median_ms": 24.315619841217995,
+            "stdev_ms": 44.044419634027335
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 96,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "stress/cold/degree32": {
+        "count": 96,
+        "solved": 93,
+        "par2_ms": 27.215606876416132,
+        "median_ms": 17.823655158281326,
+        "stdev_ms": 33.03412900368927,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 27,
+            "solved": 27,
+            "par2_ms": 13.989102267832667,
+            "median_ms": 13.852782547473907,
+            "stdev_ms": 1.5305869975448487
+          },
+          "20": {
+            "count": 69,
+            "solved": 66,
+            "par2_ms": 32.391195636296615,
+            "median_ms": 20.598042756319046,
+            "stdev_ms": 37.77575364870162
+          }
+        },
+        "scales": {
+          "48": {
+            "count": 48,
+            "solved": 48,
+            "par2_ms": 16.910147620365024,
+            "median_ms": 15.471935272216797,
+            "stdev_ms": 5.41013080416983
+          },
+          "64": {
+            "count": 48,
+            "solved": 45,
+            "par2_ms": 37.52106613246724,
+            "median_ms": 24.327917490154505,
+            "stdev_ms": 44.266598810615534
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 96,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "stress/cold/witness32": {
+        "count": 96,
+        "solved": 93,
+        "par2_ms": 26.913906044016283,
+        "median_ms": 18.45327066257596,
+        "stdev_ms": 33.21161968324983,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 27,
+            "solved": 27,
+            "par2_ms": 12.334130600922638,
+            "median_ms": 11.876712553203106,
+            "stdev_ms": 1.2002390828941296
+          },
+          "20": {
+            "count": 69,
+            "solved": 66,
+            "par2_ms": 32.61903556522684,
+            "median_ms": 20.790090784430504,
+            "stdev_ms": 37.72255959599103
+          }
+        },
+        "scales": {
+          "48": {
+            "count": 48,
+            "solved": 48,
+            "par2_ms": 17.115187384964276,
+            "median_ms": 15.081353019922972,
+            "stdev_ms": 7.516873444468855
+          },
+          "64": {
+            "count": 48,
+            "solved": 45,
+            "par2_ms": 36.712624703068286,
+            "median_ms": 24.224726017564535,
+            "stdev_ms": 44.46203770232095
+          }
+        },
+        "recognized": 93,
+        "graph_unknown": 66,
+        "routes": {
+          "legacy": 0,
+          "no_response": 3,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 27,
+          "fallback": 66
+        }
+      },
+      "stress/cold/exact": {
+        "count": 96,
+        "solved": 96,
+        "par2_ms": 10.680854650369534,
+        "median_ms": 10.462673846632242,
+        "stdev_ms": 1.3165388262270377,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 27,
+            "solved": 27,
+            "par2_ms": 12.220725348150289,
+            "median_ms": 11.664505116641521,
+            "stdev_ms": 1.3365269044721817
+          },
+          "20": {
+            "count": 69,
+            "solved": 69,
+            "par2_ms": 10.078296551237935,
+            "median_ms": 10.1317735388875,
+            "stdev_ms": 0.6546491825623919
+          }
+        },
+        "scales": {
+          "48": {
+            "count": 48,
+            "solved": 48,
+            "par2_ms": 10.092869381575534,
+            "median_ms": 9.780965279787779,
+            "stdev_ms": 0.8637550948507725
+          },
+          "64": {
+            "count": 48,
+            "solved": 48,
+            "par2_ms": 11.268839919163534,
+            "median_ms": 10.631447192281485,
+            "stdev_ms": 1.4321973161523571
+          }
+        },
+        "recognized": 96,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 0,
+          "no_response": 0,
+          "exact_sat": 27,
+          "exact_unsat": 69,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "stress/resident/stock": {
+        "count": 96,
+        "solved": 93,
+        "par2_ms": 21.009385355318955,
+        "median_ms": 11.681641801260412,
+        "stdev_ms": 33.877863774651885,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 27,
+            "solved": 27,
+            "par2_ms": 8.618715716120615,
+            "median_ms": 8.251861028838903,
+            "stdev_ms": 3.0806179715121744
+          },
+          "20": {
+            "count": 69,
+            "solved": 66,
+            "par2_ms": 25.857908257613957,
+            "median_ms": 13.582231913460419,
+            "stdev_ms": 38.92268599217867
+          }
+        },
+        "scales": {
+          "48": {
+            "count": 48,
+            "solved": 48,
+            "par2_ms": 10.484226989016557,
+            "median_ms": 8.7945609993767,
+            "stdev_ms": 5.423282181589504
+          },
+          "64": {
+            "count": 48,
+            "solved": 45,
+            "par2_ms": 31.53454372162135,
+            "median_ms": 19.02132284885738,
+            "stdev_ms": 45.432969934556375
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 96,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "stress/resident/degree32": {
+        "count": 96,
+        "solved": 93,
+        "par2_ms": 20.775776287276432,
+        "median_ms": 11.544647481059656,
+        "stdev_ms": 34.033438576485345,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 27,
+            "solved": 27,
+            "par2_ms": 7.521860155975446,
+            "median_ms": 6.792061642045155,
+            "stdev_ms": 1.4495183827608558
+          },
+          "20": {
+            "count": 69,
+            "solved": 66,
+            "par2_ms": 25.96209129517682,
+            "median_ms": 13.978506292914972,
+            "stdev_ms": 38.991429725233324
+          }
+        },
+        "scales": {
+          "48": {
+            "count": 48,
+            "solved": 48,
+            "par2_ms": 10.324755305191502,
+            "median_ms": 8.897163002984598,
+            "stdev_ms": 5.405313766974907
+          },
+          "64": {
+            "count": 48,
+            "solved": 45,
+            "par2_ms": 31.226797269361366,
+            "median_ms": 18.163766275392845,
+            "stdev_ms": 45.704278917308464
+          }
+        },
+        "recognized": 0,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 96,
+          "no_response": 0,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      },
+      "stress/resident/witness32": {
+        "count": 96,
+        "solved": 93,
+        "par2_ms": 20.233394453437842,
+        "median_ms": 11.475873790914193,
+        "stdev_ms": 34.17747095565144,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 27,
+            "solved": 27,
+            "par2_ms": 5.858340274749531,
+            "median_ms": 5.514201824553311,
+            "stdev_ms": 1.1445191448713103
+          },
+          "20": {
+            "count": 69,
+            "solved": 66,
+            "par2_ms": 25.85841565379414,
+            "median_ms": 13.960294367279857,
+            "stdev_ms": 38.95186281674486
+          }
+        },
+        "scales": {
+          "48": {
+            "count": 48,
+            "solved": 48,
+            "par2_ms": 9.935530698082099,
+            "median_ms": 8.830393373500556,
+            "stdev_ms": 5.964386955004773
+          },
+          "64": {
+            "count": 48,
+            "solved": 45,
+            "par2_ms": 30.531258208793588,
+            "median_ms": 17.82414785702713,
+            "stdev_ms": 45.922475106334964
+          }
+        },
+        "recognized": 93,
+        "graph_unknown": 66,
+        "routes": {
+          "legacy": 0,
+          "no_response": 3,
+          "exact_sat": 0,
+          "exact_unsat": 0,
+          "witness_sat": 27,
+          "fallback": 66
+        }
+      },
+      "stress/resident/exact": {
+        "count": 96,
+        "solved": 96,
+        "par2_ms": 3.7712289001016566,
+        "median_ms": 3.6198732705088332,
+        "stdev_ms": 1.2229119615778574,
+        "truth": {
+          "0": {
+            "count": 0,
+            "solved": 0,
+            "par2_ms": null,
+            "median_ms": null,
+            "stdev_ms": null
+          },
+          "10": {
+            "count": 27,
+            "solved": 27,
+            "par2_ms": 5.3286531830154775,
+            "median_ms": 4.7680729476269335,
+            "stdev_ms": 1.117232027237187
+          },
+          "20": {
+            "count": 69,
+            "solved": 69,
+            "par2_ms": 3.161802006787553,
+            "median_ms": 3.22961836354807,
+            "stdev_ms": 0.5216394759736002
+          }
+        },
+        "scales": {
+          "48": {
+            "count": 48,
+            "solved": 48,
+            "par2_ms": 3.1955515247924873,
+            "median_ms": 2.7688796253642067,
+            "stdev_ms": 0.8227288609386827
+          },
+          "64": {
+            "count": 48,
+            "solved": 48,
+            "par2_ms": 4.346906275410826,
+            "median_ms": 3.7396315747173503,
+            "stdev_ms": 1.291918261778153
+          }
+        },
+        "recognized": 96,
+        "graph_unknown": 0,
+        "routes": {
+          "legacy": 0,
+          "no_response": 0,
+          "exact_sat": 27,
+          "exact_unsat": 69,
+          "witness_sat": 0,
+          "fallback": 0
+        }
+      }
+    },
+    "contrasts": {
+      "confirm/cold/stock": {
+        "graphs": 128,
+        "mean_ms": 8.737868529149434,
+        "lower_ms": 4.2463165411761485,
+        "upper_ms": 14.80532905445418
+      },
+      "confirm/cold/degree32": {
+        "graphs": 128,
+        "mean_ms": 2.5059083167838656,
+        "lower_ms": 0.8822099726718011,
+        "upper_ms": 6.227331681411334
+      },
+      "confirm/cold/random32": {
+        "graphs": 128,
+        "mean_ms": 2.7952135213935336,
+        "lower_ms": 1.0176530937618131,
+        "upper_ms": 6.638586305608544
+      },
+      "confirm/cold/witness32": {
+        "graphs": 128,
+        "mean_ms": 1.343331553572271,
+        "lower_ms": -0.2738508535070717,
+        "upper_ms": 5.029356897941599
+      },
+      "unsat/cold": {
+        "graphs": 23,
+        "mean_ms": 8.888604362373767,
+        "lower_ms": 2.25695409823656,
+        "upper_ms": 27.76937009071206
+      },
+      "fallback/cold": {
+        "graphs": 32,
+        "mean_ms": 0.10971870506182257,
+        "lower_ms": -0.12142992854933332,
+        "upper_ms": 0.3712958089535175
+      },
+      "confirm/resident/stock": {
+        "graphs": 128,
+        "mean_ms": 8.714828237619562,
+        "lower_ms": 4.221297555920534,
+        "upper_ms": 14.71583906840251
+      },
+      "confirm/resident/degree32": {
+        "graphs": 128,
+        "mean_ms": 2.5309246128825986,
+        "lower_ms": 1.2717335455919156,
+        "upper_ms": 6.021395656592142
+      },
+      "confirm/resident/random32": {
+        "graphs": 128,
+        "mean_ms": 2.745085787965864,
+        "lower_ms": 1.3019742657686746,
+        "upper_ms": 6.479942125601896
+      },
+      "confirm/resident/witness32": {
+        "graphs": 128,
+        "mean_ms": 1.557419611749032,
+        "lower_ms": 0.23198862568447276,
+        "upper_ms": 5.110166297671878
+      },
+      "unsat/resident": {
+        "graphs": 23,
+        "mean_ms": 8.709783293250586,
+        "lower_ms": 2.1229215629545792,
+        "upper_ms": 27.493572377017884
+      },
+      "fallback/resident": {
+        "graphs": 32,
+        "mean_ms": -0.1291532438093177,
+        "lower_ms": -0.302758584196757,
+        "upper_ms": 0.038151623124980806
+      }
+    },
+    "learned_advantage": false,
+    "confirmation_gates": {
+      "cold": false,
+      "resident": false
+    },
+    "unsat_mechanism_gates": {
+      "cold": true,
+      "resident": true
+    },
+    "fallback_noninferiority_gates": {
+      "cold": true,
+      "resident": true
+    },
+    "scope": "同主机新数据固定候选确认；压力/回退组分开，非学习或外部独立复现"
   }
 }

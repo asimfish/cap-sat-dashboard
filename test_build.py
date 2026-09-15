@@ -4,11 +4,57 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress
+from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress
 from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_confirmation_export_keeps_panels_and_rejects_claim_drift(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/confirm_20260915_e65';root.mkdir(parents=True)
+            def save(name,obj):(root/name).write_text(json.dumps(obj))
+            identity=dict(kind='bundle_digest',value='a'*64,scope='evaluation_inputs')
+            raw=dict(cells=19968,learned_advantage=False,input_identity=identity,totals={},contrasts={},
+                confirmation_gates=dict(cold=True,resident=True,private='PRIVATE'),unsat_mechanism_gates=dict(cold=True,resident=True),
+                fallback_noninferiority_gates=dict(cold=True,resident=True))
+            def stats(n,ms):return dict(count=n,solved=n,par2_ms=ms if n else None,median_ms=ms if n else None,stdev_ms=.1 if n else None)
+            for panel in ['confirm','fallback','stress']:
+                count=1152 if panel=='confirm' else 96
+                arms=['stock','degree32','random32','witness32','exact','pair42','pair43','pair44'] if panel=='confirm' else ['stock','degree32','witness32','exact']
+                ns=['48','64'] if panel=='stress' else ['24','32','48','64']
+                for reg in ['cold','resident']:
+                    for arm in arms:
+                        ms=5 if arm=='exact' and panel!='fallback' else 10
+                        raw['totals'][f'{panel}/{reg}/{arm}']=dict(stats(count,ms),truth={t:stats(n,ms) for t,n in [('0',0),('10',count*3//4),('20',count//4)]},
+                            scales={n:stats(count//len(ns),ms) for n in ns},recognized=0,graph_unknown=0,routes={'legacy':count},private='PRIVATE')
+            for reg in ['cold','resident']:
+                for arm in ['stock','degree32','random32','witness32']:
+                    raw['contrasts'][f'confirm/{reg}/{arm}']=dict(graphs=128,mean_ms=5,lower_ms=4,upper_ms=6)
+                raw['contrasts'][f'unsat/{reg}']=dict(graphs=32,mean_ms=5,lower_ms=4,upper_ms=6)
+                raw['contrasts'][f'fallback/{reg}']=dict(graphs=32,mean_ms=0,lower_ms=-.01,upper_ms=.01)
+            save('STATUS.json',dict(phase='terminal',input_identity=identity))
+            names=['FROZEN.json','POOL.json','RECEIPT.json','RESULTS.json','raw.jsonl.gz','charged.jsonl.gz']
+            for name in names:save(name,{'private':'PRIVATE'})
+            def refresh():
+                save('RESULTS.json',raw);h=hashlib.sha256()
+                for name in names:
+                    body=(root/name).read_bytes();label=name.encode()
+                    h.update(len(label).to_bytes(8,'big'));h.update(label);h.update(len(body).to_bytes(8,'big'));h.update(body)
+                save('AUDIT.json',dict(verdict='full_replay_pass',cells=19968,input_identity=identity,
+                    export_identity=dict(kind='bundle_digest',value=h.hexdigest(),scope='release')))
+            refresh();out=confirmation_progress(repo)
+            self.assertEqual(out['cells'],19968);self.assertEqual(len(out['totals']),32)
+            self.assertNotIn('PRIVATE',json.dumps(out));self.assertFalse(out['learned_advantage'])
+            raw['confirmation_gates']['cold']=False;refresh();self.assertIsNone(confirmation_progress(repo))
+            raw['confirmation_gates']['cold']=True
+            raw['fallback_noninferiority_gates']['resident']=False;refresh();self.assertIsNone(confirmation_progress(repo))
+            raw['fallback_noninferiority_gates']['resident']=True
+            raw['totals']['confirm/cold/exact']['par2_ms']=float('nan');refresh();self.assertIsNone(confirmation_progress(repo))
+            raw['totals']['confirm/cold/exact']['par2_ms']=5
+            raw['learned_advantage']=True;refresh();self.assertIsNone(confirmation_progress(repo))
+            raw['learned_advantage']=False;refresh()
+            (root/'charged.jsonl.gz').write_bytes(b'changed');self.assertIsNone(confirmation_progress(repo))
+
     def test_exact_search_hashes_scopes_and_gate_recomputation(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/exact_search_20260915_e64';root.mkdir(parents=True)
@@ -319,7 +365,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),19)
+        self.assertEqual(len(plan['actions']),20)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -342,6 +388,7 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('不足8小时',actions['A16']['stop'])
         self.assertIn('学习净优势仍未通过',actions['A17']['status'])
         self.assertIn('非学习优势',actions['A18']['status'])
+        self.assertIn('更强整体确认门未通过',actions['A19']['status'])
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:
