@@ -7,10 +7,11 @@ receipts; stale exports do not claim live execution. Window completion does not
 mean performance success. Missing blocks forbid an unreserved pass. No GPU
 training or paper rewrite is claimed. Historical E61 remains stopped incomplete.
 
-Latest audited performance update: A25's mandatory full-checker optimization reduces verified
-exact-resident cost30.38% and witness32 resident25.44%. Implementation gates8/10
-and strongest comparisons0/2: overall advantage still unestablished. All original
-clauses remain checked; native solver unchanged, historical failures retained.
+Latest audited performance update: A27's one-attempt prefix reduces sparse-stress
+exact-resident full cost6.62% versus32 attempts (1.193481→1.114467ms; corrected
+gain lower bound0.037235ms). Only15/28 development gates pass; both matched-panel
+strongest gates fail. This is a scoped repair, not a promotion or learned advantage.
+A25's earlier checker gains and every historical failure remain separate.
 
 Open-source, dependency-free research progress dashboard. MIT licensed.
 
@@ -46,11 +47,25 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Twenty-six actions have dependencies, costs, acceptance and stopping rules. Their
+Twenty-eight actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
 The roadmap's review date and SHA256 are separate from live export freshness.
+
+`#action-A27`:128 newly generated development graphs in two64-graph panels,
+11520full-cost cells and5940SAT witnesses independently replayed. Baseline,
+shared32 and shared1 are measured in the same binary. Only exact's prefix changes;
+witness32 retains32 attempts, the1ms total graph deadline and full original-CNF
+checks remain. Release and ASan/UBSan correctness pass. The sparse-stress resident
+repair passes its3%/positive-interval gate; graph-search-stage mean falls86.70%,
+which does not mean ExactSearch itself accelerated. Matched6/14 and stress9/14
+gates pass. Matched n48 resident request+validation is17.949us slower than witness32;
+matched cold mean regresses7.24%. Tails and all failures remain. Witness32 wins
+already present in original exact are not attributed to shared1. No new confirmation,
+production switch, learned advantage, or alteration of A26's eight-hour campaign.
+Next: diagnose same-witness n48 validation, input parse and cold exit costs; do not
+search more prefix counts or use timing noise to select a winner.
 
 `#action-A25`:64fresh graphs,3840full-cost cells,3120SAT witnesses independently
 replayed using the old checker. Both implementations call a reusable verified

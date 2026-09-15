@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-15T20:20:24.709937+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-15T20:22:00.608478+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -33,7 +33,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-15T20:20:24.709937+00:00",
+  "generated": "2026-09-15T20:22:00.608478+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3059,7 +3059,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-16",
-    "scope": "人工审读的性能计划：A26新增共享SAT快路径与有界精确残差的8小时双CPU检验，实时状态见顶部面板，运行不代表验收通过。A25精确驻留降30.38%、仅补全SAT驻留降25.44%，但实现门8/10、最强比较0/2；E65确认失败和旧长尾保留。七项缺口仍4部分改善、3未解决，不改论文或宣称学习优势。",
+    "scope": "人工审读的性能计划：A27单次前缀将困难驻留完整成本降低6.62%，但28门仅15过，匹配最强两门失败，未推广。A26原8小时双CPU检验保持不变，实时状态见顶部，运行不代表验收通过。A25局部降本、E65确认失败和旧长尾均保留。七项缺口仍4部分改善、3未解决，不改论文或宣称学习优势。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3074,7 +3074,7 @@
         "title": "端到端收益能否超过廉价基线",
         "state": "部分改善",
         "priority": "最高",
-        "progress": "历史 n250 对极性的时间差区间跨零；九月 n350 Glucose 对默认有收益，Kissat 不支持同样结论。E27随机修复+回退已有收益，CAP仍未胜过廉价修复。E64原廉价基线收益在E65复现，但加入仅补全SAT的更强确认门两模式均失败。A20等价重排修复六门通过，A24编译补全精确驻留降3.07%。A25另64新图完整校验客户端优化：精确1.655→1.152ms(-30.38%)，仅补全SAT 2.001→1.492ms(-25.44%)；实现门8/10、最强0/2，不能跨图叠加或称学习优势。",
+        "progress": "历史 n250 对极性的时间差区间跨零；九月 n350 Glucose 对默认有收益，Kissat 不支持同样结论。E27随机修复+回退已有收益，CAP仍未胜过廉价修复。E64原廉价基线收益在E65复现，但加入仅补全SAT的更强确认门两模式均失败。A20等价重排修复六门通过，A24编译补全精确驻留降3.07%。A25精确驻留降30.38%、仅补全SAT驻留降25.44%，实现门8/10、最强0/2。A27另128图开发：单次前缀对32次前缀将困难驻留1.193481→1.114467ms(-6.62%)，改善门通过；整体15/28、匹配最强两门仍失败，不跨图叠加或称学习优势。",
         "remaining": "尚无跨后端、跨问题族稳定优于默认及廉价对照的部署优势；小实例的预测成本仍可能超过搜索节省。",
         "directions": [
           "A0",
@@ -3095,9 +3095,10 @@
           "A23",
           "A24",
           "A25",
-          "A26"
+          "A26",
+          "A27"
         ],
-        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35；E64；E65；重排识别修复；lifecycle_20260915_v1；io_20260915_v1；spawn_20260915_v1；witness_20260916_v1；checker_20260916_v1；shared_prefix_20260916_v3",
+        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35；E64；E65；重排识别修复；lifecycle_20260915_v1；io_20260915_v1；spawn_20260915_v1；witness_20260916_v1；checker_20260916_v1；shared_prefix_20260916_v3；single_prefix_20260916_v1",
         "evidence_level": "历史报告 + 后续局部审计；E65同主机新数据复现对原廉价基线的收益，但包含新SAT补全对照的更强确认门未过；不是普遍加速"
       },
       {
@@ -3573,9 +3574,23 @@
         "method": "同一二进制两配置，五个策略公平共享解析、精简启动、编译补全和完整校验。两个CPU通道各自三批正常分布、一批稀疏困难残余；新seed、不按SAT或速度筛选。冷/驻留包括创建、就绪、请求、校验、预热分摊和退出；全部长尾保留。release/sanitizer正确性、同见证回归、异常父退出清理、缺失块拒绝成功及摘要接口回归须先通过。",
         "gate": "每通道/分布单列；最强对照冷和驻留均须至少5%全成本收益、12项校正下界为正、求解数不减、每规模full及request+validation无害；新旧五策略须5%非劣。按时间块而非三次重复重采样。8小时结束另作终态读出；缺失/中断块禁止无保留通过，不用时长证明优势。",
         "stop": "v1小试3840次重放后在继承审计打印处缺字段失败，记录保留；v2修复小试通过后短暂启动，被协作复核发现监督/缺失块口径风险而停止。v3补父进程死亡保护、子孙身份清理、各lane独立分层和严格终态回执绑定后再启动。磁盘低于50GiB、产物超过8GiB、内存不足16GiB、正确性/审计失败或STOP立即停止；旧冻结实验和论文不改。当前性能结论仍未突破，不是学习优势、工业泛化或生产切换。"
+      },
+      {
+        "id": "A27",
+        "title": "只做一次廉价补全，失败立即进入精确残差",
+        "priority": "P1 · 局部修复保留，整体不推广",
+        "status": "困难驻留降6.62%；整体15/28，匹配最强两门未过",
+        "cost": "128新生成开发图、匹配/稀疏困难各64图×3轮×5策略×3配置×冷/驻留，共11520单元；5940个SAT见证和全部账目重放，无GPU训练",
+        "depends_on": [
+          "A26"
+        ],
+        "hypothesis": "A26各通道/分布最早两完成块诊断发现：困难UNSAT n48/n64共享32次补全耗时134/186微秒，而原图搜索约5/4微秒。重复尝试可能抵消SAT快路径收益；降低前缀次数有可检验机制，不扩大参数网格。",
+        "method": "另建隔离版本，同一二进制baseline/shared32/shared1三配置；只有exact在shared1最多一次度数补全，witness32始终最多32次。失败用同一1ms总图截止时间内的原精确搜索；完整原CNF校验、全部控制、预热和退出计费不变。release/ASan各7项含6504小图组合通过；旧32次配置在最多一次回归断言正确失败。原A26八小时队列、冻结文件和时钟未改；本轮属于受A26诊断启发的开发，不是独立确认。",
+        "gate": "28项预设单侧图聚类校正比较：困难驻留对shared32至少降3%、下界正；其他修复及对原exact和廉价控制须5%非劣；最强对照须降5%、下界正且每规模full/request+validation无害。匹配6/14、困难9/14，共15/28；困难驻留7门全过，冷非劣门多项失败；匹配最强冷/驻留两门均失败。困难图搜索阶段减半机制两门通过，不豁免总体失败。",
+        "stop": "困难驻留完整成本shared32→shared1为1.193481→1.114467ms(-6.62%，校正节省下界0.037235ms)，图搜索阶段72.125→9.592微秒(-86.70%)，不是ExactSearch本身加速。困难冷5.909072→5.822553ms仅点估计改善1.46%，非劣区间未过；匹配冷7.256298→7.781614ms退化7.24%，驻留1.637139→1.579568ms仅非劣过门，不能称严格改善。匹配n48驻留比witness32请求+校验慢17.949微秒，最强门失败。困难相对witness32冷/驻留通过，但原exact已有大量这类收益，不能归给单次前缀。原exact保留101.305ms驻留长尾，不能把受其影响的31.35%均值差当作稳定新增收益。下一步分解n48同见证校验和读取/解析成本及冷退出长尾，诊断先行，不继续挑前缀次数；不删校验、不改E65失败，不切换生产或改论文。"
       }
     ],
-    "sha256": "57f4bfc90eb30bd26be10d53d67a9c9887b87dd5fd1997f8580ccb1e79db6c49"
+    "sha256": "4ab031f52f0d1f44d22ac42737019dd3ca69fffa6c0597a6b963c1d4ffef998f"
   },
   "pilot": {
     "id": "E26",
@@ -7407,20 +7422,20 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-16T03:36:43.501975+00:00",
+    "earliest_target_at": "2026-09-16T03:38:19.026444+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
     "phase": "running",
-    "observed": "2026-09-15T20:20:23.090161+00:00",
+    "observed": "2026-09-15T20:21:59.567204+00:00",
     "started_at": "2026-09-15T18:11:52.444946+00:00",
     "planned_end": "2026-09-16T02:11:52.444946+00:00",
-    "elapsed_s": 7710.645257608965,
-    "active_coverage_s": 7675.827464776114,
+    "elapsed_s": 7807.122294005938,
+    "active_coverage_s": 7772.310297939926,
     "duration_s": 28800,
-    "completed_jobs": 353,
-    "completed_cells": 1355520,
-    "sat_witnesses": 928980,
+    "completed_jobs": 357,
+    "completed_cells": 1370880,
+    "sat_witnesses": 937560,
     "failed_jobs": 0,
     "running_jobs": 2,
     "cpu_lanes": 2,
