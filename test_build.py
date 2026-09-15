@@ -403,7 +403,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),22)
+        self.assertEqual(len(plan['actions']),23)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -431,6 +431,9 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('整体门未通过',actions['A21']['status'])
         self.assertIn('仅补全SAT冷启动失败',actions['A21']['gate'])
         self.assertIn('10.667→8.857',actions['A21']['stop'])
+        self.assertIn('长尾未解决',actions['A22']['status'])
+        self.assertIn('默认冷启动失败',actions['A22']['gate'])
+        self.assertIn('8.821→8.315',actions['A22']['stop'])
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:
