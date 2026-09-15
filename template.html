@@ -11,6 +11,7 @@
 <section id="targeted"><h2>E62 · 定向修复：硬件位计数与学习空间核查</h2><div id="targeted-progress" class="panel"></div></section>
 <section id="exact-search"><h2>E64 · 精确搜索：直接降低不可满足判定成本</h2><div id="exact-search-progress" class="panel"></div></section>
 <section id="confirmation"><h2>E65 · 固定算法的新数据确认与适用边界</h2><div id="confirmation-progress" class="panel"></div></section>
+<section id="recognition-repair"><h2>定向修复 · 等价重排不再丢失精确搜索路径</h2><div id="recognition-repair-progress" class="panel"></div></section>
 <section id="issues"><h2>缺点解决情况</h2><div class="toolbar"><label for="filter">筛选</label><select id="filter"><option value="all">所有问题</option><option value="open">仍待解决</option><option value="closed">已修复 / 负结果关闭</option></select></div><div id="issue-list" class="issues"></div></section>
 <section id="runs"><h2>实验完成度 <span class="muted">E17 / E19 · n = 350</span></h2><div class="table"><table><thead><tr><th>实验</th><th>种子</th><th>有效实例行</th><th>状态</th><th>最近日志更新 UTC</th></tr></thead><tbody id="run-list"></tbody></table></div><p class="muted">每实例行包含 4 个求解器臂；每组计划 5 × 300 行。表中仅覆盖 E17/E19 n350；其他实验见缺点卡片。局部或校验失败的种子不进入结果汇总。</p></section>
 <section id="results"><h2>结果与边界</h2><div class="toolbar"><label for="group">实例子集</label><select id="group"><option>SAT</option><option>UNSAT</option><option>ALL</option></select><label for="comparator">对照</label><select id="comparator"><option value="default">原生 CaDiCaL</option><option value="polarity">Polarity</option><option value="walksat_equal">等成本 WalkSAT</option></select></div><div class="table"><table><thead><tr><th>模型</th><th>完整种子</th><th>实例 / 种子</th><th>PAR-2 收益 / 秒</th><th>95% 种子区间</th></tr></thead><tbody id="result-list"></tbody></table></div><p class="muted">收益 = 对照 PAR-2 − CAP-SAT PAR-2；正值有利于 CAP。超时按 2 × 600 秒惩罚。区间仅对种子重采样，条件于固定实例面板；不代表生成簇不确定性。SAT / UNSAT 标签取所有读取结果的确定性结论并集，未决实例仍保留在 ALL。</p><div class="panel"><b>解释时必须保留的限制</b><p>跨运行资源竞争影响 CPU 时间；frozen seed 1024 包含跨主机补跑，重新准备初始化成本。不同训练规模的时间差不能直接解释为训练的因果收益。工业与更大规模随机 SAT 的负结果仍成立。</p><p id="truth" class="muted"></p></div></section>
@@ -50,6 +51,7 @@ function render(){
  renderExactSearch();
  renderConfirmation();
  renderConfirmationReason();
+ renderRecognitionRepair();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -99,6 +101,19 @@ function render(){
  const acceptance=Object.entries(n.acceptance||{}).map(([k,v])=>`${k.startsWith('rlaf')?'RLAF':'NeuroBack'}：${esc(accepted[v]||v)}`).join(' · ');
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
+}
+function renderRecognitionRepair(){
+ const u=data.recognition_repair,target=document.getElementById('recognition-repair-progress');
+ if(!u){target.textContent='暂无通过完整审计的重排修复结果。';return;}
+ const forms={canonical:'规范输入',reversed:'反转子句',shuffled:'打乱子句与文字'},gate=x=>x?'通过':'未通过';
+ const stages=u.totals['canonical/cold'].new_exact.stages_ms;
+ const solved=v=>{const a=['old_exact','new_exact','new_witness','new_degree32'].map(k=>v[k].solved+'/'+v[k].count);return a.every(x=>x===a[0])?'全部 '+a[0]:a.join(' · ');};
+ target.innerHTML=`<p>64张新图，每图三种等价排列、三轮计时、四臂、冷/驻留，共4,608次。三种排列仍只有64张独立图。保留原规范识别和搜索算法，只在规范识别失败时严格匹配编码子句多重集。</p>
+ <div class="table"><table><thead><tr><th>输入 / 生命周期</th><th>旧精确 ms</th><th>修复精确 ms</th><th>仅补全SAT ms</th><th>度数基线 ms</th><th>四臂核验</th><th>预设门槛</th></tr></thead><tbody>${Object.entries(forms).flatMap(([form,label])=>['cold','resident'].map(reg=>{const v=u.totals[form+'/'+reg],arms=['old_exact','new_exact','new_witness','new_degree32'];return `<tr><td>${label} / ${reg==='cold'?'冷':'驻留'}</td>${arms.map(a=>`<td>${v[a].par2_ms.toFixed(3)}</td>`).join('')}<td>${solved(v)}</td><td>${form==='canonical'?'5%非劣':'重排修复'}${gate(u.gates[form][reg])}</td></tr>`;})).join('')}</tbody></table></div>
+ <p>六项门槛${gate(u.all_gates_pass)}。精确识别（旧→新）：${Object.entries(forms).flatMap(([f,label])=>['cold','resident'].map(r=>{const v=u.totals[f+'/'+r];return `${label}/${r==='cold'?'冷':'驻留'} ${v.old_exact.recognized}→${v.new_exact.recognized}/${v.new_exact.count}`;})).join('；')}。重排门要求完整PAR-2降低至少10%、各规模无退化、求解数不减；规范输入只检验5%非劣，不声称严格更快。</p>
+ <p>六个预设单侧检验按图聚类重采样10,000次，并做Bonferroni联合校正。相对旧精确路径的校正收益下界（ms）：${Object.entries(forms).flatMap(([f,label])=>['cold','resident'].map(r=>`${label}/${r==='cold'?'冷':'驻留'} ${u.contrasts[f+'/'+r].lower_ms.toFixed(3)}`)).join('；')}。</p>
+ <p>规范输入修复版冷启动分解：启动 ${stages.startup_s.toFixed(3)}ms、请求 ${stages.request_s.toFixed(3)}ms、Python核验 ${stages.python_audit_s.toFixed(3)}ms、退出 ${stages.exit_s.toFixed(3)}ms。启动已包含创建与就绪，不重复相加。驻留总成本含启动、独立预热和退出的64请求摊销。</p>
+ <p class="alert">这是受支持编码的局部工程修复，不是学习优势。仅补全SAT/度数两列是描述性强对照；E65更强整体确认门仍未通过，不能用本轮重排修复覆盖它。未支持辅助变量重命名、任意编码或通用工业SAT，未切换生产路由。</p><p class="muted">${esc(u.scope)}</p>`;
 }
 function renderConfirmation(){
  const u=data.confirmation,target=document.getElementById('confirmation-progress');

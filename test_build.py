@@ -4,11 +4,49 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress
+from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress
 from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_recognition_repair_binding_gate_and_public_allowlist(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/recognition_20260915_v1';root.mkdir(parents=True)
+            def save(name,obj):
+                b=json.dumps(obj).encode();(root/name).write_bytes(b);return hashlib.sha256(b).hexdigest()
+            audit=dict(verdict='full_record_replay_pass',cells=4608,graphs=64,source_frozen=True)
+            for name,key in [('FROZEN.json','frozen'),('raw.jsonl.gz','raw'),('charged.jsonl.gz','charged')]:
+                audit[key+'_sha256']=save(name,{'private':'PRIVATE'})
+            save('STATUS.json',dict(phase='terminal',completed_cells=4608))
+            raw=dict(cells=4608,graphs=64,repeats=3,learned_advantage=False,all_gates_pass=True,
+                     frozen_sha256=audit['frozen_sha256'],summaries={},by_scale={},contrasts={},gates={})
+            def stats(count,ms):
+                return dict(count=count,solved=count,recognized=count,par2_ms=ms,median_ms=ms,std_ms=.1,p95_ms=ms,
+                    stages_ms={k:.1 for k in ['startup_s','spawn_s','readiness_s','request_s','python_audit_s','exit_s']},private='PRIVATE')
+            for form in ['canonical','reversed','shuffled']:
+                for key in ['summaries','by_scale','contrasts','gates']:raw[key][form]={}
+                for reg in ['cold','resident']:
+                    def group(count):return {a:stats(count,5 if a=='new_exact' else 10) for a in ['old_exact','new_exact','new_witness','new_degree32']}
+                    raw['summaries'][form][reg]=group(192)
+                    raw['by_scale'][form][reg]={n:group(48) for n in ['24','32','48','64']}
+                    raw['contrasts'][form][reg]=dict(gain_ms=5,lower_ms=4,upper_ms=6)
+                    raw['gates'][form][reg]=True
+            def refresh():
+                audit['results_sha256']=save('RESULTS.json',raw);audit['gates']=raw['gates'];save('AUDIT.json',audit)
+            refresh();out=recognition_repair_progress(repo)
+            self.assertEqual(out['cells'],4608);self.assertTrue(out['all_gates_pass']);self.assertNotIn('PRIVATE',json.dumps(out))
+            raw['gates']['shuffled']['resident']=False;refresh();self.assertIsNone(recognition_repair_progress(repo))
+            raw['gates']['shuffled']['resident']=True
+            raw['contrasts']['canonical']['cold']['lower_ms']=-1;refresh();self.assertIsNone(recognition_repair_progress(repo))
+            raw['gates']['canonical']['cold']=False;raw['all_gates_pass']=False;refresh()
+            self.assertFalse(recognition_repair_progress(repo)['all_gates_pass'])
+            raw['summaries']['canonical']['cold']['new_exact']['par2_ms']=float('nan');refresh();self.assertIsNone(recognition_repair_progress(repo))
+            raw['summaries']['canonical']['cold']['new_exact']['par2_ms']=5
+            raw['by_scale']['reversed']['cold']['24']['old_exact']['count']=47;refresh();self.assertIsNone(recognition_repair_progress(repo))
+            raw['by_scale']['reversed']['cold']['24']['old_exact']['count']=48
+            raw['learned_advantage']=True;refresh();self.assertIsNone(recognition_repair_progress(repo))
+            raw['learned_advantage']=False;refresh();(root/'raw.jsonl.gz').write_bytes(b'drift');self.assertIsNone(recognition_repair_progress(repo))
+
     def test_confirmation_export_keeps_panels_and_rejects_claim_drift(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/confirm_20260915_e65';root.mkdir(parents=True)
@@ -365,7 +403,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),20)
+        self.assertEqual(len(plan['actions']),21)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -389,6 +427,7 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('学习净优势仍未通过',actions['A17']['status'])
         self.assertIn('非学习优势',actions['A18']['status'])
         self.assertIn('更强整体确认门未通过',actions['A19']['status'])
+        self.assertIn('六项修复门通过',actions['A20']['status'])
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:

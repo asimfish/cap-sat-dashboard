@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-15T12:28:29.834438+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-15T12:40:55.828011+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -11,6 +11,7 @@
 <section id="targeted"><h2>E62 · 定向修复：硬件位计数与学习空间核查</h2><div id="targeted-progress" class="panel"></div></section>
 <section id="exact-search"><h2>E64 · 精确搜索：直接降低不可满足判定成本</h2><div id="exact-search-progress" class="panel"></div></section>
 <section id="confirmation"><h2>E65 · 固定算法的新数据确认与适用边界</h2><div id="confirmation-progress" class="panel"></div></section>
+<section id="recognition-repair"><h2>定向修复 · 等价重排不再丢失精确搜索路径</h2><div id="recognition-repair-progress" class="panel"></div></section>
 <section id="issues"><h2>缺点解决情况</h2><div class="toolbar"><label for="filter">筛选</label><select id="filter"><option value="all">所有问题</option><option value="open">仍待解决</option><option value="closed">已修复 / 负结果关闭</option></select></div><div id="issue-list" class="issues"></div></section>
 <section id="runs"><h2>实验完成度 <span class="muted">E17 / E19 · n = 350</span></h2><div class="table"><table><thead><tr><th>实验</th><th>种子</th><th>有效实例行</th><th>状态</th><th>最近日志更新 UTC</th></tr></thead><tbody id="run-list"></tbody></table></div><p class="muted">每实例行包含 4 个求解器臂；每组计划 5 × 300 行。表中仅覆盖 E17/E19 n350；其他实验见缺点卡片。局部或校验失败的种子不进入结果汇总。</p></section>
 <section id="results"><h2>结果与边界</h2><div class="toolbar"><label for="group">实例子集</label><select id="group"><option>SAT</option><option>UNSAT</option><option>ALL</option></select><label for="comparator">对照</label><select id="comparator"><option value="default">原生 CaDiCaL</option><option value="polarity">Polarity</option><option value="walksat_equal">等成本 WalkSAT</option></select></div><div class="table"><table><thead><tr><th>模型</th><th>完整种子</th><th>实例 / 种子</th><th>PAR-2 收益 / 秒</th><th>95% 种子区间</th></tr></thead><tbody id="result-list"></tbody></table></div><p class="muted">收益 = 对照 PAR-2 − CAP-SAT PAR-2；正值有利于 CAP。超时按 2 × 600 秒惩罚。区间仅对种子重采样，条件于固定实例面板；不代表生成簇不确定性。SAT / UNSAT 标签取所有读取结果的确定性结论并集，未决实例仍保留在 ALL。</p><div class="panel"><b>解释时必须保留的限制</b><p>跨运行资源竞争影响 CPU 时间；frozen seed 1024 包含跨主机补跑，重新准备初始化成本。不同训练规模的时间差不能直接解释为训练的因果收益。工业与更大规模随机 SAT 的负结果仍成立。</p><p id="truth" class="muted"></p></div></section>
@@ -31,7 +32,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-15T12:28:29.834438+00:00",
+  "generated": "2026-09-15T12:40:55.828011+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3056,8 +3057,8 @@
   },
   "performance_plan": {
     "version": 1,
-    "reviewed": "2026-09-13",
-    "scope": "人工审读的性能计划：历史与后续实验分开。E35调用降本、E36局部信号保留；E37成对小网络通过验证稳定性门，但E38原生完整成本开发未证明学习优势。训练门通过不等于七项缺口解决，本轮不改论文。",
+    "reviewed": "2026-09-15",
+    "scope": "人工审读的性能计划：历史与后续实验分开。E64受限精确搜索收益、E65更强确认失败均保留；A20新数据重排修复六项门通过，不替代整体确认或学习优势。七项缺口仍为4项部分改善、3项未解决，本轮不改论文。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3072,7 +3073,7 @@
         "title": "端到端收益能否超过廉价基线",
         "state": "部分改善",
         "priority": "最高",
-        "progress": "历史 n250 对极性的时间差区间跨零；九月 n350 Glucose 对默认有收益，Kissat 不支持同样结论。E27 独立 48 例中，随机修复 + 默认回退比默认快17.5%，CAP仍未胜过廉价修复。E64新精确搜索在128张顶点覆盖编码开发图上，相对原有廉价对照中最快者，冷启动降低24.9%、驻留降低66.3%；相对新SAT补全对照也分别低19.2%、59.5%。这是受限任务的非学习算法收益，尚未独立确认。",
+        "progress": "历史 n250 对极性的时间差区间跨零；九月 n350 Glucose 对默认有收益，Kissat 不支持同样结论。E27 独立48例中，随机修复+默认回退比默认快17.5%，CAP仍未胜过廉价修复。E64受限精确搜索的原廉价基线收益在E65新128图复现：冷启动降低19.2%、驻留56.8%，但加入仅补全SAT的更强确认门两模式均失败。A20修复等价重排识别，在64新图上冷启动下降40.3%–41.9%、驻留66.7%–68.8%，六项修复门通过；这是非学习的局部修复，不解决学习优势、全分布确认或工业泛化。",
         "remaining": "尚无跨后端、跨问题族稳定优于默认及廉价对照的部署优势；小实例的预测成本仍可能超过搜索节省。",
         "directions": [
           "A0",
@@ -3086,9 +3087,10 @@
           "A16",
           "A17",
           "A18",
-          "A19"
+          "A19",
+          "A20"
         ],
-        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35；E64；E65",
+        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35；E64；E65；重排识别修复",
         "evidence_level": "历史报告 + 后续局部审计；E65同主机新数据复现对原廉价基线的收益，但包含新SAT补全对照的更强确认门未过；不是普遍加速"
       },
       {
@@ -3465,9 +3467,23 @@
         "method": "确认组3搜索种子×3轮×8臂×冷/驻留，1s总截止时间。重排组32图保持CNF语义，刻意拒绝规范编码识别；压力组32个n48/64不同密度图采用100ms截止时间，不与主组混算。完整生命周期计费，超时保留；全部账目和15984个SAT见证重放。",
         "gate": "12项图聚类校正比较。相对stock/degree32/random32的收益复现；加入witness32后，确认门两生命周期均失败：n48均值退化，冷启动对witness32的同时下界为-0.274ms。UNSAT机制门、相对stock回退的5%非劣门均通过。",
         "stop": "确认组相对原有最快廉价基线：冷13.075→10.569ms(-19.2%)，驻留4.456→1.925ms(-56.8%)；不能写成最强对照全面确认。n48全部SAT，驻留多5.385微秒；冷启动173/82/48ms三个长尾大部分在native请求之外，不能无证据归因于调度。重排回退全解；压力组exact96/96、其他对照93/96，差异是同一张图的3次重复。下一步另建版本分解启动/通信/Python检查/退出，研究先直接补全再对残差精确搜索及等价编码识别；不改本次算法或删除确认失败样本。无学习优势、外部独立复现或生产切换。"
+      },
+      {
+        "id": "A20",
+        "title": "等价重排识别修复与全生命周期分解",
+        "priority": "P1 · 已验证局部实质修复",
+        "status": "六项修复门通过；E65强确认仍未通过",
+        "cost": "64新图、三种等价形式、3轮、4臂、冷/驻留共4608次；6504穷举组合与ASan/UBSan通过；无GPU网格",
+        "depends_on": [
+          "A19"
+        ],
+        "hypothesis": "E65等价子句重排丢失图快路径，根因是只识别固定后缀。保留规范快路径，失败后严格多重集匹配受信编码，可恢复结构而不改变精确搜索算法。",
+        "method": "新版本recognition_20260915_v1，不修改旧冻结实验。严格消耗全部基数模板子句，再验证唯一正二元图边；缺失、篡改、重复及不支持编码继续回退。计时记录创建、就绪、请求、Python校验和退出；驻留启动/预热/退出按64请求分摊。4608单元全部核验，3816个SAT见证重放。",
+        "gate": "四项重排修复均须至少降低10%完整PAR-2、图聚类校正下界为正、各规模无退化、求解数不减；两项规范输入5%非劣。六个预设单侧检验联合校正，全部通过。三种形式不能当192张独立图；witness/degree仅作描述性强对照。",
+        "stop": "反转输入冷18.486→10.732ms、驻留10.997→3.427ms；随机重排冷18.413→10.989ms、驻留11.041→3.680ms。规范冷10.306→10.267ms、驻留3.008→3.033ms，非劣不等于严格改善。规范冷启动约6.333ms占完整10.267ms的大部分，下一步研究共享对照的轻量生命周期及先见证后残差搜索，须用未来新数据验证。E65失败不改写；无学习优势、任意编码支持、独立UNSAT证书或生产切换。"
       }
     ],
-    "sha256": "bc082776b2aee3157843d17bc1ffc9032f08e3ce96df93d51507d786dfd7231c"
+    "sha256": "fcd125289be5682c89d8880d425271aa0474dfde753608304e144a2c3baa2194"
   },
   "pilot": {
     "id": "E26",
@@ -7299,7 +7315,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-15T19:44:48.515168+00:00",
+    "earliest_target_at": "2026-09-15T19:57:14.240921+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "targeted": {
@@ -10686,6 +10702,2177 @@
       "resident": true
     },
     "scope": "同主机新数据固定候选确认；压力/回退组分开，非学习或外部独立复现"
+  },
+  "recognition_repair": {
+    "graphs": 64,
+    "cells": 4608,
+    "repeats": 3,
+    "totals": {
+      "canonical/cold": {
+        "old_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 10.306180236511864,
+          "median_ms": 10.171276982873678,
+          "std_ms": 1.508433786637931,
+          "p95_ms": 12.651470489799976,
+          "stages_ms": {
+            "startup_s": 6.341754201760826,
+            "spawn_s": 1.8897904471183817,
+            "readiness_s": 4.303334969639157,
+            "request_s": 1.764323281046624,
+            "python_audit_s": 0.9595029502330968,
+            "exit_s": 1.2261192993416141
+          }
+        },
+        "new_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 10.266855325122984,
+          "median_ms": 10.142096783965826,
+          "std_ms": 1.536022847457948,
+          "p95_ms": 12.761131534352899,
+          "stages_ms": {
+            "startup_s": 6.33313142558715,
+            "spawn_s": 1.906677833176218,
+            "readiness_s": 4.279994182676698,
+            "request_s": 1.7506337899249047,
+            "python_audit_s": 0.9520583650252471,
+            "exit_s": 1.2148626265116036
+          }
+        },
+        "new_witness": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 10.751491519234454,
+          "median_ms": 10.69221319630742,
+          "std_ms": 1.4757477161708779,
+          "p95_ms": 12.962786573916674,
+          "stages_ms": {
+            "startup_s": 6.331518190563656,
+            "spawn_s": 1.9023646066974227,
+            "readiness_s": 4.256701383080023,
+            "request_s": 2.236653526779264,
+            "python_audit_s": 0.949923662119545,
+            "exit_s": 1.2179427333952237
+          }
+        },
+        "new_degree32": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 0,
+          "par2_ms": 11.892920898390003,
+          "median_ms": 11.569113936275244,
+          "std_ms": 1.7870170583971046,
+          "p95_ms": 14.77549271658063,
+          "stages_ms": {
+            "startup_s": 6.3634054095018655,
+            "spawn_s": 1.9243996066506952,
+            "readiness_s": 4.286907574472328,
+            "request_s": 3.3166537129242593,
+            "python_audit_s": 0.957393897503304,
+            "exit_s": 1.2393912814635162
+          }
+        }
+      },
+      "canonical/resident": {
+        "old_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 3.00776544221056,
+          "median_ms": 3.096045693382621,
+          "std_ms": 1.4437479811458378,
+          "p95_ms": 5.387975072517293,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 1.7390972013041999,
+            "python_audit_s": 0.937106044148095,
+            "exit_s": 0.0
+          }
+        },
+        "new_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 3.0333791995265833,
+          "median_ms": 2.8833929100073874,
+          "std_ms": 1.4776262302459293,
+          "p95_ms": 5.361869667103747,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 1.7432837097051863,
+            "python_audit_s": 0.9563186855909104,
+            "exit_s": 0.0
+          }
+        },
+        "new_witness": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 3.5659725399455056,
+          "median_ms": 3.5548926680348814,
+          "std_ms": 1.3279709917250462,
+          "p95_ms": 5.354807953699492,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 2.216681474237703,
+            "python_audit_s": 0.9446595601427058,
+            "exit_s": 0.0
+          }
+        },
+        "new_degree32": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 0,
+          "par2_ms": 4.556388303171843,
+          "median_ms": 4.458190385776106,
+          "std_ms": 1.5955614632271968,
+          "p95_ms": 7.064518315019085,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 3.1710070373568064,
+            "python_audit_s": 0.9452852488417799,
+            "exit_s": 0.0
+          }
+        }
+      },
+      "reversed/cold": {
+        "old_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 0,
+          "par2_ms": 18.486435985929955,
+          "median_ms": 12.071327771991491,
+          "std_ms": 17.54581935556968,
+          "p95_ms": 54.33475794270614,
+          "stages_ms": {
+            "startup_s": 6.743079172641349,
+            "spawn_s": 2.3107254770972454,
+            "readiness_s": 4.28279575620157,
+            "request_s": 9.530504554277286,
+            "python_audit_s": 0.972245674347505,
+            "exit_s": 1.2256968814957265
+          }
+        },
+        "new_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 10.731734102591872,
+          "median_ms": 10.410926304757595,
+          "std_ms": 2.2381774951016795,
+          "p95_ms": 13.43234097585082,
+          "stages_ms": {
+            "startup_s": 6.4227877543695895,
+            "spawn_s": 1.9935105907885977,
+            "readiness_s": 4.2817452097854884,
+            "request_s": 2.1238431848663217,
+            "python_audit_s": 0.9509620382838572,
+            "exit_s": 1.2187386892037466
+          }
+        },
+        "new_witness": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 11.146642190093795,
+          "median_ms": 11.018526274710894,
+          "std_ms": 1.7149673693090595,
+          "p95_ms": 13.705198327079414,
+          "stages_ms": {
+            "startup_s": 6.337142680422403,
+            "spawn_s": 1.9099077326245606,
+            "readiness_s": 4.279095339976872,
+            "request_s": 2.616131653970418,
+            "python_audit_s": 0.96263379479448,
+            "exit_s": 1.215171529717433
+          }
+        },
+        "new_degree32": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 0,
+          "par2_ms": 12.130103428110791,
+          "median_ms": 11.771777644753456,
+          "std_ms": 3.6323627325366306,
+          "p95_ms": 14.55661877989769,
+          "stages_ms": {
+            "startup_s": 6.6557881752184285,
+            "spawn_s": 2.2336885352463773,
+            "readiness_s": 4.244573812078063,
+            "request_s": 3.273005621546569,
+            "python_audit_s": 0.957593156878526,
+            "exit_s": 1.2276916919897
+          }
+        }
+      },
+      "reversed/resident": {
+        "old_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 0,
+          "par2_ms": 10.9967211028561,
+          "median_ms": 4.95090673211962,
+          "std_ms": 16.84133522019125,
+          "p95_ms": 39.599559988710084,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 9.485372963051,
+            "python_audit_s": 0.9612650125442693,
+            "exit_s": 0.0
+          }
+        },
+        "new_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 3.4274313414546973,
+          "median_ms": 3.4485389478504658,
+          "std_ms": 1.679677230106381,
+          "p95_ms": 6.1629178293515,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 2.0996000142379976,
+            "python_audit_s": 0.9539674453359718,
+            "exit_s": 0.0
+          }
+        },
+        "new_witness": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 3.9860396791482344,
+          "median_ms": 3.9063269359758124,
+          "std_ms": 1.5995519110797425,
+          "p95_ms": 6.327575838804478,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 2.6288998536377526,
+            "python_audit_s": 0.9648634489470472,
+            "exit_s": 0.0
+          }
+        },
+        "new_degree32": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 0,
+          "par2_ms": 4.5816300601776065,
+          "median_ms": 4.556898362352513,
+          "std_ms": 1.548491113306383,
+          "p95_ms": 6.988524076587054,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 3.1912909471429884,
+            "python_audit_s": 0.9464831479514638,
+            "exit_s": 0.0
+          }
+        }
+      },
+      "shuffled/cold": {
+        "old_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 0,
+          "par2_ms": 18.413305607585546,
+          "median_ms": 12.592637911438942,
+          "std_ms": 19.841374214183013,
+          "p95_ms": 47.14640490710724,
+          "stages_ms": {
+            "startup_s": 6.44458952107622,
+            "spawn_s": 1.941592888518547,
+            "readiness_s": 4.3426359091730165,
+            "request_s": 9.363950419356115,
+            "python_audit_s": 1.093928546955188,
+            "exit_s": 1.4952514611650258
+          }
+        },
+        "new_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 10.988738868036307,
+          "median_ms": 10.893953498452902,
+          "std_ms": 1.9890351606194812,
+          "p95_ms": 14.176576118916273,
+          "stages_ms": {
+            "startup_s": 6.431155304502075,
+            "spawn_s": 1.956195269788926,
+            "readiness_s": 4.327378997307581,
+            "request_s": 2.23971455610202,
+            "python_audit_s": 1.0824502969626337,
+            "exit_s": 1.2194309577656288
+          }
+        },
+        "new_witness": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 11.649873384158127,
+          "median_ms": 11.476727668195963,
+          "std_ms": 3.565464814498896,
+          "p95_ms": 14.163136528804898,
+          "stages_ms": {
+            "startup_s": 6.650605859855811,
+            "spawn_s": 1.9427492952672765,
+            "readiness_s": 4.326350492192432,
+            "request_s": 2.678676062108328,
+            "python_audit_s": 1.0821988835232332,
+            "exit_s": 1.222445396706462
+          }
+        },
+        "new_degree32": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 0,
+          "par2_ms": 12.353187121334486,
+          "median_ms": 12.052554171532393,
+          "std_ms": 2.8322065146878974,
+          "p95_ms": 14.868512051180005,
+          "stages_ms": {
+            "startup_s": 6.445178053885077,
+            "spawn_s": 1.95047056574064,
+            "readiness_s": 4.340148176803875,
+            "request_s": 3.354857617523521,
+            "python_audit_s": 1.074450464026692,
+            "exit_s": 1.4616843351783853
+          }
+        }
+      },
+      "shuffled/resident": {
+        "old_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 0,
+          "par2_ms": 11.041431071741195,
+          "median_ms": 4.986249157809652,
+          "std_ms": 19.872916234840144,
+          "p95_ms": 36.572909489041166,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 9.306967190544432,
+            "python_audit_s": 1.0836766887223348,
+            "exit_s": 0.0
+          }
+        },
+        "new_exact": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 3.679907948632414,
+          "median_ms": 3.6387132859090343,
+          "std_ms": 1.8292072576638445,
+          "p95_ms": 6.604057375807315,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 2.2253033966990188,
+            "python_audit_s": 1.0649375423478584,
+            "exit_s": 0.0
+          }
+        },
+        "new_witness": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 192,
+          "par2_ms": 4.111458765692078,
+          "median_ms": 4.193317668978125,
+          "std_ms": 1.6309332631449398,
+          "p95_ms": 6.4834112956305034,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 2.648340285910914,
+            "python_audit_s": 1.063450748915784,
+            "exit_s": 0.0
+          }
+        },
+        "new_degree32": {
+          "count": 192,
+          "solved": 192,
+          "recognized": 0,
+          "par2_ms": 4.874008911428973,
+          "median_ms": 4.803198367881123,
+          "std_ms": 1.7116954248842284,
+          "p95_ms": 7.723899179836734,
+          "stages_ms": {
+            "startup_s": 0.0,
+            "spawn_s": 0.0,
+            "readiness_s": 0.0,
+            "request_s": 3.334742378986751,
+            "python_audit_s": 1.0711436577063675,
+            "exit_s": 0.0
+          }
+        }
+      }
+    },
+    "scales": {
+      "canonical/cold": {
+        "24": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 8.935369667597115,
+            "median_ms": 8.884229697287083,
+            "std_ms": 0.5242578072707867,
+            "p95_ms": 9.744129003956914,
+            "stages_ms": {
+              "startup_s": 6.326356087811291,
+              "spawn_s": 1.8679289302478235,
+              "readiness_s": 4.310891071024041,
+              "request_s": 1.0371174818525712,
+              "python_audit_s": 0.3468851209618151,
+              "exit_s": 1.2108514783903956
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 8.910225122235715,
+            "median_ms": 8.839229587465525,
+            "std_ms": 0.5140978558622422,
+            "p95_ms": 9.587678825482726,
+            "stages_ms": {
+              "startup_s": 6.309082848019898,
+              "spawn_s": 1.9413980383736391,
+              "readiness_s": 4.22931198651592,
+              "request_s": 1.0404694476164877,
+              "python_audit_s": 0.33334004304682213,
+              "exit_s": 1.2099029845558107
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 9.099638244758049,
+            "median_ms": 8.83365934714675,
+            "std_ms": 0.6793779697229162,
+            "p95_ms": 10.481535643339157,
+            "stages_ms": {
+              "startup_s": 6.263537138390045,
+              "spawn_s": 1.8992316521083314,
+              "readiness_s": 4.223050918274869,
+              "request_s": 1.2840772202859323,
+              "python_audit_s": 0.32774727636327344,
+              "exit_s": 1.209176048481216
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 10.061922560756406,
+            "median_ms": 9.833854157477617,
+            "std_ms": 0.8332445244643742,
+            "p95_ms": 11.939642392098904,
+            "stages_ms": {
+              "startup_s": 6.348694383632392,
+              "spawn_s": 1.8698784794347982,
+              "readiness_s": 4.311929359876861,
+              "request_s": 2.1090749263142547,
+              "python_audit_s": 0.33642588338504237,
+              "exit_s": 1.2527886622895796
+            }
+          }
+        },
+        "32": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 9.096728443788985,
+            "median_ms": 9.031615685671568,
+            "std_ms": 0.5610348636334926,
+            "p95_ms": 10.184205137193203,
+            "stages_ms": {
+              "startup_s": 6.331712298560888,
+              "spawn_s": 1.8921939772553742,
+              "readiness_s": 4.301759860633562,
+              "request_s": 1.2381789468539257,
+              "python_audit_s": 0.2793405243816475,
+              "exit_s": 1.2339834938757122
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 8.998840465210378,
+            "median_ms": 9.028501342982054,
+            "std_ms": 0.4230909804796035,
+            "p95_ms": 9.648266155272722,
+            "stages_ms": {
+              "startup_s": 6.245080071190993,
+              "spawn_s": 1.8631526230213542,
+              "readiness_s": 4.2401479052690165,
+              "request_s": 1.2585048292142649,
+              "python_audit_s": 0.27019941868881386,
+              "exit_s": 1.2105971885224183
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 10.66426643713688,
+            "median_ms": 10.608113370835781,
+            "std_ms": 1.3075085066101253,
+            "p95_ms": 12.994260713458061,
+            "stages_ms": {
+              "startup_s": 6.208680589528133,
+              "spawn_s": 1.850065290151785,
+              "readiness_s": 4.222637585674723,
+              "request_s": 2.9469115543179214,
+              "python_audit_s": 0.2744636537196736,
+              "exit_s": 1.2175706409228344
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 11.157330280790726,
+            "median_ms": 10.928979143500328,
+            "std_ms": 0.9471734604671315,
+            "p95_ms": 13.203587848693132,
+            "stages_ms": {
+              "startup_s": 6.251866385961573,
+              "spawn_s": 1.8650531807603936,
+              "readiness_s": 4.235959631235649,
+              "request_s": 3.392995432174454,
+              "python_audit_s": 0.2849883361098667,
+              "exit_s": 1.2119981499078374
+            }
+          }
+        },
+        "48": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 10.797419042016069,
+            "median_ms": 10.785018559545279,
+            "std_ms": 0.4893879928806536,
+            "p95_ms": 11.668333550915122,
+            "stages_ms": {
+              "startup_s": 6.308642642882963,
+              "spawn_s": 1.9116924377158284,
+              "readiness_s": 4.24039726688837,
+              "request_s": 1.9941722663740316,
+              "python_audit_s": 1.2502424069680274,
+              "exit_s": 1.2293296361652513
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 10.69513630742828,
+            "median_ms": 10.647916700690985,
+            "std_ms": 0.418634748432961,
+            "p95_ms": 11.396290408447385,
+            "stages_ms": {
+              "startup_s": 6.334489269647747,
+              "spawn_s": 1.8975163693539798,
+              "readiness_s": 4.2867090087383986,
+              "request_s": 1.9383965991437435,
+              "python_audit_s": 1.1964747488188248,
+              "exit_s": 1.2094652047380805
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 10.840217214232931,
+            "median_ms": 10.679311119019985,
+            "std_ms": 0.9305087136993195,
+            "p95_ms": 11.41215767711401,
+            "stages_ms": {
+              "startup_s": 6.457982138575365,
+              "spawn_s": 1.9384155554386477,
+              "readiness_s": 4.259226087015122,
+              "request_s": 1.9467473418141406,
+              "python_audit_s": 1.19618367170915,
+              "exit_s": 1.2240231541606288
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 12.102478533051908,
+            "median_ms": 12.013793457299471,
+            "std_ms": 0.9570620007147843,
+            "p95_ms": 13.609458971768618,
+            "stages_ms": {
+              "startup_s": 6.491729407571256,
+              "spawn_s": 2.024392345144103,
+              "readiness_s": 4.3276505505976575,
+              "request_s": 3.1886358240929744,
+              "python_audit_s": 1.192304849003752,
+              "exit_s": 1.2141579451660316
+            }
+          }
+        },
+        "64": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 12.395203792645285,
+            "median_ms": 12.332453858107328,
+            "std_ms": 0.5702216617496407,
+            "p95_ms": 13.492640806362033,
+            "stages_ms": {
+              "startup_s": 6.400305777788162,
+              "spawn_s": 1.8873464432545006,
+              "readiness_s": 4.360291680010657,
+              "request_s": 2.7878244291059673,
+              "python_audit_s": 1.9615437486208975,
+              "exit_s": 1.230312588935097
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 12.463219405617565,
+            "median_ms": 12.458138633519411,
+            "std_ms": 0.6026277040213829,
+            "p95_ms": 13.502764701843262,
+            "stages_ms": {
+              "startup_s": 6.443873513489962,
+              "spawn_s": 1.9246443019558985,
+              "readiness_s": 4.363807830183457,
+              "request_s": 2.7651642837251225,
+              "python_audit_s": 2.008219249546528,
+              "exit_s": 1.229485128230105
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 12.401844180809954,
+            "median_ms": 12.458331417292356,
+            "std_ms": 0.45451324336432974,
+            "p95_ms": 13.093169778585434,
+            "stages_ms": {
+              "startup_s": 6.395872895761083,
+              "spawn_s": 1.9217459290909271,
+              "readiness_s": 4.321890941355377,
+              "request_s": 2.7688779906990626,
+              "python_audit_s": 2.001300046686083,
+              "exit_s": 1.221001090016216
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 14.24995221896097,
+            "median_ms": 14.045078307390213,
+            "std_ms": 0.8792944191332835,
+            "p95_ms": 16.007942892611027,
+            "stages_ms": {
+              "startup_s": 6.3613314608422415,
+              "spawn_s": 1.9382744212634861,
+              "readiness_s": 4.272090756179144,
+              "request_s": 4.575908669115354,
+              "python_audit_s": 2.015856521514555,
+              "exit_s": 1.2786203684906166
+            }
+          }
+        }
+      },
+      "canonical/resident": {
+        "24": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 1.630589312602145,
+            "median_ms": 1.638539892155677,
+            "std_ms": 0.20535818230764413,
+            "p95_ms": 1.9279394524346571,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 0.9701314847916365,
+              "python_audit_s": 0.32938898463423055,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 1.6291528930499528,
+            "median_ms": 1.6661302506690845,
+            "std_ms": 0.19622708983249854,
+            "p95_ms": 1.8984458554768935,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 0.9567750967107713,
+              "python_audit_s": 0.3390789497643709,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 1.9286709430161864,
+            "median_ms": 1.7331727794953622,
+            "std_ms": 0.5124724879231762,
+            "p95_ms": 3.0152406645356677,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.2050448567606509,
+              "python_audit_s": 0.3195886965841055,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 2.7142754746212936,
+            "median_ms": 2.64493945724098,
+            "std_ms": 0.3397172641993724,
+            "p95_ms": 3.2339797660824843,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.9476043332057695,
+              "python_audit_s": 0.327089490989844,
+              "exit_s": 0.0
+            }
+          }
+        },
+        "32": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 1.8192188823983695,
+            "median_ms": 1.6050984268076718,
+            "std_ms": 0.37839197015734266,
+            "p95_ms": 2.281237591523677,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.223893331674238,
+              "python_audit_s": 0.26462551128740114,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 1.8346700574814652,
+            "median_ms": 1.6555425099795684,
+            "std_ms": 0.36566604233707156,
+            "p95_ms": 2.4299065175000574,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.2363429026057322,
+              "python_audit_s": 0.26460987282916903,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 3.643833304522559,
+            "median_ms": 3.775813245738391,
+            "std_ms": 1.2507877194238326,
+            "p95_ms": 5.784533899714005,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.973553976820161,
+              "python_audit_s": 0.26551100503032404,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 3.958824008198765,
+            "median_ms": 3.8132551417220384,
+            "std_ms": 0.8635597501324668,
+            "p95_ms": 5.903186828800244,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.263987833634019,
+              "python_audit_s": 0.25537041559194523,
+              "exit_s": 0.0
+            }
+          }
+        },
+        "48": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 3.4623232641024515,
+            "median_ms": 3.4165249089710414,
+            "std_ms": 0.21050399053282617,
+            "p95_ms": 3.8446686055976897,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.933194735708336,
+              "python_audit_s": 1.1981359954612951,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 3.4763380099320784,
+            "median_ms": 3.384569674381055,
+            "std_ms": 0.34924052012459533,
+            "p95_ms": 3.794620961707551,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.9634087026740112,
+              "python_audit_s": 1.1797940242104232,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 3.582841221941635,
+            "median_ms": 3.542987644323148,
+            "std_ms": 0.2945323372813755,
+            "p95_ms": 4.150626677437685,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.959523418918252,
+              "python_audit_s": 1.219280684987704,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 4.728619761105317,
+            "median_ms": 4.610458498063963,
+            "std_ms": 0.4748536177115864,
+            "p95_ms": 5.166792349336902,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.098313754890114,
+              "python_audit_s": 1.1897953227162361,
+              "exit_s": 0.0
+            }
+          }
+        },
+        "64": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 5.118930309739274,
+            "median_ms": 5.026966624427587,
+            "std_ms": 0.36752089459647097,
+            "p95_ms": 5.7162154793331865,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.8291692530425885,
+              "python_audit_s": 1.956273685209453,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 5.193355837642836,
+            "median_ms": 5.095355896628462,
+            "std_ms": 0.4109315357773284,
+            "p95_ms": 6.02351549314335,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.8166081368302307,
+              "python_audit_s": 2.0417918955596783,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 5.108544690301642,
+            "median_ms": 5.126236806972884,
+            "std_ms": 0.2711979763093298,
+            "p95_ms": 5.467860674252734,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.728603644451747,
+              "python_audit_s": 1.9742578539686897,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 6.823833968761998,
+            "median_ms": 6.702385486278217,
+            "std_ms": 0.4185690272851881,
+            "p95_ms": 7.420330819149967,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 4.374122227697323,
+              "python_audit_s": 2.008885766069094,
+              "exit_s": 0.0
+            }
+          }
+        }
+      },
+      "reversed/cold": {
+        "24": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 11.440714685401568,
+            "median_ms": 9.944810532033443,
+            "std_ms": 10.309693829223075,
+            "p95_ms": 11.02000973187387,
+            "stages_ms": {
+              "startup_s": 7.771237035437177,
+              "spawn_s": 3.38221985536317,
+              "readiness_s": 4.2420425452291965,
+              "request_s": 2.0935326853456595,
+              "python_audit_s": 0.34181063529103994,
+              "exit_s": 1.219765768231203
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 8.933392178732902,
+            "median_ms": 8.838667999953032,
+            "std_ms": 0.4887032473927184,
+            "p95_ms": 9.820381598547101,
+            "stages_ms": {
+              "startup_s": 6.262299061442415,
+              "spawn_s": 1.8696896343802412,
+              "readiness_s": 4.247835429850966,
+              "request_s": 1.1128042824566364,
+              "python_audit_s": 0.32637369198103744,
+              "exit_s": 1.2175731050471466
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 9.178282072146734,
+            "median_ms": 8.966861292719841,
+            "std_ms": 0.6882034101063481,
+            "p95_ms": 10.569136496633291,
+            "stages_ms": {
+              "startup_s": 6.259588718724747,
+              "spawn_s": 1.8920239332752924,
+              "readiness_s": 4.221035186977436,
+              "request_s": 1.3555924330527584,
+              "python_audit_s": 0.34317164681851864,
+              "exit_s": 1.2047432246617973
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 10.552481709358593,
+            "median_ms": 9.73490672186017,
+            "std_ms": 5.045711354419151,
+            "p95_ms": 10.723786009475589,
+            "stages_ms": {
+              "startup_s": 6.944872865763803,
+              "spawn_s": 2.642967835223923,
+              "readiness_s": 4.1629098316965,
+              "request_s": 2.0593012062211833,
+              "python_audit_s": 0.3282460190045337,
+              "exit_s": 1.2054930557496846
+            }
+          }
+        },
+        "32": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 11.552609231633445,
+            "median_ms": 11.486679781228304,
+            "std_ms": 0.8914883858659404,
+            "p95_ms": 13.335908250883222,
+            "stages_ms": {
+              "startup_s": 6.393003064052512,
+              "spawn_s": 1.9459375956406195,
+              "readiness_s": 4.306310826602082,
+              "request_s": 3.638032610372951,
+              "python_audit_s": 0.27690975305934745,
+              "exit_s": 1.230924002205332
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 9.4777190242894,
+            "median_ms": 9.43340128287673,
+            "std_ms": 0.5642717834668751,
+            "p95_ms": 10.5125876609236,
+            "stages_ms": {
+              "startup_s": 6.495775402678798,
+              "spawn_s": 1.9368799791360896,
+              "readiness_s": 4.406720923725516,
+              "request_s": 1.4655450941063464,
+              "python_audit_s": 0.2842745549666385,
+              "exit_s": 1.217203001336505
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 11.126144575731209,
+            "median_ms": 11.163311079144478,
+            "std_ms": 1.5635780248776923,
+            "p95_ms": 13.918163208290935,
+            "stages_ms": {
+              "startup_s": 6.296851866257687,
+              "spawn_s": 1.8738568372403581,
+              "readiness_s": 4.282264562789351,
+              "request_s": 3.309180106346806,
+              "python_audit_s": 0.2857227615701656,
+              "exit_s": 1.2180392513982952
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 11.36822608532384,
+            "median_ms": 11.046887375414371,
+            "std_ms": 1.3494528737995688,
+            "p95_ms": 13.78527032211423,
+            "stages_ms": {
+              "startup_s": 6.41203213793536,
+              "spawn_s": 1.93161383504048,
+              "readiness_s": 4.2123001961347954,
+              "request_s": 3.4423784042398133,
+              "python_audit_s": 0.26920104088882607,
+              "exit_s": 1.229259903387477
+            }
+          }
+        },
+        "48": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 13.49065974742795,
+            "median_ms": 12.91478332132101,
+            "std_ms": 1.9567775273499992,
+            "p95_ms": 18.321247352287173,
+            "stages_ms": {
+              "startup_s": 6.335601210594177,
+              "spawn_s": 1.9762546677763262,
+              "readiness_s": 4.20960698587199,
+              "request_s": 4.667489847633988,
+              "python_audit_s": 1.2534120469354093,
+              "exit_s": 1.2187909451313317
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 11.052063976724943,
+            "median_ms": 10.968720074743032,
+            "std_ms": 0.42871762533306323,
+            "p95_ms": 11.809451226145029,
+            "stages_ms": {
+              "startup_s": 6.249703796735655,
+              "spawn_s": 1.8729692480216424,
+              "readiness_s": 4.229849767095099,
+              "request_s": 2.357902587391436,
+              "python_audit_s": 1.2049172073602676,
+              "exit_s": 1.2228770259146888
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 11.088516757202646,
+            "median_ms": 10.949872899800539,
+            "std_ms": 0.6509669018820984,
+            "p95_ms": 12.27296101860702,
+            "stages_ms": {
+              "startup_s": 6.329100132764627,
+              "spawn_s": 1.8948040475758414,
+              "readiness_s": 4.2894434300251305,
+              "request_s": 2.311238339946916,
+              "python_audit_s": 1.2177676738550265,
+              "exit_s": 1.2147883341337244
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 12.02016385893027,
+            "median_ms": 11.967735830694437,
+            "std_ms": 0.5576286052929592,
+            "p95_ms": 12.927024252712727,
+            "stages_ms": {
+              "startup_s": 6.364423975658913,
+              "spawn_s": 1.8742417450994253,
+              "readiness_s": 4.340356196432064,
+              "request_s": 3.1956577052672706,
+              "python_audit_s": 1.211952359881252,
+              "exit_s": 1.2317079429825146
+            }
+          }
+        },
+        "64": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 37.46176027925685,
+            "median_ms": 30.07636498659849,
+            "std_ms": 25.254083558539946,
+            "p95_ms": 95.72442858479913,
+            "stages_ms": {
+              "startup_s": 6.472475380481531,
+              "spawn_s": 1.938489789608866,
+              "readiness_s": 4.373222667103012,
+              "request_s": 27.722963073756546,
+              "python_audit_s": 2.016850262104223,
+              "exit_s": 1.2333068104150395
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 13.463761230620245,
+            "median_ms": 13.077909126877785,
+            "std_ms": 2.6312640950984783,
+            "p95_ms": 14.551031403243542,
+            "stages_ms": {
+              "startup_s": 6.68337275662149,
+              "spawn_s": 2.2945035016164184,
+              "readiness_s": 4.242574718470375,
+              "request_s": 3.5591207755108676,
+              "python_audit_s": 1.988282698827485,
+              "exit_s": 1.2173016245166461
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 13.193625355294595,
+            "median_ms": 13.001189101487398,
+            "std_ms": 0.5949066141736358,
+            "p95_ms": 14.396979985758662,
+            "stages_ms": {
+              "startup_s": 6.463030003942549,
+              "spawn_s": 1.9789461124067507,
+              "readiness_s": 4.32363818011557,
+              "request_s": 3.4885157365351915,
+              "python_audit_s": 2.003873096934209,
+              "exit_s": 1.223115308675915
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 14.57954205883046,
+            "median_ms": 13.884668704122305,
+            "std_ms": 4.012963568643316,
+            "p95_ms": 15.152810048311949,
+            "stages_ms": {
+              "startup_s": 6.901823721515636,
+              "spawn_s": 2.4859307256216803,
+              "readiness_s": 4.262729024048895,
+              "request_s": 4.3946851704580085,
+              "python_audit_s": 2.0209732077394924,
+              "exit_s": 1.2443058658391237
+            }
+          }
+        }
+      },
+      "reversed/resident": {
+        "24": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 2.9449447756633162,
+            "median_ms": 2.8391246451064944,
+            "std_ms": 0.32179505813871995,
+            "p95_ms": 3.612667159177363,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.0773235398034253,
+              "python_audit_s": 0.3181581074992816,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 1.7845989107930411,
+            "median_ms": 1.7790272395359352,
+            "std_ms": 0.20412467358578548,
+            "p95_ms": 2.0338833215646446,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.083757864156117,
+              "python_audit_s": 0.32758445013314486,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 2.067339727849079,
+            "median_ms": 1.8513872346375138,
+            "std_ms": 0.5201022928756489,
+            "p95_ms": 3.2748960773460563,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.3304044065686564,
+              "python_audit_s": 0.3455587235900263,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 2.7705963633100814,
+            "median_ms": 2.6877432683249936,
+            "std_ms": 0.3182113571687185,
+            "p95_ms": 3.3050699181330856,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.0018445987564824,
+              "python_audit_s": 0.32543678147097427,
+              "exit_s": 0.0
+            }
+          }
+        },
+        "32": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 4.39766573254019,
+            "median_ms": 4.318088467698544,
+            "std_ms": 0.869032942840536,
+            "p95_ms": 6.455658597406,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.5588131674254933,
+              "python_audit_s": 0.2887821174226701,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 2.1074182683757194,
+            "median_ms": 1.9987604900961742,
+            "std_ms": 0.3770134668359462,
+            "p95_ms": 2.5946795103664044,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.4635088543097179,
+              "python_audit_s": 0.26975760313992697,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 3.8655195045672976,
+            "median_ms": 4.265057781594805,
+            "std_ms": 1.3343966005607957,
+            "p95_ms": 6.54188594999141,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.1926732820769153,
+              "python_audit_s": 0.28006010688841343,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 4.05362408006719,
+            "median_ms": 3.8863872759975493,
+            "std_ms": 1.0313824450640747,
+            "p95_ms": 6.298451653128721,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.342132219889512,
+              "python_audit_s": 0.26784243527799845,
+              "exit_s": 0.0
+            }
+          }
+        },
+        "48": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 6.345402526979645,
+            "median_ms": 5.848235683515668,
+            "std_ms": 1.7212115584599212,
+            "p95_ms": 10.004599628155118,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 4.60540089989081,
+              "python_audit_s": 1.190769486129284,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 3.9010531133196005,
+            "median_ms": 3.848559303150978,
+            "std_ms": 0.30560124777282327,
+            "p95_ms": 4.221445704024518,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.3083181392091014,
+              "python_audit_s": 1.2188365799374878,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 3.9598326790534584,
+            "median_ms": 3.9021311386022717,
+            "std_ms": 0.2453648501194718,
+            "p95_ms": 4.326393942028517,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.354587777517736,
+              "python_audit_s": 1.2133810475158195,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 4.767067094993156,
+            "median_ms": 4.735871087177657,
+            "std_ms": 0.2737704762538221,
+            "p95_ms": 5.208156543085352,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.103613193767766,
+              "python_audit_s": 1.2189981838067372,
+              "exit_s": 0.0
+            }
+          }
+        },
+        "64": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 30.298871376241248,
+            "median_ms": 22.91144465561956,
+            "std_ms": 25.06221348917496,
+            "p95_ms": 88.86494052130725,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 27.699954245084275,
+              "python_audit_s": 2.047350339125842,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 5.9166550733304275,
+            "median_ms": 5.886960731004365,
+            "std_ms": 0.3823335608052616,
+            "p95_ms": 6.486766107263975,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.542815199277053,
+              "python_audit_s": 1.9996911481333277,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 6.051466805123103,
+            "median_ms": 5.9813263433170505,
+            "std_ms": 0.4004123343197397,
+            "p95_ms": 6.507831354974769,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.6379339483877025,
+              "python_audit_s": 2.0204539177939296,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 6.735232702339999,
+            "median_ms": 6.713509566907305,
+            "std_ms": 0.3468657118217004,
+            "p95_ms": 7.309091515344335,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 4.317573776158194,
+              "python_audit_s": 1.9736551912501454,
+              "exit_s": 0.0
+            }
+          }
+        }
+      },
+      "shuffled/cold": {
+        "24": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 10.211053459594646,
+            "median_ms": 10.068964678794146,
+            "std_ms": 0.6947703163876321,
+            "p95_ms": 11.559260403737426,
+            "stages_ms": {
+              "startup_s": 6.430660529683034,
+              "spawn_s": 1.912864138527463,
+              "readiness_s": 4.3372600339353085,
+              "request_s": 2.1905232570134103,
+              "python_audit_s": 0.3583789221011102,
+              "exit_s": 1.2170563374335568
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 9.131406977151832,
+            "median_ms": 9.109630715101957,
+            "std_ms": 0.49308173142184236,
+            "p95_ms": 9.692387375980616,
+            "stages_ms": {
+              "startup_s": 6.345587278095384,
+              "spawn_s": 1.8817024150242407,
+              "readiness_s": 4.327656817622483,
+              "request_s": 1.2060495791956782,
+              "python_audit_s": 0.3553313630012174,
+              "exit_s": 1.2092384858988225
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 10.239893686957657,
+            "median_ms": 9.151514153927565,
+            "std_ms": 6.463652398818829,
+            "p95_ms": 10.77897809445858,
+            "stages_ms": {
+              "startup_s": 7.265738463805367,
+              "spawn_s": 1.8763157034603257,
+              "readiness_s": 4.3186714756302536,
+              "request_s": 1.3975078666893144,
+              "python_audit_s": 0.34560794786860544,
+              "exit_s": 1.2156591013384361
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 10.423071857076138,
+            "median_ms": 10.014641098678112,
+            "std_ms": 2.215207409596807,
+            "p95_ms": 11.670993128791451,
+            "stages_ms": {
+              "startup_s": 6.446958888166894,
+              "spawn_s": 1.9149589158284168,
+              "readiness_s": 4.3868635936329765,
+              "request_s": 2.101466932799667,
+              "python_audit_s": 0.34407417600353557,
+              "exit_s": 1.5159818188597758
+            }
+          }
+        },
+        "32": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 12.397929967846721,
+            "median_ms": 11.399946641176939,
+            "std_ms": 7.10133828607318,
+            "p95_ms": 12.764198100194335,
+            "stages_ms": {
+              "startup_s": 6.321525822083156,
+              "spawn_s": 1.9226600221979122,
+              "readiness_s": 4.250321847697099,
+              "request_s": 3.5082989876779416,
+              "python_audit_s": 0.3075327646608154,
+              "exit_s": 2.2460760665126145
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 9.400933418267718,
+            "median_ms": 9.330903179943562,
+            "std_ms": 0.6176798115835893,
+            "p95_ms": 10.598385194316506,
+            "stages_ms": {
+              "startup_s": 6.345099303871393,
+              "spawn_s": 1.922028313856572,
+              "readiness_s": 4.2742674122564495,
+              "request_s": 1.5164868479284148,
+              "python_audit_s": 0.3046846832148731,
+              "exit_s": 1.2195838110831876
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 11.072234987902144,
+            "median_ms": 11.37502072378993,
+            "std_ms": 1.305629491126717,
+            "p95_ms": 12.871218705549836,
+            "stages_ms": {
+              "startup_s": 6.35370301703612,
+              "spawn_s": 1.909747370518744,
+              "readiness_s": 4.297079363216956,
+              "request_s": 3.192935371771455,
+              "python_audit_s": 0.2889242605306208,
+              "exit_s": 1.219785267797609
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 12.00360148989906,
+            "median_ms": 11.216343846172094,
+            "std_ms": 4.230030306734566,
+            "p95_ms": 13.66401328705251,
+            "stages_ms": {
+              "startup_s": 6.337315115767221,
+              "spawn_s": 1.9104302433940272,
+              "readiness_s": 4.272605389511834,
+              "request_s": 3.499169736945381,
+              "python_audit_s": 0.29351583604390424,
+              "exit_s": 1.8581415448958676
+            }
+          }
+        },
+        "48": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 14.427170332055539,
+            "median_ms": 13.658246025443077,
+            "std_ms": 2.5426876742241085,
+            "p95_ms": 20.662486786022775,
+            "stages_ms": {
+              "startup_s": 6.5038031510387855,
+              "spawn_s": 1.9679455241809287,
+              "readiness_s": 4.381542035844177,
+              "request_s": 5.237009570312996,
+              "python_audit_s": 1.3873166559884946,
+              "exit_s": 1.2821975979022682
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 11.68576853039364,
+            "median_ms": 11.420376598834991,
+            "std_ms": 0.8613010667477621,
+            "p95_ms": 13.106462359428404,
+            "stages_ms": {
+              "startup_s": 6.479376558369647,
+              "spawn_s": 1.9632626014451184,
+              "readiness_s": 4.364717926364392,
+              "request_s": 2.5764754003224275,
+              "python_audit_s": 1.3940523494966328,
+              "exit_s": 1.2190961667026083
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 11.56573046076422,
+            "median_ms": 11.460574809461832,
+            "std_ms": 0.7093796606477216,
+            "p95_ms": 13.305153790861368,
+            "stages_ms": {
+              "startup_s": 6.4681243772308035,
+              "spawn_s": 1.992141866746048,
+              "readiness_s": 4.325300746131688,
+              "request_s": 2.499654539860785,
+              "python_audit_s": 1.3625681555519502,
+              "exit_s": 1.2194897281005979
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 12.46354701773574,
+            "median_ms": 12.290992308408022,
+            "std_ms": 0.7101148776167041,
+            "p95_ms": 13.68292672559619,
+            "stages_ms": {
+              "startup_s": 6.506366131361574,
+              "spawn_s": 1.9911948475055397,
+              "readiness_s": 4.35788764540727,
+              "request_s": 3.3001236345929406,
+              "python_audit_s": 1.3957214929784338,
+              "exit_s": 1.244265081671377
+            }
+          }
+        },
+        "64": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 36.61706867084528,
+            "median_ms": 23.4038676135242,
+            "std_ms": 32.65908147039723,
+            "p95_ms": 122.03561025671658,
+            "stages_ms": {
+              "startup_s": 6.522368581499904,
+              "spawn_s": 1.9629018691678843,
+              "readiness_s": 4.4014197192154825,
+              "request_s": 26.519969862420112,
+              "python_audit_s": 2.3224858450703323,
+              "exit_s": 1.2356758428116639
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 13.73684654633204,
+            "median_ms": 13.631213922053576,
+            "std_ms": 0.6706653030508133,
+            "p95_ms": 14.75593145005405,
+            "stages_ms": {
+              "startup_s": 6.554558077671875,
+              "spawn_s": 2.0577877488297722,
+              "readiness_s": 4.342873832987,
+              "request_s": 3.65984639696156,
+              "python_audit_s": 2.2757327921378114,
+              "exit_s": 1.229805367377897
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 13.721634401008487,
+            "median_ms": 13.569931965321302,
+            "std_ms": 0.492427217035033,
+            "p95_ms": 14.636054635047913,
+            "stages_ms": {
+              "startup_s": 6.514857581350952,
+              "spawn_s": 1.992792240343988,
+              "readiness_s": 4.364350383790831,
+              "request_s": 3.6246064701117575,
+              "python_audit_s": 2.3316951701417565,
+              "exit_s": 1.2348474895892043
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 14.522528120627006,
+            "median_ms": 14.479306060820818,
+            "std_ms": 0.46393624513484255,
+            "p95_ms": 15.359195694327354,
+            "stages_ms": {
+              "startup_s": 6.49007208024462,
+              "spawn_s": 1.9852982562345765,
+              "readiness_s": 4.343236078663419,
+              "request_s": 4.518670165756096,
+              "python_audit_s": 2.2644903510808945,
+              "exit_s": 1.2283488952865202
+            }
+          }
+        }
+      },
+      "shuffled/resident": {
+        "24": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 3.071967619083201,
+            "median_ms": 3.0229632029659115,
+            "std_ms": 0.2600362513037864,
+            "p95_ms": 3.5697642539162184,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.062002196907997,
+              "python_audit_s": 0.35986502189189196,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 1.9124590326100588,
+            "median_ms": 1.8898582420661114,
+            "std_ms": 0.2705284197612417,
+            "p95_ms": 2.2585582570172846,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.179208493946741,
+              "python_audit_s": 0.3439268912188709,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 2.126406383467838,
+            "median_ms": 1.9719317206181586,
+            "std_ms": 0.4663520490539978,
+            "p95_ms": 3.3006343757733694,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.372449565678835,
+              "python_audit_s": 0.3551985719241202,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 2.8989235045931614,
+            "median_ms": 2.773574997263495,
+            "std_ms": 0.3593921253260636,
+            "p95_ms": 3.569983545457944,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.0731528056785464,
+              "python_audit_s": 0.35381922498345375,
+              "exit_s": 0.0
+            }
+          }
+        },
+        "32": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 4.359648087605213,
+            "median_ms": 4.295763617847115,
+            "std_ms": 0.5774201115597893,
+            "p95_ms": 5.56587706960272,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.407003008760512,
+              "python_audit_s": 0.30253914883360267,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 2.2222614691903195,
+            "median_ms": 1.977234824153129,
+            "std_ms": 0.4369354229587166,
+            "p95_ms": 2.862623846885981,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 1.534944730034719,
+              "python_audit_s": 0.2975000146155556,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 3.7637320056091994,
+            "median_ms": 4.182091593975201,
+            "std_ms": 1.103561473184751,
+            "p95_ms": 5.52506762323901,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.0493528853791454,
+              "python_audit_s": 0.3146226129805048,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 4.157936137441236,
+            "median_ms": 4.049676317663398,
+            "std_ms": 0.7301575392206812,
+            "p95_ms": 5.658556168054929,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.3952941691192486,
+              "python_audit_s": 0.29676184446240467,
+              "exit_s": 0.0
+            }
+          }
+        },
+        "48": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 7.007272031235819,
+            "median_ms": 6.482234748546034,
+            "std_ms": 2.4736675198062295,
+            "p95_ms": 12.647795222437697,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 4.990051927355428,
+              "python_audit_s": 1.3672798910799127,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 4.197141698872049,
+            "median_ms": 4.122413098230027,
+            "std_ms": 0.31929706201178754,
+            "p95_ms": 4.678546023205854,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.486209947771082,
+              "python_audit_s": 1.3215468885997932,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 4.234030348015949,
+            "median_ms": 4.193317668978125,
+            "std_ms": 0.3742565135011335,
+            "p95_ms": 4.5799077255651355,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 2.5071994168683887,
+              "python_audit_s": 1.3275609235279262,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 5.114325841229099,
+            "median_ms": 4.993760339857545,
+            "std_ms": 0.4421078878560512,
+            "p95_ms": 6.04499703622423,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.2939383139212928,
+              "python_audit_s": 1.3525467754031222,
+              "exit_s": 0.0
+            }
+          }
+        },
+        "64": {
+          "old_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 29.726836549040552,
+            "median_ms": 16.695058257027995,
+            "std_ms": 33.160725961392956,
+            "p95_ms": 115.84127744208669,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 26.768811629153788,
+              "python_audit_s": 2.305022693083932,
+              "exit_s": 0.0
+            }
+          },
+          "new_exact": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 6.387769593857229,
+            "median_ms": 6.311641875072382,
+            "std_ms": 0.41145302352906876,
+            "p95_ms": 7.076578345731832,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.700850415043533,
+              "python_audit_s": 2.2967763749572137,
+              "exit_s": 0.0
+            }
+          },
+          "new_witness": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 48,
+            "par2_ms": 6.321666325675324,
+            "median_ms": 6.244044328923337,
+            "std_ms": 0.32091280408467354,
+            "p95_ms": 6.855616964458022,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 3.6643592757172883,
+              "python_audit_s": 2.256420887230585,
+              "exit_s": 0.0
+            }
+          },
+          "new_degree32": {
+            "count": 48,
+            "solved": 48,
+            "recognized": 0,
+            "par2_ms": 7.324850162452397,
+            "median_ms": 7.203879620647058,
+            "std_ms": 0.6194797394086227,
+            "p95_ms": 8.396036154590545,
+            "stages_ms": {
+              "startup_s": 0.0,
+              "spawn_s": 0.0,
+              "readiness_s": 0.0,
+              "request_s": 4.576584227227916,
+              "python_audit_s": 2.2814467859764895,
+              "exit_s": 0.0
+            }
+          }
+        }
+      }
+    },
+    "contrasts": {
+      "canonical/cold": {
+        "gain_ms": 0.039324911388879,
+        "lower_ms": -0.07218045163123561,
+        "upper_ms": 0.1505923809115001
+      },
+      "canonical/resident": {
+        "gain_ms": -0.02561375731602312,
+        "lower_ms": -0.09288249057135543,
+        "upper_ms": 0.041447691789169
+      },
+      "reversed/cold": {
+        "gain_ms": 7.754701883338081,
+        "lower_ms": 3.7467813857801957,
+        "upper_ms": 13.300448666147267
+      },
+      "reversed/resident": {
+        "gain_ms": 7.569289761401402,
+        "lower_ms": 3.5850459031886808,
+        "upper_ms": 13.030238678402393
+      },
+      "shuffled/cold": {
+        "gain_ms": 7.42456673954924,
+        "lower_ms": 3.0452125504477103,
+        "upper_ms": 14.093090671061281
+      },
+      "shuffled/resident": {
+        "gain_ms": 7.361523123108782,
+        "lower_ms": 2.9622098217563084,
+        "upper_ms": 14.212371123358034
+      }
+    },
+    "gates": {
+      "canonical": {
+        "cold": true,
+        "resident": true
+      },
+      "reversed": {
+        "cold": true,
+        "resident": true
+      },
+      "shuffled": {
+        "cold": true,
+        "resident": true
+      }
+    },
+    "all_gates_pass": true,
+    "learned_advantage": false,
+    "sha256": "caecd6faef13d51f14c1f4ebb4566b36c51c7b8965f0c839a53fb180d696b66e",
+    "scope": "新数据上的等价重排识别修复；六项单侧门槛联合校正，不替代E65确认或学习优势"
   }
 }</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
@@ -10707,6 +12894,7 @@ function render(){
  renderExactSearch();
  renderConfirmation();
  renderConfirmationReason();
+ renderRecognitionRepair();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -10756,6 +12944,19 @@ function render(){
  const acceptance=Object.entries(n.acceptance||{}).map(([k,v])=>`${k.startsWith('rlaf')?'RLAF':'NeuroBack'}：${esc(accepted[v]||v)}`).join(' · ');
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
+}
+function renderRecognitionRepair(){
+ const u=data.recognition_repair,target=document.getElementById('recognition-repair-progress');
+ if(!u){target.textContent='暂无通过完整审计的重排修复结果。';return;}
+ const forms={canonical:'规范输入',reversed:'反转子句',shuffled:'打乱子句与文字'},gate=x=>x?'通过':'未通过';
+ const stages=u.totals['canonical/cold'].new_exact.stages_ms;
+ const solved=v=>{const a=['old_exact','new_exact','new_witness','new_degree32'].map(k=>v[k].solved+'/'+v[k].count);return a.every(x=>x===a[0])?'全部 '+a[0]:a.join(' · ');};
+ target.innerHTML=`<p>64张新图，每图三种等价排列、三轮计时、四臂、冷/驻留，共4,608次。三种排列仍只有64张独立图。保留原规范识别和搜索算法，只在规范识别失败时严格匹配编码子句多重集。</p>
+ <div class="table"><table><thead><tr><th>输入 / 生命周期</th><th>旧精确 ms</th><th>修复精确 ms</th><th>仅补全SAT ms</th><th>度数基线 ms</th><th>四臂核验</th><th>预设门槛</th></tr></thead><tbody>${Object.entries(forms).flatMap(([form,label])=>['cold','resident'].map(reg=>{const v=u.totals[form+'/'+reg],arms=['old_exact','new_exact','new_witness','new_degree32'];return `<tr><td>${label} / ${reg==='cold'?'冷':'驻留'}</td>${arms.map(a=>`<td>${v[a].par2_ms.toFixed(3)}</td>`).join('')}<td>${solved(v)}</td><td>${form==='canonical'?'5%非劣':'重排修复'}${gate(u.gates[form][reg])}</td></tr>`;})).join('')}</tbody></table></div>
+ <p>六项门槛${gate(u.all_gates_pass)}。精确识别（旧→新）：${Object.entries(forms).flatMap(([f,label])=>['cold','resident'].map(r=>{const v=u.totals[f+'/'+r];return `${label}/${r==='cold'?'冷':'驻留'} ${v.old_exact.recognized}→${v.new_exact.recognized}/${v.new_exact.count}`;})).join('；')}。重排门要求完整PAR-2降低至少10%、各规模无退化、求解数不减；规范输入只检验5%非劣，不声称严格更快。</p>
+ <p>六个预设单侧检验按图聚类重采样10,000次，并做Bonferroni联合校正。相对旧精确路径的校正收益下界（ms）：${Object.entries(forms).flatMap(([f,label])=>['cold','resident'].map(r=>`${label}/${r==='cold'?'冷':'驻留'} ${u.contrasts[f+'/'+r].lower_ms.toFixed(3)}`)).join('；')}。</p>
+ <p>规范输入修复版冷启动分解：启动 ${stages.startup_s.toFixed(3)}ms、请求 ${stages.request_s.toFixed(3)}ms、Python核验 ${stages.python_audit_s.toFixed(3)}ms、退出 ${stages.exit_s.toFixed(3)}ms。启动已包含创建与就绪，不重复相加。驻留总成本含启动、独立预热和退出的64请求摊销。</p>
+ <p class="alert">这是受支持编码的局部工程修复，不是学习优势。仅补全SAT/度数两列是描述性强对照；E65更强整体确认门仍未通过，不能用本轮重排修复覆盖它。未支持辅助变量重命名、任意编码或通用工业SAT，未切换生产路由。</p><p class="muted">${esc(u.scope)}</p>`;
 }
 function renderConfirmation(){
  const u=data.confirmation,target=document.getElementById('confirmation-progress');

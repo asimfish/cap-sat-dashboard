@@ -1277,6 +1277,65 @@ def confirmation_progress(repo):
     except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
 
 
+def recognition_repair_progress(repo):
+    """Read audited order-recognition repair; never promote E65 or learning gates."""
+    root=repo/'experiments/recognition_20260915_v1'
+    try:
+        def read(name):return json.loads((root/name).read_text())
+        def digest(name):return hashlib.sha256((root/name).read_bytes()).hexdigest()
+        raw=read('RESULTS.json');audit=read('AUDIT.json');state=read('STATUS.json')
+        if state['phase']!='terminal' or state['completed_cells']!=4608 or audit['verdict']!='full_record_replay_pass':return None
+        for name,key in [('FROZEN.json','frozen'),('RESULTS.json','results'),('raw.jsonl.gz','raw'),('charged.jsonl.gz','charged')]:
+            if digest(name)!=audit[key+'_sha256']:return None
+        if raw['frozen_sha256']!=audit['frozen_sha256'] or audit['source_frozen'] is not True:return None
+        if raw['cells']!=4608 or audit['cells']!=4608 or raw['graphs']!=64 or audit['graphs']!=64 or raw['repeats']!=3:return None
+        if raw['learned_advantage'] is not False:return None
+        def number(v):
+            if type(v) not in (int,float) or not math.isfinite(v):raise ValueError('nonfinite statistic')
+            return v
+        def summary(v,count):
+            if type(v['count']) is not int or v['count']!=count:raise ValueError('wrong denominator')
+            out={'count':count}
+            for k in ['solved','recognized']:
+                if type(v[k]) is not int or not 0<=v[k]<=count:raise ValueError('invalid count')
+                out[k]=v[k]
+            for k in ['par2_ms','median_ms','std_ms','p95_ms']:
+                out[k]=number(v[k])
+                if out[k]<0:raise ValueError('negative statistic')
+            out['stages_ms']={k:number(v['stages_ms'][k]) for k in ['startup_s','spawn_s','readiness_s','request_s','python_audit_s','exit_s']}
+            if any(v<0 for v in out['stages_ms'].values()):raise ValueError('negative stage')
+            return out
+        totals={};scales={};contrasts={};gates={}
+        arms=['old_exact','new_exact','new_witness','new_degree32']
+        for form in ['canonical','reversed','shuffled']:
+            gates[form]={}
+            for reg in ['cold','resident']:
+                key=f'{form}/{reg}'
+                totals[key]={a:summary(raw['summaries'][form][reg][a],192) for a in arms}
+                scales[key]={n:{a:summary(raw['by_scale'][form][reg][n][a],48) for a in arms} for n in ['24','32','48','64']}
+                for arm in arms:
+                    for k in ['solved','recognized']:
+                        if sum(v[arm][k] for v in scales[key].values())!=totals[key][arm][k]:return None
+                    if abs(sum(v[arm]['par2_ms'] for v in scales[key].values())/4-totals[key][arm]['par2_ms'])>1e-7:return None
+                c=raw['contrasts'][form][reg]
+                contrasts[key]={k:number(c[k]) for k in ['gain_ms','lower_ms','upper_ms']}
+                if c['lower_ms']>c['upper_ms']:return None
+                a,b=totals[key]['old_exact'],totals[key]['new_exact']
+                if abs(c['gain_ms']-(a['par2_ms']-b['par2_ms']))>1e-7:return None
+                if form=='canonical':expected=-c['lower_ms']<=.05*a['par2_ms'] and b['solved']>=a['solved']
+                else:
+                    expected=b['par2_ms']<=.9*a['par2_ms'] and c['lower_ms']>0 and b['solved']>=a['solved']
+                    expected &= all(v['new_exact']['par2_ms']<=v['old_exact']['par2_ms'] and v['new_exact']['solved']>=v['old_exact']['solved'] for v in scales[key].values())
+                gates[form][reg]=bool(expected)
+                if raw['gates'][form][reg] is not bool(expected) or audit['gates'][form][reg] is not bool(expected):return None
+        passed=all(v for values in gates.values() for v in values.values())
+        if raw['all_gates_pass'] is not passed:return None
+        return dict(graphs=64,cells=4608,repeats=3,totals=totals,scales=scales,contrasts=contrasts,gates=gates,
+                    all_gates_pass=passed,learned_advantage=False,sha256=digest('AUDIT.json'),
+                    scope='新数据上的等价重排识别修复；六项单侧门槛联合校正，不替代E65确认或学习优势')
+    except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1301,6 +1360,7 @@ def main():
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())
+    data['recognition_repair']=recognition_repair_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

@@ -1,6 +1,7 @@
 # CAP-SAT Rebuttal Dashboard
 
-Latest audited native-first update: corrected E54 piggyback semantics are included in the progress export.
+Latest audited update: order-invariant recognition repair passes its six scoped
+gates; E65's stronger confirmation failure remains visible and unchanged.
 
 Open-source, dependency-free research progress dashboard. MIT licensed.
 
@@ -36,11 +37,27 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Fourteen actions have dependencies, costs, acceptance and stopping rules. Their
+Twenty-one actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
 The roadmap's review date and SHA256 are separate from live export freshness.
+
+`#recognition-repair` / A20 reports 64 fresh graphs, each in three equivalent
+clause/literal orders, three repetitions, four arms and two lifecycles: 4,608
+measurements, not 192 independent graphs. Canonical recognition and exact search
+are unchanged; strict template-multiset matching restores the reordered path.
+The six prespecified one-sided repair/noninferiority gates all pass. Costs include
+startup, IPC, native/Python witness checks and exit; resident lifetimes and separate
+warmup costs are allocated to 64 requests. Bootstrap resampling is by graph with
+Bonferroni adjustment across the six one-sided gates. Canonical noninferiority is
+not strict improvement, and witness/degree comparisons are descriptive here.
+The exporter binds raw, charged, frozen and result digests, checks aggregate
+denominators/finite values and recomputes gates; it is not a substitute for the
+experiment's full witness/account replay. Public data are allowlisted aggregates.
+E65's stronger confirmation remains failed; neither learned advantage nor general
+SAT/industrial acceleration or a production route switch is claimed. Seven
+scientific gaps remain four partial, three open and zero fully solved.
 Edit this JSON, rebuild and publish; the browser filters partial progress versus
 unresolved gaps and links each gap to its proposed experiments. The private
 discussion attachment, reviewer identities and confidential correspondence are
