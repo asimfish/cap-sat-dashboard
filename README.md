@@ -1,7 +1,8 @@
 # CAP-SAT Rebuttal Dashboard
 
-Latest audited update: order-invariant recognition repair passes its six scoped
-gates; E65's stronger confirmation failure remains visible and unchanged.
+Latest audited update: A23's reaper-only study improves exact cold latency11.5%,
+but only6/10comparisons and3/5exit mechanisms pass. The shared repair is not
+promoted; the retained close tail and E65's stronger failure remain visible.
 
 Open-source, dependency-free research progress dashboard. MIT licensed.
 
@@ -37,11 +38,22 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Twenty-one actions have dependencies, costs, acceptance and stopping rules. Their
+Twenty-four actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
 The roadmap's review date and SHA256 are separate from live export freshness.
+
+`#action-A23` is a manually audited readout, not an automatic collector:64fresh
+graphs,3840full-cost measurements and3180SAT witnesses replayed. Exact cold
+6.891→6.096ms passes its scoped gate; exact resident1.805→1.809ms is noninferior,
+not a speedup. Five matched nonlearned controls get both close policies; startup,
+thread creation/reaping, validation and resident warmup/lifetime costs count.
+The rejected EOF prototype and failed overall reaper gates are retained. Separate
+instrumented replay locates a new40ms close event in thread startup without GC
+overlap, but does not prove a kernel/scheduler cause or fix historical tails.
+A21/A22 gains use different cohorts and must not be added to A23's percentage.
+No learning advantage, production switch or new confirmation is claimed.
 
 `#recognition-repair` / A20 reports 64 fresh graphs, each in three equivalent
 clause/literal orders, three repetitions, four arms and two lifecycles: 4,608
