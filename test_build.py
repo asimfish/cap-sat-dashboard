@@ -403,7 +403,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),25)
+        self.assertEqual(len(plan['actions']),26)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -443,6 +443,12 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('整体6/10',actions['A24']['gate'])
         self.assertIn('2.480→2.404',actions['A24']['stop'])
         self.assertIn('逐原子句检查',actions['A24']['stop'])
+        self.assertIn('精确驻留降30.38%',actions['A25']['status'])
+        self.assertIn('冷/驻留两门均未通过',actions['A25']['gate'])
+        self.assertIn('实现门8/10',actions['A25']['gate'])
+        self.assertIn('1.655→1.152',actions['A25']['stop'])
+        self.assertIn('慢5.819微秒',actions['A25']['stop'])
+        self.assertIn('不删校验',actions['A25']['stop'])
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:

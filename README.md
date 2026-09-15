@@ -1,9 +1,9 @@
 # CAP-SAT Rebuttal Dashboard
 
-Latest audited update: A24's compiled-witness study improves full exact-resident
-cost3.07%, with all four scales improving. Only6/10comparisons pass despite4/4
-completion-stage gains: strongest witness32 resident fails. Shared repair is not
-promoted; cold noninferiority, retained tails and E65's stronger failure stay explicit.
+Latest audited update: A25's mandatory full-checker optimization reduces verified
+exact-resident cost30.38% and witness32 resident25.44%. Implementation gates8/10
+and strongest comparisons0/2: overall advantage still unestablished. All original
+clauses remain checked; native solver unchanged, historical failures retained.
 
 Open-source, dependency-free research progress dashboard. MIT licensed.
 
@@ -39,11 +39,23 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Twenty-five actions have dependencies, costs, acceptance and stopping rules. Their
+Twenty-six actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
 The roadmap's review date and SHA256 are separate from live export freshness.
+
+`#action-A25`:64fresh graphs,3840full-cost cells,3120SAT witnesses independently
+replayed using the old checker. Both implementations call a reusable verified
+request API, which checks every original clause and complete assignment before
+returning SAT. Exact resident1.655→1.152ms(-30.38%), witness32 resident2.001→
+1.492ms(-25.44%) and witness cold6.614→6.035ms(-8.74%) pass. Exact cold and random
+cold gates fail; all10validation-stage mechanisms pass. The native binary stays
+unchanged. No CNF preconversion, result cache or correctness-check removal.
+Direct strongest resident mean favors exact22.75%, but the predeclared request
+plus validation scale guard fails by5.819us at n64; cold strongest also fails.
+Full-cost gains do not establish a complete strongest-baseline win, native-core
+speedup, CAP learning, independent confirmation or production deployment.
 
 `#action-A24` is a manually audited readout:64fresh graphs,3840full-cost cells
 and3120SAT witnesses replayed. Exact resident2.480→2.404ms(-3.07%) passes its
