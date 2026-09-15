@@ -4,11 +4,47 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from build import stability_progress, overnight_progress
+from build import stability_progress, overnight_progress, targeted_progress
 from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_targeted_readout_requires_hashes_and_rejects_false_learning_gate(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/targeted_20260915_e62';root.mkdir(parents=True)
+            def save(name,obj):
+                body=json.dumps(obj).encode();(root/name).write_bytes(body);return hashlib.sha256(body).hexdigest()
+            fh=save('FROZEN.json',{'cpu':99,'private':'PRIVATE_PATH'})
+            rh=save('RECEIPT.json',{'frozen_sha256':fh})
+            totals={};contrasts={};stages={}
+            for b in ['old','popcnt']:
+                for reg in ['cold','resident']:
+                    for arm in ['stock','degree32','random32','pair42','pair43','pair44']:
+                        key=f'{b}/{reg}/{arm}';ms=7 if b=='old' else 5
+                        totals[key]=dict(count=1152,solved=1152,candidates=900,par2_ms=ms,median_ms=ms,stdev_ms=.1,
+                            private_weights='PRIVATE',scales={str(n):dict(par2_ms=ms,solved=288) for n in [24,32,48,64]})
+                        stages[key]={'features_s':{'mean_us':40 if b=='old' else 20}}
+            for reg in ['cold','resident']:
+                for arm in ['pair42','pair43','pair44']:
+                    contrasts[f'repair/{reg}/{arm}']=dict(gain_ms=2,simultaneous95_lower_ms=1)
+                    for c in ['stock','degree32','random32']:
+                        contrasts[f'learning/{reg}/{arm}/{c}']=dict(gain_ms=0,simultaneous95_lower_ms=-.1)
+            result=dict(cells=27648,totals=totals,contrasts=contrasts,learning_gates={'cold':False,'resident':False},receipt_sha256=rh)
+            hh=save('HEADROOM.json',dict(count=4096,additional=10,shards=[dict(validation_count=512,additional=10 if i==0 else 0) for i in range(8)]))
+            sh=save('STAGES.json',stages)
+            def refresh():
+                h=save('RESULTS.json',result)
+                save('AUDIT.json',dict(verdict='accounting_and_sampled_witness_replay_pass',cells=27648,
+                    results_sha256=h,headroom_sha256=hh,stages_sha256=sh,frozen_sha256=fh,receipt_sha256=rh))
+            refresh();out=targeted_progress(repo)
+            self.assertEqual(out['headroom']['additional'],10)
+            self.assertNotIn('PRIVATE',json.dumps(out));self.assertNotIn('cpu',out)
+            result['learning_gates']['cold']=True;refresh();self.assertIsNone(targeted_progress(repo))
+            result['learning_gates']['cold']=False
+            result['totals']['old/cold/stock']['par2_ms']=float('nan');refresh();self.assertIsNone(targeted_progress(repo))
+            result['totals']['old/cold/stock']['par2_ms']=7;refresh()
+            (root/'RESULTS.json').write_text('{}');self.assertIsNone(targeted_progress(repo))
+
     def test_overnight_requires_frozen_config_and_excludes_private_process_data(self):
         import datetime as dt
         with tempfile.TemporaryDirectory() as d:
@@ -249,7 +285,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),17)
+        self.assertEqual(len(plan['actions']),18)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -270,6 +306,7 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('E61',actions['A16']['status'])
         self.assertIn('需另做全成本评估',actions['A16']['gate'])
         self.assertIn('不足8小时',actions['A16']['stop'])
+        self.assertIn('学习净优势仍未通过',actions['A17']['status'])
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:

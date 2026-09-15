@@ -1088,6 +1088,64 @@ def overnight_progress(repo, now=None):
         return None
 
 
+def targeted_progress(repo):
+    """Publish only terminal E62 engineering/readout aggregates with hash bindings."""
+    root=repo/'experiments/targeted_20260915_e62'
+    try:
+        def read(name):return json.loads((root/name).read_text())
+        def digest(name):return hashlib.sha256((root/name).read_bytes()).hexdigest()
+        audit=read('AUDIT.json');raw=read('RESULTS.json');head=read('HEADROOM.json');stages=read('STAGES.json')
+        if audit['verdict']!='accounting_and_sampled_witness_replay_pass':return None
+        for name,key in [('RESULTS.json','results_sha256'),('HEADROOM.json','headroom_sha256'),
+                         ('STAGES.json','stages_sha256'),('FROZEN.json','frozen_sha256'),('RECEIPT.json','receipt_sha256')]:
+            if digest(name)!=audit[key]:return None
+        if raw['cells']!=27648 or audit['cells']!=27648 or raw['receipt_sha256']!=audit['receipt_sha256']:return None
+        def number(v):
+            if type(v) not in (float,int) or not math.isfinite(v):raise ValueError('invalid number')
+            return v
+        totals={};contrasts={}
+        for binary in ['old','popcnt']:
+            for regime in ['cold','resident']:
+                for arm in ['stock','degree32','random32','pair42','pair43','pair44']:
+                    key=f'{binary}/{regime}/{arm}';v=raw['totals'][key]
+                    if v['count']!=1152:return None
+                    if any(type(v[k]) is not int or not 0<=v[k]<=1152 for k in ['solved','candidates']):return None
+                    totals[key]={k:number(v[k]) for k in ['count','solved','candidates','par2_ms','median_ms','stdev_ms']}
+                    if any(totals[key][k]<0 for k in totals[key]):return None
+        for regime in ['cold','resident']:
+            expected=True
+            for arm in ['pair42','pair43','pair44']:
+                key=f'repair/{regime}/{arm}'
+                contrasts[key]={k:number(raw['contrasts'][key][k]) for k in ['gain_ms','simultaneous95_lower_ms']}
+                t=raw['totals'][f'popcnt/{regime}/{arm}']
+                for control in ['stock','degree32','random32']:
+                    other=raw['totals'][f'popcnt/{regime}/{control}']
+                    contrast=raw['contrasts'][f'learning/{regime}/{arm}/{control}']
+                    expected &= t['par2_ms']<=.95*other['par2_ms'] and t['solved']>=other['solved'] and number(contrast['simultaneous95_lower_ms'])>0
+                    expected &= all(t['scales'][n]['par2_ms']<=other['scales'][n]['par2_ms'] and t['scales'][n]['solved']>=other['scales'][n]['solved'] for n in ['24','32','48','64'])
+            if raw['learning_gates'][regime] is not bool(expected):return None
+        if head['count']!=4096 or sum(s['validation_count'] for s in head['shards'])!=4096:return None
+        if head['additional']!=sum(s['additional'] for s in head['shards']):return None
+        if type(head['additional']) is not int or not 0<=head['additional']<=4096:return None
+        feature={b:{a:number(stages[f'{b}/resident/{a}']['features_s']['mean_us']) for a in ['pair42','pair43','pair44']} for b in ['old','popcnt']}
+        residual=None
+        rr=repo/'experiments/residual_20260915_e63'
+        if (rr/'RESULTS.json').exists():
+            rb=(rr/'RESULTS.json').read_bytes();rv=json.loads(rb);rs=json.loads((rr/'STATUS.json').read_text())
+            if rs['phase']!='terminal' or rs['results_sha256']!=hashlib.sha256(rb).hexdigest():return None
+            if hashlib.sha256((rr/'FROZEN.json').read_bytes()).hexdigest()!=rv['frozen_sha256']:return None
+            if hashlib.sha256((rr/'rows.json.gz').read_bytes()).hexdigest()!=rv['rows_sha256']:return None
+            counts={k:rv['counts'][k] for k in ['SAT','UNSAT','UNKNOWN']}
+            if any(type(v) is not int or v<0 for v in counts.values()):return None
+            if sum(counts.values())!=rv['residuals'] or rv['total_validation']!=4096:return None
+            residual=dict(counts=counts,residuals=rv['residuals'],total_validation=4096,sha256=hashlib.sha256(rb).hexdigest())
+        return dict(cells=27648,graphs=128,totals=totals,repair_contrasts=contrasts,residual=residual,
+            learning_gates={r:raw['learning_gates'][r] for r in ['cold','resident']},
+            headroom=dict(count=4096,additional=head['additional']),feature_mean_us=feature,
+            audit_sha256=digest('AUDIT.json'),scope='同源码硬件指令修复的开发评测；不是独立确认或原论文学习优势')
+    except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1109,6 +1167,7 @@ def main():
     data['stability']=stability_progress(args.repo.resolve())
     data['native_first']=native_first_progress(args.repo.resolve())
     data['overnight']=overnight_progress(args.repo.resolve())
+    data['targeted']=targeted_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

@@ -39,6 +39,7 @@ def main():
         unchanged = unchanged and old.get('decoder_utility') == current.get('decoder_utility')
         unchanged = unchanged and old.get('stability') == current.get('stability')
         unchanged = unchanged and old.get('overnight') == current.get('overnight')
+        unchanged = unchanged and old.get('targeted') == current.get('targeted')
         if unchanged and same_code and age < 3600:
             print('No change; next freshness export within one hour')
             return

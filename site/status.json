@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-15T08:24:45.592004+00:00",
+  "generated": "2026-09-15T08:37:09.575949+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3051,7 +3051,8 @@
           "A12",
           "A13",
           "A15",
-          "A16"
+          "A16",
+          "A17"
         ],
         "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35",
         "evidence_level": "历史报告 + 后续局部审计；不是普遍加速"
@@ -3378,9 +3379,9 @@
       {
         "id": "A16",
         "title": "E61：八小时全成本队列与多目标候选训练",
-        "priority": "P1 · 已下发持续探索",
-        "status": "调度器已启动；运行状态与计数见页面上方 E61",
-        "cost": "累计8小时有效实验墙钟，8路CPU评测、3路共享GPU、最多4核数据准备；预定义432项训练，是否完成以实测计数为准",
+        "priority": "已停止 · 新要求优先定向修复",
+        "status": "E61 已停止；保留证据，未跑满8小时",
+        "cost": "原目标8小时；实际累计有效约43.7分钟，保留267项训练结果；运行中断及主动停止均不冒充完成",
         "depends_on": [
           "A15"
         ],
@@ -3388,9 +3389,23 @@
         "method": "CPU四类队列：n24/32/48/64匹配分布、困难n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算；所有控制及三个既有模型均用同一启动器、缓存语义和32首步上限。另用8份新训练/验证数据，2模型×3损失×3学习率×3种子共432项GPU候选。每项最多12000步，连续8次验证不改善则早停；全部结果保留，不挑训练种子。",
         "gate": "首先验收有效运行时长、可复核结果与完整成本账目。新训练权重仅导出候选，需另做全成本评估；验证进步、队列跑满、工程降本均不等于学习或论文端到端优势。",
         "stop": "累计有实验执行达到8小时后停止派发并收尾；资源安全暂停不冒充有效运行，10小时墙钟上限或人工STOP会如实记录不足8小时。GPU候选提前跑完不做无意义空转，CPU新图评测继续。数据与代码哈希漂移、显存/磁盘风险和连续失败触发保护，不终止其他用户任务。"
+      },
+      {
+        "id": "A17",
+        "title": "E62：修复软件位计数开销，停止低收益首步训练",
+        "priority": "P1 · 定向修复已验证",
+        "status": "端到端损失部分收回；学习净优势仍未通过",
+        "cost": "128新图、3种子、3轮、2二进制、6臂、冷/驻留，共27648次；另只读核查4096既有验证图，不新增GPU训练",
+        "depends_on": [
+          "A16"
+        ],
+        "hypothesis": "原二进制反复调用软件位计数，挤占100μs预算；但廉价32首步已接近固定完成规则的覆盖上限，继续首步训练未必有足够收益空间。",
+        "method": "源码、权重、CPU、数据固定，只添加-mpopcnt；所有对照同步优化。72个边界/退化图、6臂的特征/分数/宽预算选择完全一致。计入完整冷启动及驻留生命周期；27648次参考一致，运行时检查全部SAT见证，事后独立抽检1294个见证。",
+        "gate": "实现修复：同模型完整成本配对收益，单独验证；学习门仍要求三个种子均比所有同等优化的廉价对照快至少5%、求解数不减、各规模无害及同时区间下界为正。不得把工程修复等同于原论文学习优势。",
+        "stop": "三个模型驻留11.044–11.218ms降至7.768–8.221ms，降25.6%–30.8%；冷启动降13.7%–15.6%，六项修复收益的同时下界均为正。但修复后驻留度数基线6.174ms，学习门仍失败，候选恢复预期未满足。4096验证图中免费全首步oracle仅多覆盖10图，停止扩张该训练网格。下一步先验证廉价搜索失败后的可改进空间，再设计能改变后续搜索的动作监督；有可复核空间才启动新训练。"
       }
     ],
-    "sha256": "d4a0fbc73eeee963b3296288256140dde4e063d5fd8167a5eee0e7dffad109b6"
+    "sha256": "262d459807040d20050db88d4c242a7aabd58b20c1a446f6ad6c42edf029fd2a"
   },
   "pilot": {
     "id": "E26",
@@ -7222,7 +7237,263 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-15T15:41:03.970228+00:00",
+    "earliest_target_at": "2026-09-15T15:53:28.090585+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
+  },
+  "targeted": {
+    "cells": 27648,
+    "graphs": 128,
+    "totals": {
+      "old/cold/stock": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 0,
+        "par2_ms": 22.35818128327891,
+        "median_ms": 13.26317386701703,
+        "stdev_ms": 28.59152510982893
+      },
+      "old/cold/degree32": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 916,
+        "par2_ms": 15.745795926906997,
+        "median_ms": 12.921532150357962,
+        "stdev_ms": 19.838237685336555
+      },
+      "old/cold/random32": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 911,
+        "par2_ms": 15.953478784164568,
+        "median_ms": 12.969596311450005,
+        "stdev_ms": 19.648629210267945
+      },
+      "old/cold/pair42": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 771,
+        "par2_ms": 19.197787483992418,
+        "median_ms": 12.987931724637747,
+        "stdev_ms": 24.598417575451077
+      },
+      "old/cold/pair43": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 783,
+        "par2_ms": 18.693437378614263,
+        "median_ms": 12.990154791623354,
+        "stdev_ms": 23.885366721592863
+      },
+      "old/cold/pair44": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 776,
+        "par2_ms": 19.22500305307848,
+        "median_ms": 13.053232338279486,
+        "stdev_ms": 25.099234885616028
+      },
+      "old/resident/stock": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 0,
+        "par2_ms": 13.394213535421942,
+        "median_ms": 4.45023143159536,
+        "stdev_ms": 28.246118805926766
+      },
+      "old/resident/degree32": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 917,
+        "par2_ms": 6.113301322329789,
+        "median_ms": 3.420332036815428,
+        "stdev_ms": 18.52590854348228
+      },
+      "old/resident/random32": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 909,
+        "par2_ms": 6.642552781462048,
+        "median_ms": 3.472812718731196,
+        "stdev_ms": 19.74474257758294
+      },
+      "old/resident/pair42": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 608,
+        "par2_ms": 11.2177464939628,
+        "median_ms": 4.134150881630679,
+        "stdev_ms": 25.74606359277669
+      },
+      "old/resident/pair43": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 609,
+        "par2_ms": 11.043819202718119,
+        "median_ms": 4.1236267412993275,
+        "stdev_ms": 25.331496786359587
+      },
+      "old/resident/pair44": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 607,
+        "par2_ms": 11.073608134918484,
+        "median_ms": 4.0806602288891245,
+        "stdev_ms": 25.422838805894123
+      },
+      "popcnt/cold/stock": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 0,
+        "par2_ms": 22.844269127947175,
+        "median_ms": 13.372885063290596,
+        "stdev_ms": 29.61567755301522
+      },
+      "popcnt/cold/degree32": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 917,
+        "par2_ms": 15.574854872182994,
+        "median_ms": 12.938637752085924,
+        "stdev_ms": 18.920197042454408
+      },
+      "popcnt/cold/random32": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 917,
+        "par2_ms": 15.50902817851036,
+        "median_ms": 12.918430380523205,
+        "stdev_ms": 18.796924292416907
+      },
+      "popcnt/cold/pair42": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 886,
+        "par2_ms": 16.207434996936676,
+        "median_ms": 12.93708011507988,
+        "stdev_ms": 19.720782766961616
+      },
+      "popcnt/cold/pair43": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 894,
+        "par2_ms": 16.06992165842611,
+        "median_ms": 12.985834851861,
+        "stdev_ms": 19.352325049715077
+      },
+      "popcnt/cold/pair44": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 888,
+        "par2_ms": 16.594043148668586,
+        "median_ms": 12.956245336681604,
+        "stdev_ms": 20.66176662183421
+      },
+      "popcnt/resident/stock": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 0,
+        "par2_ms": 13.378540796919777,
+        "median_ms": 4.384520444242905,
+        "stdev_ms": 28.130227286043596
+      },
+      "popcnt/resident/degree32": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 917,
+        "par2_ms": 6.173993991978932,
+        "median_ms": 3.474673506085916,
+        "stdev_ms": 18.683014066513408
+      },
+      "popcnt/resident/random32": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 914,
+        "par2_ms": 6.234533941703073,
+        "median_ms": 3.4406217770689786,
+        "stdev_ms": 18.725918707152626
+      },
+      "popcnt/resident/pair42": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 746,
+        "par2_ms": 7.767588314891327,
+        "median_ms": 3.9928809904571,
+        "stdev_ms": 20.478557307846483
+      },
+      "popcnt/resident/pair43": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 745,
+        "par2_ms": 8.22083245455158,
+        "median_ms": 3.9935731450289795,
+        "stdev_ms": 21.687810778247783
+      },
+      "popcnt/resident/pair44": {
+        "count": 1152,
+        "solved": 1152,
+        "candidates": 728,
+        "par2_ms": 7.79055788411319,
+        "median_ms": 3.8976543037279043,
+        "stdev_ms": 20.756566728176363
+      }
+    },
+    "repair_contrasts": {
+      "repair/cold/pair42": {
+        "gain_ms": 2.99035248705574,
+        "simultaneous95_lower_ms": 0.5376018987708113
+      },
+      "repair/cold/pair43": {
+        "gain_ms": 2.623515720188152,
+        "simultaneous95_lower_ms": 0.43518985416826395
+      },
+      "repair/cold/pair44": {
+        "gain_ms": 2.6309599044098926,
+        "simultaneous95_lower_ms": 0.36428867620930694
+      },
+      "repair/resident/pair42": {
+        "gain_ms": 3.450158179071473,
+        "simultaneous95_lower_ms": 0.9442609170963374
+      },
+      "repair/resident/pair43": {
+        "gain_ms": 2.822986748166538,
+        "simultaneous95_lower_ms": 0.999497564025323
+      },
+      "repair/resident/pair44": {
+        "gain_ms": 3.283050250805294,
+        "simultaneous95_lower_ms": 1.1214727534395401
+      }
+    },
+    "residual": {
+      "counts": {
+        "SAT": 17,
+        "UNSAT": 1245,
+        "UNKNOWN": 0
+      },
+      "residuals": 1262,
+      "total_validation": 4096,
+      "sha256": "e7b8baf5daad4e3866827a1834c34791d1ec708c7bef7ad026de2c0160a8d546"
+    },
+    "learning_gates": {
+      "cold": false,
+      "resident": false
+    },
+    "headroom": {
+      "count": 4096,
+      "additional": 10
+    },
+    "feature_mean_us": {
+      "old": {
+        "pair42": 53.049373996654715,
+        "pair43": 53.076094546766214,
+        "pair44": 53.600429964716525
+      },
+      "popcnt": {
+        "pair42": 38.32215184553017,
+        "pair43": 37.65880764048181,
+        "pair44": 39.234663644392676
+      }
+    },
+    "audit_sha256": "3a76128eff24a37d7b642268e2d64e3e9f6bbed35b0bd829fbf5102223ae557b",
+    "scope": "同源码硬件指令修复的开发评测；不是独立确认或原论文学习优势"
   }
 }
