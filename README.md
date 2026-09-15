@@ -7,11 +7,13 @@ receipts; stale exports do not claim live execution. Window completion does not
 mean performance success. Missing blocks forbid an unreserved pass. No GPU
 training or paper rewrite is claimed. Historical E61 remains stopped incomplete.
 
-Latest audited performance update: A27's one-attempt prefix reduces sparse-stress
-exact-resident full cost6.62% versus32 attempts (1.193481→1.114467ms; corrected
-gain lower bound0.037235ms). Only15/28 development gates pass; both matched-panel
-strongest gates fail. This is a scoped repair, not a promotion or learned advantage.
-A25's earlier checker gains and every historical failure remain separate.
+Latest audited performance update: A28 omits unused SLS indices only in the guarded
+nonlearned entry. Matched exact-resident full cost falls19.60%
+(1.605263→1.290584ms; corrected lower gain0.229563ms), witness32 falls7.30%, and
+the matched strongest-resident gate passes. Sparse-stress exact resident worsens
+14.71%; only10/24 total gates pass. Waiting tails remain unresolved. A27 and A25's
+earlier local gains and every historical failure stay separate. No promotion or
+learned advantage is claimed.
 
 Open-source, dependency-free research progress dashboard. MIT licensed.
 
@@ -47,11 +49,25 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Twenty-eight actions have dependencies, costs, acceptance and stopping rules. Their
+Twenty-nine actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
 The roadmap's review date and SHA256 are separate from live export freshness.
+
+`#action-A28`:128 new development graphs,7680full-cost cells and4260SAT witnesses
+replayed. Both profiles use original exact without a prefix. Token parsing,
+original clauses, recognition, search, all native/caller checks, fallback and
+full lifecycle accounting stay unchanged; five controls receive the same change.
+The restricted nonlearned binary does not expose the old general/SLS CLI.
+Matched8/12 and stress2/12 gates pass; parse mechanisms10/10 and6/10. Resident
+matched exact and witness32 improve19.60%/7.30%, but stress exact resident
+2.059603→2.362667ms regresses14.71%. All tail events remain. A 2,560-call post-hoc
+diagnostic does not reproduce the20ms tails; file open averages~300us, file close
+~4us. It neither fixes nor identifies historical NFS/scheduler or process-exit
+tail causes. Next: examine a fully charged input-transfer path to avoid repeated
+file opens; do not hide serialization, transfer or validation costs. Not launched.
+This is development, not confirmation, CAP learning or industrial advantage.
 
 `#action-A27`:128 newly generated development graphs in two64-graph panels,
 11520full-cost cells and5940SAT witnesses independently replayed. Baseline,
