@@ -4,11 +4,39 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress
+from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress
 from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_prefix_campaign_stale_terminal_and_public_allowlist(self):
+        import datetime as dt
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/shared_prefix_20260916_v3';root.mkdir(parents=True)
+            def save(name,obj):
+                body=json.dumps(obj).encode();(root/name).write_bytes(body);return hashlib.sha256(body).hexdigest()
+            digest=save('FROZEN.json',dict(duration_s=28800,cpus=[49,68],private='PRIVATE'))
+            state=dict(frozen_sha256=digest,duration_s=28800,cpus=[49,68],started_at='2026-09-16T02:00:00+08:00',
+                observed='2026-09-16T02:01:00+08:00',planned_end='2026-09-16T10:00:00+08:00',
+                elapsed_s=60,active_coverage_s=55,phase='running',completed=[],failed=[],running=[{'private':'PRIVATE'}],
+                completed_jobs=0,failed_jobs=0,completed_cells=0,supervisor_pid=1,supervisor_create_time=0)
+            save('STATUS.json',state);now=dt.datetime.fromisoformat(state['observed'])
+            with patch('build.prefix_supervisor_alive',return_value=True):
+                out=prefix_campaign_progress(repo,now);self.assertEqual(out['phase'],'running')
+                self.assertNotIn('PRIVATE',json.dumps(out));self.assertNotIn('supervisor_pid',out)
+                self.assertFalse(out['duration_target_met']);self.assertEqual(out['performance_verdict'],'pending')
+                self.assertEqual(prefix_campaign_progress(repo,now+dt.timedelta(minutes=3))['phase'],'stale')
+            with patch('build.prefix_supervisor_alive',return_value=False):
+                self.assertEqual(prefix_campaign_progress(repo,now)['phase'],'stale')
+            state.update(phase='window_complete',duration_target_met=True)
+            save('STATUS.json',state);save('FINAL.json',state)
+            self.assertIsNone(prefix_campaign_progress(repo,now))
+            state.update(elapsed_s=28800,observed=state['planned_end'],running=[])
+            save('STATUS.json',state);save('FINAL.json',state)
+            self.assertTrue(prefix_campaign_progress(repo)['duration_target_met'])
+            state['active_coverage_s']=float('nan');save('STATUS.json',state);save('FINAL.json',state)
+            self.assertIsNone(prefix_campaign_progress(repo))
+
     def test_recognition_repair_binding_gate_and_public_allowlist(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/recognition_20260915_v1';root.mkdir(parents=True)
@@ -403,7 +431,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),26)
+        self.assertEqual(len(plan['actions']),27)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}

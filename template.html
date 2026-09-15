@@ -160,7 +160,7 @@ function renderPrefixCampaign(){
  const stale=(Date.now()-Date.parse(u.observed))/1000>120;
  const phase=stale&&!['window_complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'运行快照：双 CPU 实验执行中',stale:'快照已陈旧：当前状态待下次导出确认',window_complete:'8 小时窗口结束；另看性能验收',stopped_incomplete:'提前停止；未完成 8 小时窗口'};
- const verdict={pending:'待完整读出，不宣称优势',gates_pass:'同主机实验门通过，仍非学习或普遍优势',gates_not_passed:'完整实验门未通过，问题尚未解决'};
+ const verdict={pending:'待完整读出，不宣称优势',gates_pass:'同主机实验门通过，仍非学习或普遍优势',gates_not_passed:'完整实验门未通过，问题尚未解决',incomplete_evidence:'存在缺失/中断块，证据不完整，不能无保留宣称通过'};
  const date=v=>new Date(v).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false});
  target.innerHTML=`<b>${esc(labels[phase])}</b><div class="cards"><div class="card"><b>${(u.elapsed_s/3600).toFixed(2)} / 8 h</b><span>窗口已过墙钟；不等于 GPU/CPU 计算小时</span></div><div class="card"><b>${u.completed_jobs} 批</b><span>${u.completed_cells.toLocaleString()} 次完整计费与重放；${u.sat_witnesses.toLocaleString()} 个 SAT 见证</span></div><div class="card"><b>${u.running_jobs} / ${u.cpu_lanes} 路</b><span>上次快照执行中；失败/中断 ${u.failed_jobs} 批</span></div></div><p>北京时间：${esc(date(u.started_at))} → ${esc(date(u.planned_end))}。最后心跳 ${esc(date(u.observed))}；保守有任务覆盖 ${(u.active_coverage_s/3600).toFixed(2)} h。</p><p>先运行与 witness32 相同的最多 32 次廉价补全，失败才用剩余的 1 ms 总图预算进入精确搜索。五个策略、两配置、冷/驻留完整成本对照；每批 64 张新图 × 3 轮，共 3,840 次。正常分布与稀疏困难残余分开统计，所有长尾和超时保留。</p><p class="alert">${esc(verdict[u.performance_verdict])}。正确性失败或资源越界会安全停止，不为凑时长放宽门槛。v1 启动小试的报告接口错误已保留；修复版另行验证。没有重启 E61。</p><p class="muted">${esc(u.scope)}。服务器每 15 分钟导出，页面每分钟检查；超过 2 分钟的心跳显示陈旧，不能把网页更新时间当作进程活跃。</p>`;
 }

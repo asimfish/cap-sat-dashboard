@@ -6,6 +6,7 @@ import hashlib
 import html
 import json
 import math
+import os
 from pathlib import Path
 import random
 import re
@@ -1336,9 +1337,23 @@ def recognition_repair_progress(repo):
     except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
 
 
+def prefix_supervisor_alive(root,state):
+    """Bind Linux PID to creation time and exact expected script, not kill(pid,0)."""
+    try:
+        pid=state['supervisor_pid']
+        if type(pid) is not int or pid<=1:return False
+        proc=Path('/proc')/str(pid)
+        fields=(proc/'stat').read_text().rsplit(')',1)[1].split()
+        boot=int(next(line.split()[1] for line in Path('/proc/stat').read_text().splitlines() if line.startswith('btime ')))
+        created=boot+int(fields[19])/os.sysconf('SC_CLK_TCK')
+        cmd=(proc/'cmdline').read_bytes().split(b'\0')
+        return fields[0] not in ('Z','T','t','X','x') and abs(created-state['supervisor_create_time'])<.02 and str(root/'supervisor.py').encode() in cmd
+    except (OSError,ValueError,KeyError,TypeError,IndexError,StopIteration):return False
+
+
 def prefix_campaign_progress(repo, now=None):
     """A26 operational receipts only; elapsed time is not performance success."""
-    root=repo/'experiments/shared_prefix_20260916_v2'
+    root=repo/'experiments/shared_prefix_20260916_v3'
     try:
         frozen=(root/'FROZEN.json').read_bytes();cfg=json.loads(frozen)
         raw=(root/'STATUS.json').read_bytes();state=json.loads(raw)
@@ -1356,6 +1371,7 @@ def prefix_campaign_progress(repo, now=None):
         if abs((end-started).total_seconds()-28800)>.01 or active>elapsed+2 or elapsed>(observed-started).total_seconds()+2:return None
         phase=state['phase'];terminal=phase in ('window_complete','stopped_incomplete')
         if phase not in ('starting','running','window_complete','stopped_incomplete'):return None
+        if terminal and json.loads((root/'FINAL.json').read_text())!=state:return None
         if phase=='window_complete' and (elapsed<28800 or state.get('duration_target_met') is not True):return None
         if len(state['completed'])>4096:return None
         seen=set();witnesses=0
@@ -1369,15 +1385,16 @@ def prefix_campaign_progress(repo, now=None):
                 if hashlib.sha256((dest/name).read_bytes()).hexdigest()!=receipt[key]:return None
             audit=json.loads((dest/'AUDIT.json').read_text())
             if audit['verdict']!='full_replay_pass' or audit['cells']!=3840:return None
+            if receipt['sat_witnesses']!=audit['sat_witnesses'] or not 0<=number(receipt['sat_witnesses'])<=3840:return None
             witnesses+=number(receipt['sat_witnesses'])
         if state['completed_jobs']!=len(seen) or state['completed_cells']!=3840*len(seen):return None
         if state['failed_jobs']!=len(state['failed']) or len(state['running'])>2:return None
         age=((now or dt.datetime.now(dt.timezone.utc))-observed).total_seconds()
-        if not terminal and not -5<=age<=120:phase='stale'
+        if not terminal and (not -5<=age<=120 or not prefix_supervisor_alive(root,state)):phase='stale'
         verdict='pending'
         if terminal and (root/'READOUT.json').exists():
             readout=json.loads((root/'READOUT.json').read_text())
-            if readout['state_sha256']==hashlib.sha256(raw).hexdigest() and readout['verdict'] in ('pending','gates_pass','gates_not_passed'):
+            if readout['state_sha256']==hashlib.sha256(raw).hexdigest() and readout['verdict'] in ('pending','gates_pass','gates_not_passed','incomplete_evidence'):
                 verdict=readout['verdict']
         return dict(phase=phase,observed=observed.isoformat(),started_at=started.isoformat(),planned_end=end.isoformat(),
             elapsed_s=elapsed,active_coverage_s=active,duration_s=28800,completed_jobs=len(seen),

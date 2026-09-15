@@ -1,6 +1,13 @@
 # CAP-SAT Rebuttal Dashboard
 
-Latest audited update: A25's mandatory full-checker optimization reduces verified
+Current campaign: A26 runs a fixed eight-hour, two-CPU-lane comparison of a shared
+SAT prefix and bounded exact residual search, with fresh matched and sparse-stress
+blocks. The live panel verifies heartbeat/process identity and audited completion
+receipts; stale exports do not claim live execution. Window completion does not
+mean performance success. Missing blocks forbid an unreserved pass. No GPU
+training or paper rewrite is claimed. Historical E61 remains stopped incomplete.
+
+Latest audited performance update: A25's mandatory full-checker optimization reduces verified
 exact-resident cost30.38% and witness32 resident25.44%. Implementation gates8/10
 and strongest comparisons0/2: overall advantage still unestablished. All original
 clauses remain checked; native solver unchanged, historical failures retained.

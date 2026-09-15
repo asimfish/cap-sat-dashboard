@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-15T18:03:27.062277+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-15T18:15:29.629635+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -33,7 +33,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-15T18:03:27.062277+00:00",
+  "generated": "2026-09-15T18:15:29.629635+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3059,7 +3059,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-16",
-    "scope": "人工审读的性能计划：A25保留完整校验的客户端优化，使精确驻留降30.38%、仅补全SAT驻留降25.44%，但实现门8/10、最强比较0/2，不能宣称全面突破。原生搜索未改，全部见证独立复核；E65确认失败和旧长尾保留。七项缺口仍4部分改善、3未解决，不改论文或宣称学习优势。",
+    "scope": "人工审读的性能计划：A26新增共享SAT快路径与有界精确残差的8小时双CPU检验，实时状态见顶部面板，运行不代表验收通过。A25精确驻留降30.38%、仅补全SAT驻留降25.44%，但实现门8/10、最强比较0/2；E65确认失败和旧长尾保留。七项缺口仍4部分改善、3未解决，不改论文或宣称学习优势。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3094,9 +3094,10 @@
           "A22",
           "A23",
           "A24",
-          "A25"
+          "A25",
+          "A26"
         ],
-        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35；E64；E65；重排识别修复；lifecycle_20260915_v1；io_20260915_v1；spawn_20260915_v1；witness_20260916_v1；checker_20260916_v1",
+        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35；E64；E65；重排识别修复；lifecycle_20260915_v1；io_20260915_v1；spawn_20260915_v1；witness_20260916_v1；checker_20260916_v1；shared_prefix_20260916_v3",
         "evidence_level": "历史报告 + 后续局部审计；E65同主机新数据复现对原廉价基线的收益，但包含新SAT补全对照的更强确认门未过；不是普遍加速"
       },
       {
@@ -3558,9 +3559,23 @@
         "method": "两配置都使用可调用的request_verified接口，完整校验后才返回SAT；同一A24原生二进制、搜索、解析、见证补全和退出不变。仅nested all/any对比isdisjoint/map，不预转换CNF、不缓存结果；全部对照公平共享。11803穷举子句组合、1000随机公式、52旧见证差分及非法赋值/空子句/尾子句/超时/Python-O测试通过；原6504小图组合release与sanitizer通过。输入是调用方已解析且与不可变文件匹配的原CNF，不是任意文件公共服务。",
         "gate": "12项预设图配对校正比较：精确/仅补全SAT冷与驻留4项须降至少5%、下界为正、各规模无退化；其余6项5%非劣。实现门8/10：精确冷n32退化、随机冷非劣区间失败；10/10校验机制门通过。两项最强比较额外要求各规模请求+校验无退化，防止只靠预热摊销；冷/驻留两门均未通过。",
         "stop": "完整驻留(ms)：精确1.655→1.152(-30.38%，节省下界0.379836ms)，仅补全SAT 2.001→1.492(-25.44%)，四规模均改善。冷(ms)：默认13.939→13.622，度数7.213→6.908，随机7.338→7.126，仅补全SAT 6.614→6.035(-8.74%)，精确6.180→5.829；精确冷平均改善仍因n32退化不过门。最强驻留总成本精确比同样优化后的补全低22.75%，但n64请求+校验1.359768对1.353949ms，慢5.819微秒；分解请求反而快1.899微秒、校验慢7.718微秒，仅6/48对见证相同，不能直接归因搜索。保留50.216ms退出和22.517ms创建长尾。下一步固定赋值配对分解校验差异，再考虑共享SAT快路径/有界残差或独立编译校验器，未启动；不删校验、不跨图叠加，不改E65失败，不是学习优势或生产切换。"
+      },
+      {
+        "id": "A26",
+        "title": "共享SAT快路径与有界精确残差：8小时跨时段检验",
+        "priority": "P1 · 当前执行重点",
+        "status": "固定候选已实现；启动与实时进度见顶部A26面板，尚无完整验收结论",
+        "cost": "双CPU独立测量通道；每批64新图×3轮×5策略×2配置×冷/驻留=3840次，8小时固定墙钟窗口；不启动无关GPU训练",
+        "depends_on": [
+          "A25"
+        ],
+        "hypothesis": "固定A25赋值200次交叉计时后，n64精确相对witness校验差异仅约0.35微秒，不能把旧7.72微秒差异归因见证内容。共享最多32次廉价完成，使SAT前缀成功时精确与witness32返回相同完整赋值；失败才在原1ms总图预算内搜索残余。",
+        "method": "同一二进制两配置，五个策略公平共享解析、精简启动、编译补全和完整校验。两个CPU通道各自三批正常分布、一批稀疏困难残余；新seed、不按SAT或速度筛选。冷/驻留包括创建、就绪、请求、校验、预热分摊和退出；全部长尾保留。release/sanitizer正确性、同见证回归、异常父退出清理、缺失块拒绝成功及摘要接口回归须先通过。",
+        "gate": "每通道/分布单列；最强对照冷和驻留均须至少5%全成本收益、12项校正下界为正、求解数不减、每规模full及request+validation无害；新旧五策略须5%非劣。按时间块而非三次重复重采样。8小时结束另作终态读出；缺失/中断块禁止无保留通过，不用时长证明优势。",
+        "stop": "v1小试3840次重放后在继承审计打印处缺字段失败，记录保留；v2修复小试通过后短暂启动，被协作复核发现监督/缺失块口径风险而停止。v3补父进程死亡保护、子孙身份清理、各lane独立分层和严格终态回执绑定后再启动。磁盘低于50GiB、产物超过8GiB、内存不足16GiB、正确性/审计失败或STOP立即停止；旧冻结实验和论文不改。当前性能结论仍未突破，不是学习优势、工业泛化或生产切换。"
       }
     ],
-    "sha256": "539ea14e062910a6e5738f7ed2441d83d0eade27300df5deda0d002a853428fc"
+    "sha256": "57f4bfc90eb30bd26be10d53d67a9c9887b87dd5fd1997f8580ccb1e79db6c49"
   },
   "pilot": {
     "id": "E26",
@@ -7392,22 +7407,22 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-16T01:19:45.478682+00:00",
+    "earliest_target_at": "2026-09-16T01:31:47.927669+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
-    "phase": "stopped_incomplete",
-    "observed": "2026-09-15T18:03:20.208109+00:00",
-    "started_at": "2026-09-15T18:02:54.299346+00:00",
-    "planned_end": "2026-09-16T02:02:54.299346+00:00",
-    "elapsed_s": 25.908807579427958,
-    "active_coverage_s": 25.052854974754155,
+    "phase": "running",
+    "observed": "2026-09-15T18:15:27.801862+00:00",
+    "started_at": "2026-09-15T18:11:52.444946+00:00",
+    "planned_end": "2026-09-16T02:11:52.444946+00:00",
+    "elapsed_s": 215.356958351098,
+    "active_coverage_s": 210.34245886188,
     "duration_s": 28800,
-    "completed_jobs": 0,
-    "completed_cells": 0,
-    "sat_witnesses": 0,
-    "failed_jobs": 2,
-    "running_jobs": 0,
+    "completed_jobs": 9,
+    "completed_cells": 34560,
+    "sat_witnesses": 24000,
+    "failed_jobs": 0,
+    "running_jobs": 2,
     "cpu_lanes": 2,
     "performance_verdict": "pending",
     "duration_target_met": false,
@@ -13098,7 +13113,7 @@ function renderPrefixCampaign(){
  const stale=(Date.now()-Date.parse(u.observed))/1000>120;
  const phase=stale&&!['window_complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'运行快照：双 CPU 实验执行中',stale:'快照已陈旧：当前状态待下次导出确认',window_complete:'8 小时窗口结束；另看性能验收',stopped_incomplete:'提前停止；未完成 8 小时窗口'};
- const verdict={pending:'待完整读出，不宣称优势',gates_pass:'同主机实验门通过，仍非学习或普遍优势',gates_not_passed:'完整实验门未通过，问题尚未解决'};
+ const verdict={pending:'待完整读出，不宣称优势',gates_pass:'同主机实验门通过，仍非学习或普遍优势',gates_not_passed:'完整实验门未通过，问题尚未解决',incomplete_evidence:'存在缺失/中断块，证据不完整，不能无保留宣称通过'};
  const date=v=>new Date(v).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false});
  target.innerHTML=`<b>${esc(labels[phase])}</b><div class="cards"><div class="card"><b>${(u.elapsed_s/3600).toFixed(2)} / 8 h</b><span>窗口已过墙钟；不等于 GPU/CPU 计算小时</span></div><div class="card"><b>${u.completed_jobs} 批</b><span>${u.completed_cells.toLocaleString()} 次完整计费与重放；${u.sat_witnesses.toLocaleString()} 个 SAT 见证</span></div><div class="card"><b>${u.running_jobs} / ${u.cpu_lanes} 路</b><span>上次快照执行中；失败/中断 ${u.failed_jobs} 批</span></div></div><p>北京时间：${esc(date(u.started_at))} → ${esc(date(u.planned_end))}。最后心跳 ${esc(date(u.observed))}；保守有任务覆盖 ${(u.active_coverage_s/3600).toFixed(2)} h。</p><p>先运行与 witness32 相同的最多 32 次廉价补全，失败才用剩余的 1 ms 总图预算进入精确搜索。五个策略、两配置、冷/驻留完整成本对照；每批 64 张新图 × 3 轮，共 3,840 次。正常分布与稀疏困难残余分开统计，所有长尾和超时保留。</p><p class="alert">${esc(verdict[u.performance_verdict])}。正确性失败或资源越界会安全停止，不为凑时长放宽门槛。v1 启动小试的报告接口错误已保留；修复版另行验证。没有重启 E61。</p><p class="muted">${esc(u.scope)}。服务器每 15 分钟导出，页面每分钟检查；超过 2 分钟的心跳显示陈旧，不能把网页更新时间当作进程活跃。</p>`;
 }
