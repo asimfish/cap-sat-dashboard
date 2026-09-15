@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-15T09:25:51.626316+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-15T09:35:29.045204+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -9,6 +9,7 @@
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
 <section id="overnight"><h2>E61 · 8 小时持续实验队列</h2><div id="overnight-progress" class="panel"></div></section>
 <section id="targeted"><h2>E62 · 定向修复：硬件位计数与学习空间核查</h2><div id="targeted-progress" class="panel"></div></section>
+<section id="exact-search"><h2>E64 · 精确搜索：直接降低不可满足判定成本</h2><div id="exact-search-progress" class="panel"></div></section>
 <section id="issues"><h2>缺点解决情况</h2><div class="toolbar"><label for="filter">筛选</label><select id="filter"><option value="all">所有问题</option><option value="open">仍待解决</option><option value="closed">已修复 / 负结果关闭</option></select></div><div id="issue-list" class="issues"></div></section>
 <section id="runs"><h2>实验完成度 <span class="muted">E17 / E19 · n = 350</span></h2><div class="table"><table><thead><tr><th>实验</th><th>种子</th><th>有效实例行</th><th>状态</th><th>最近日志更新 UTC</th></tr></thead><tbody id="run-list"></tbody></table></div><p class="muted">每实例行包含 4 个求解器臂；每组计划 5 × 300 行。表中仅覆盖 E17/E19 n350；其他实验见缺点卡片。局部或校验失败的种子不进入结果汇总。</p></section>
 <section id="results"><h2>结果与边界</h2><div class="toolbar"><label for="group">实例子集</label><select id="group"><option>SAT</option><option>UNSAT</option><option>ALL</option></select><label for="comparator">对照</label><select id="comparator"><option value="default">原生 CaDiCaL</option><option value="polarity">Polarity</option><option value="walksat_equal">等成本 WalkSAT</option></select></div><div class="table"><table><thead><tr><th>模型</th><th>完整种子</th><th>实例 / 种子</th><th>PAR-2 收益 / 秒</th><th>95% 种子区间</th></tr></thead><tbody id="result-list"></tbody></table></div><p class="muted">收益 = 对照 PAR-2 − CAP-SAT PAR-2；正值有利于 CAP。超时按 2 × 600 秒惩罚。区间仅对种子重采样，条件于固定实例面板；不代表生成簇不确定性。SAT / UNSAT 标签取所有读取结果的确定性结论并集，未决实例仍保留在 ALL。</p><div class="panel"><b>解释时必须保留的限制</b><p>跨运行资源竞争影响 CPU 时间；frozen seed 1024 包含跨主机补跑，重新准备初始化成本。不同训练规模的时间差不能直接解释为训练的因果收益。工业与更大规模随机 SAT 的负结果仍成立。</p><p id="truth" class="muted"></p></div></section>
@@ -29,7 +30,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-15T09:25:51.626316+00:00",
+  "generated": "2026-09-15T09:35:29.045204+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3070,7 +3071,7 @@
         "title": "端到端收益能否超过廉价基线",
         "state": "部分改善",
         "priority": "最高",
-        "progress": "历史 n250 对极性的时间差区间跨零；九月 n350 Glucose 对默认有收益，Kissat 不支持同样结论。E27 独立 48 例中，随机修复 + 默认回退的全成本 PAR-2 比默认低 17.5%，解出 19 对 15；这是工程提速，CAP 仍未胜过廉价修复。",
+        "progress": "历史 n250 对极性的时间差区间跨零；九月 n350 Glucose 对默认有收益，Kissat 不支持同样结论。E27 独立 48 例中，随机修复 + 默认回退比默认快17.5%，CAP仍未胜过廉价修复。E64新精确搜索在128张顶点覆盖编码开发图上，相对原有廉价对照中最快者，冷启动降低24.9%、驻留降低66.3%；相对新SAT补全对照也分别低19.2%、59.5%。这是受限任务的非学习算法收益，尚未独立确认。",
         "remaining": "尚无跨后端、跨问题族稳定优于默认及廉价对照的部署优势；小实例的预测成本仍可能超过搜索节省。",
         "directions": [
           "A0",
@@ -3082,9 +3083,10 @@
           "A13",
           "A15",
           "A16",
-          "A17"
+          "A17",
+          "A18"
         ],
-        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35",
+        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35；E64",
         "evidence_level": "历史报告 + 后续局部审计；不是普遍加速"
       },
       {
@@ -3432,10 +3434,24 @@
         "hypothesis": "原二进制反复调用软件位计数，挤占100μs预算；但廉价32首步已接近固定完成规则的覆盖上限，继续首步训练未必有足够收益空间。",
         "method": "源码、权重、CPU、数据固定，只添加-mpopcnt；所有对照同步优化。72个边界/退化图、6臂的特征/分数/宽预算选择完全一致。计入完整冷启动及驻留生命周期；27648次参考一致，运行时检查全部SAT见证，事后独立抽检1294个见证。",
         "gate": "实现修复：同模型完整成本配对收益，单独验证；学习门仍要求三个种子均比所有同等优化的廉价对照快至少5%、求解数不减、各规模无害及同时区间下界为正。不得把工程修复等同于原论文学习优势。",
-        "stop": "三个模型驻留11.044–11.218ms降至7.768–8.221ms，降25.6%–30.8%；冷启动降13.7%–15.6%，六项修复收益的同时下界均为正。但修复后驻留度数基线6.174ms，学习门仍失败，候选恢复预期未满足。4096验证图中免费全首步oracle仅多覆盖10图，停止扩张该训练网格。下一步先验证廉价搜索失败后的可改进空间，再设计能改变后续搜索的动作监督；有可复核空间才启动新训练。"
+        "stop": "三个模型驻留11.044–11.218ms降至7.768–8.221ms，降25.6%–30.8%；冷启动降13.7%–15.6%，六项修复收益的同时下界均为正。但修复后驻留度数基线6.174ms，学习门仍失败，候选恢复预期未满足。4096验证图中免费全首步oracle仅多覆盖10图，停止扩张该训练网格。E63进一步确认1262个廉价搜索残差中1245个UNSAT、17个SAT，下一步已按A18实现精确搜索；这不是覆盖数到时间收益的通用上界。"
+      },
+      {
+        "id": "A18",
+        "title": "E64：精确搜索与安全剪枝，降低UNSAT判定成本",
+        "priority": "P1 · 受限任务已有端到端收益",
+        "status": "冷启动/驻留工程门通过；非学习优势",
+        "cost": "6504个小图/约束组合穷举交叉检查，release与ASan/UBSan均通过；128新图、3搜索种子、3轮、8臂、两生命周期，共18432次；没有GPU训练",
+        "depends_on": [
+          "A17"
+        ],
+        "hypothesis": "主残差是UNSAT，首步赋值排序不能直接完成不可满足判定。严格识别顶点覆盖编码后，用补图团搜索和着色上界完成精确判定，SAT再直接补全辅助变量，可能消除大量通用CNF求解成本。",
+        "method": "实现有截止时间的完整分支搜索；只有受信seqcounter模板与图边严格匹配才启用，编码不匹配或未决回退CaDiCaL。SAT完整见证在native、Python及事后全部重放中验证。所有对照共用相同二进制、POPCNT、加载/退出规则与1ms图预算；用仅直接补全SAT的对照分离UNSAT搜索收益。",
+        "gate": "工程门：完整生命周期PAR-2比stock/degree32/random32均降低至少10%，八项比较校正后的图聚类下界为正，求解数不减、各规模无退化。UNSAT机制门独立对比仅补全SAT。两生命周期、两类门均通过；每臂1152/1152求解，未声称学习优势或独立确认。",
+        "stop": "相对原有廉价对照中最快者：冷启动14.471→10.874ms，降低24.9%；驻留5.649→1.906ms，降低66.3%。相对新增SAT补全对照，全图冷/驻留成本也分别低19.2%/59.5%。UNSAT驻留相对仅补全SAT的对照14.911→0.729ms，减少95.1%。18432单元和14832个SAT见证全部审计。保留为新的非学习强基线，下一步应冻结新确认图并做独立复测，再检查更难/不同分布；不能把受限编码收益扩写为通用SAT、工业泛化或原论文学习优势。未导出独立认证UNSAT证明证书，未切换生产路由，旧训练网格保持停止。"
       }
     ],
-    "sha256": "262d459807040d20050db88d4c242a7aabd58b20c1a446f6ad6c42edf029fd2a"
+    "sha256": "0d75c66f36a9d73968aa2467916a0ed9f9e875da83c7163aff8fa91c75ee5b3e"
   },
   "pilot": {
     "id": "E26",
@@ -7267,7 +7283,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-15T16:42:10.432556+00:00",
+    "earliest_target_at": "2026-09-15T16:51:47.383761+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "targeted": {
@@ -7525,6 +7541,913 @@
     },
     "audit_sha256": "3a76128eff24a37d7b642268e2d64e3e9f6bbed35b0bd829fbf5102223ae557b",
     "scope": "同源码硬件指令修复的开发评测；不是独立确认或原论文学习优势"
+  },
+  "exact_search": {
+    "cells": 18432,
+    "graphs": 128,
+    "totals": {
+      "cold/stock": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 17.256130755413324,
+        "median_ms": 12.392139993607998,
+        "stdev_ms": 20.27443093849429,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 15.730708378378177,
+            "median_ms": 12.678882107138634,
+            "stdev_ms": 11.700863271989624
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 23.540870948798126,
+            "median_ms": 11.855384334921837,
+            "stdev_ms": 38.68938513226969
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.279060700365031,
+            "median_ms": 10.184957645833492,
+            "stdev_ms": 0.8403985440841223
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.727513185986835,
+            "median_ms": 11.594097130000591,
+            "stdev_ms": 1.0830271801217244
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 14.02588172802805,
+            "median_ms": 13.056624215096235,
+            "stdev_ms": 3.6446877188043842
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 32.992067407273375,
+            "median_ms": 19.979371689260006,
+            "stdev_ms": 35.98429325488523
+          }
+        }
+      },
+      "cold/degree32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 14.703268197384508,
+        "median_ms": 11.905561666935682,
+        "stdev_ms": 19.514841226022043,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 12.471537508608968,
+            "median_ms": 11.979118920862675,
+            "stdev_ms": 7.502326818019974
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 23.89799863513973,
+            "median_ms": 11.746584437787533,
+            "stdev_ms": 40.23231421946425
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.932949184077895,
+            "median_ms": 10.095111094415188,
+            "stdev_ms": 12.241049008313917
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.781984041186256,
+            "median_ms": 11.330937035381794,
+            "stdev_ms": 3.9579471908540915
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.380482056566203,
+            "median_ms": 12.22745981067419,
+            "stdev_ms": 1.0979708447863763
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 23.717657507707674,
+            "median_ms": 14.378023333847523,
+            "stdev_ms": 35.36661960578444
+          }
+        }
+      },
+      "cold/random32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 14.471110628316334,
+        "median_ms": 11.941247154027224,
+        "stdev_ms": 17.95057556920221,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 12.296642783623362,
+            "median_ms": 11.99273020029068,
+            "stdev_ms": 3.726019650232217
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 23.42991814845138,
+            "median_ms": 11.851618066430092,
+            "stdev_ms": 38.70569477272179
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.227904819961017,
+            "median_ms": 10.096326936036348,
+            "stdev_ms": 0.8084385176057988
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.57069151263891,
+            "median_ms": 11.382181197404861,
+            "stdev_ms": 1.2168784207951473
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.36340189481982,
+            "median_ms": 12.212666217237711,
+            "stdev_ms": 0.9419811295383336
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 23.72244428584559,
+            "median_ms": 14.339033514261246,
+            "stdev_ms": 34.24013098436848
+          }
+        }
+      },
+      "cold/pair42": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 14.482519316111897,
+        "median_ms": 11.991774197667837,
+        "stdev_ms": 17.96353591115347,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 12.251572262499774,
+            "median_ms": 12.023377232253551,
+            "stdev_ms": 2.330410684907172
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 23.674021176993847,
+            "median_ms": 11.82569656521082,
+            "stdev_ms": 39.117670587391686
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.268471397769948,
+            "median_ms": 10.176519863307476,
+            "stdev_ms": 0.8973593780877422
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.713140446873796,
+            "median_ms": 11.363130994141102,
+            "stdev_ms": 1.6418847081499393
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.6086237497576,
+            "median_ms": 12.228648643940687,
+            "stdev_ms": 2.5787569585108816
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 23.33984167004625,
+            "median_ms": 14.371213968843222,
+            "stdev_ms": 34.29593308322069
+          }
+        }
+      },
+      "cold/pair43": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 14.630660552130495,
+        "median_ms": 11.989920865744352,
+        "stdev_ms": 18.240846102733332,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 12.41021534024126,
+            "median_ms": 12.023145332932472,
+            "stdev_ms": 4.733992143038893
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 23.778894825114143,
+            "median_ms": 11.925910599529743,
+            "stdev_ms": 38.89187286438758
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.590043889048198,
+            "median_ms": 10.138717945665121,
+            "stdev_ms": 3.6720620958264285
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.670913686329085,
+            "median_ms": 11.342042591422796,
+            "stdev_ms": 1.9620200727461865
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.780024013611385,
+            "median_ms": 12.25606445223093,
+            "stdev_ms": 6.670776200504189
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 23.48166061953331,
+            "median_ms": 14.352353289723396,
+            "stdev_ms": 34.13700335593359
+          }
+        }
+      },
+      "cold/pair44": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 14.535143544586996,
+        "median_ms": 11.972493957728148,
+        "stdev_ms": 18.0994930205866,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 12.243892690076411,
+            "median_ms": 12.039612978696823,
+            "stdev_ms": 2.57773032888048
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 23.975097065170605,
+            "median_ms": 11.869438923895359,
+            "stdev_ms": 39.301265693362055
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.35859818997172,
+            "median_ms": 10.115307755768299,
+            "stdev_ms": 1.99214995646667
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.069574392323071,
+            "median_ms": 11.495491955429316,
+            "stdev_ms": 5.702268429561346
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.38252342510451,
+            "median_ms": 12.212470639497042,
+            "stdev_ms": 0.9035864515219124
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 23.32987817094868,
+            "median_ms": 14.344733208417892,
+            "stdev_ms": 34.21430397687237
+          }
+        }
+      },
+      "cold/witness32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 13.453067845451491,
+        "median_ms": 10.938997846096754,
+        "stdev_ms": 18.410996904787904,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 10.872998038766967,
+            "median_ms": 10.683413594961166,
+            "stdev_ms": 2.706262348305444
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 24.082955448991722,
+            "median_ms": 11.82250864803791,
+            "stdev_ms": 39.62840908956916
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 9.380921314004809,
+            "median_ms": 9.196673054248095,
+            "stdev_ms": 0.7629040870161587
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.418166227586982,
+            "median_ms": 10.92188199982047,
+            "stdev_ms": 6.936252006811654
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 10.98362852159577,
+            "median_ms": 10.905587114393711,
+            "stdev_ms": 0.7091089092451831
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 22.0295553186184,
+            "median_ms": 12.645380571484566,
+            "stdev_ms": 34.777560970458545
+          }
+        }
+      },
+      "cold/exact": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 10.8738746477886,
+        "median_ms": 10.373388417065144,
+        "stdev_ms": 7.995534597292698,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 10.857836386548534,
+            "median_ms": 10.765577666461468,
+            "stdev_ms": 1.540069835073635
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 10.939952284097672,
+            "median_ms": 9.129462763667107,
+            "stdev_ms": 17.851603876929328
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 9.164270844646833,
+            "median_ms": 9.048754815012217,
+            "stdev_ms": 0.7782917096368426
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 9.848503942420292,
+            "median_ms": 9.391377680003643,
+            "stdev_ms": 5.93261122583756
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 11.09486750081285,
+            "median_ms": 10.921364184468985,
+            "stdev_ms": 0.8908886295744068
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 13.387856303274425,
+            "median_ms": 12.599706649780273,
+            "stdev_ms": 14.470940881359118
+          }
+        }
+      },
+      "resident/stock": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 8.496331709061955,
+        "median_ms": 3.7117081689454303,
+        "stdev_ms": 20.160933071512215,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 6.952646391764456,
+            "median_ms": 3.910807431869519,
+            "stdev_ms": 11.471217901417472
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 14.856315216327655,
+            "median_ms": 3.261824417374252,
+            "stdev_ms": 38.65355406372286
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.1011367199308655,
+            "median_ms": 2.001515866140835,
+            "stdev_ms": 0.4430290017814067
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.296530439304964,
+            "median_ms": 3.1334971099568065,
+            "stdev_ms": 0.870715543520982
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 5.009928937296435,
+            "median_ms": 4.382074719615048,
+            "stdev_ms": 2.447433931253524
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 23.577730739715562,
+            "median_ms": 10.822900945640868,
+            "stdev_ms": 36.25666365381301
+          }
+        }
+      },
+      "resident/degree32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 5.648875932416154,
+        "median_ms": 3.1127753075755513,
+        "stdev_ms": 17.740292439729576,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 3.3843170721741935,
+            "median_ms": 3.0646110293067372,
+            "stdev_ms": 1.449676864151749
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 14.978858436613033,
+            "median_ms": 3.3119276874155426,
+            "stdev_ms": 38.72721378065539
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 1.990110212419596,
+            "median_ms": 1.8869994916409876,
+            "stdev_ms": 0.43773108355641577
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.07977947846262,
+            "median_ms": 2.9800876824689717,
+            "stdev_ms": 0.9964293198638972
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.5490541001005718,
+            "median_ms": 3.1729891488794237,
+            "stdev_ms": 0.7614333584167989
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 13.976559938681829,
+            "median_ms": 4.563047696137801,
+            "stdev_ms": 34.1514910269523
+          }
+        }
+      },
+      "resident/random32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 5.737067310191277,
+        "median_ms": 3.1445089443877805,
+        "stdev_ms": 17.57722093338552,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 3.5061989545925374,
+            "median_ms": 3.099079137124742,
+            "stdev_ms": 1.7318609031859045
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 14.928244935258085,
+            "median_ms": 3.427612389108011,
+            "stdev_ms": 38.336684333026454
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.0232824689527558,
+            "median_ms": 1.898092826498517,
+            "stdev_ms": 0.4481417539143746
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.1550153265319145,
+            "median_ms": 3.046151035960065,
+            "stdev_ms": 0.9953597680637069
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.6131917586317286,
+            "median_ms": 3.217805020540254,
+            "stdev_ms": 0.8152703273174995
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 14.15677968664871,
+            "median_ms": 4.629375664080726,
+            "stdev_ms": 33.77887611934057
+          }
+        }
+      },
+      "resident/pair42": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 5.666598051902838,
+        "median_ms": 3.129034024217011,
+        "stdev_ms": 17.58179926209479,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 3.4207424287435106,
+            "median_ms": 3.0846993468003348,
+            "stdev_ms": 1.4451547386398171
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 14.919523219319268,
+            "median_ms": 3.3199346047088816,
+            "stdev_ms": 38.37801895341739
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.042821097549879,
+            "median_ms": 1.900686575633396,
+            "stdev_ms": 0.533559361777921
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.093464219192457,
+            "median_ms": 2.981584212344994,
+            "stdev_ms": 0.9709772099637505
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.579081585889475,
+            "median_ms": 3.2227767357350485,
+            "stdev_ms": 0.751374195549835
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 13.951025304979542,
+            "median_ms": 4.600028230925091,
+            "stdev_ms": 33.83566832413596
+          }
+        }
+      },
+      "resident/pair43": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 5.66461027079236,
+        "median_ms": 3.11918258012156,
+        "stdev_ms": 17.679212103585698,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 3.4047208109621523,
+            "median_ms": 3.0515956993137174,
+            "stdev_ms": 1.445535437809646
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 14.975354845292815,
+            "median_ms": 3.354466457191544,
+            "stdev_ms": 38.58986542622034
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.0357174887774616,
+            "median_ms": 1.9180215652644013,
+            "stdev_ms": 0.4875421639601902
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.0726506302016787,
+            "median_ms": 2.951262009446509,
+            "stdev_ms": 0.9467081430374084
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.5532627912794448,
+            "median_ms": 3.1696421222780677,
+            "stdev_ms": 0.7823614080668366
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 13.996810172910854,
+            "median_ms": 4.60412522200689,
+            "stdev_ms": 34.024139264210255
+          }
+        }
+      },
+      "resident/pair44": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 5.702600740834088,
+        "median_ms": 3.1801241736199395,
+        "stdev_ms": 17.820347245977707,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 3.43772004710699,
+            "median_ms": 3.1221075162951215,
+            "stdev_ms": 1.452634469135509
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 15.033909198989729,
+            "median_ms": 3.4969335708107487,
+            "stdev_ms": 38.914761881686516
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.0153715942999244,
+            "median_ms": 1.8504412898134128,
+            "stdev_ms": 0.4743100481289677
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.1370008372404197,
+            "median_ms": 3.055813181466268,
+            "stdev_ms": 1.0007648008615297
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.598125377417697,
+            "median_ms": 3.2429822022095323,
+            "stdev_ms": 0.7722098327943286
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 14.059905154378308,
+            "median_ms": 4.636490368284285,
+            "stdev_ms": 34.3070746952675
+          }
+        }
+      },
+      "resident/witness32": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 4.701998037894049,
+        "median_ms": 2.171293323044665,
+        "stdev_ms": 17.794938314006433,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 2.2240940691006448,
+            "median_ms": 1.8742299580480903,
+            "stdev_ms": 1.2456897602659895
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 14.910962389322878,
+            "median_ms": 3.3135461878070296,
+            "stdev_ms": 38.60841633862703
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 1.2419162384402525,
+            "median_ms": 0.9077592852311984,
+            "stdev_ms": 0.6307533563371265
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.5844054867371193,
+            "median_ms": 2.5320356811183347,
+            "stdev_ms": 1.2659025990663622
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.338358195427443,
+            "median_ms": 1.913753441234197,
+            "stdev_ms": 0.7194010345155682
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 12.643312230971382,
+            "median_ms": 3.0518956045852974,
+            "stdev_ms": 34.38062366324872
+          }
+        }
+      },
+      "resident/exact": {
+        "count": 1152,
+        "solved": 1152,
+        "par2_ms": 1.9062769715674222,
+        "median_ms": 1.7165771932923235,
+        "stdev_ms": 1.2570652408292453,
+        "truth": {
+          "10": {
+            "count": 927,
+            "solved": 927,
+            "par2_ms": 2.1920764544059343,
+            "median_ms": 1.8760757205503371,
+            "stdev_ms": 1.2116085117820392
+          },
+          "20": {
+            "count": 225,
+            "solved": 225,
+            "par2_ms": 0.728783102272751,
+            "median_ms": 0.38671474855315563,
+            "stdev_ms": 0.5660892613350202
+          }
+        },
+        "scales": {
+          "24": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 0.9565890237960654,
+            "median_ms": 0.821653964521829,
+            "stdev_ms": 0.3834406972262056
+          },
+          "32": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 1.0393134119415965,
+            "median_ms": 1.0929267324778873,
+            "stdev_ms": 0.5958445018648835
+          },
+          "48": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 2.326992952374793,
+            "median_ms": 1.9151658222350914,
+            "stdev_ms": 0.7181186376965292
+          },
+          "64": {
+            "count": 288,
+            "solved": 288,
+            "par2_ms": 3.3022124981572336,
+            "median_ms": 2.8432430578201697,
+            "stdev_ms": 1.2358314539875186
+          }
+        }
+      }
+    },
+    "contrasts": {
+      "cold/stock": {
+        "graphs": 128,
+        "gain_ms": 6.382256107624723,
+        "simultaneous95_lower_ms": 3.2039700986135564
+      },
+      "cold/degree32": {
+        "graphs": 128,
+        "gain_ms": 3.829393549595908,
+        "simultaneous95_lower_ms": 1.4592432395046573
+      },
+      "cold/random32": {
+        "graphs": 128,
+        "gain_ms": 3.597235980527735,
+        "simultaneous95_lower_ms": 1.4004110507408363
+      },
+      "cold/witness32": {
+        "graphs": 25,
+        "gain_ms": 13.143003164894052,
+        "simultaneous95_lower_ms": 1.7611526679247616
+      },
+      "resident/stock": {
+        "graphs": 128,
+        "gain_ms": 6.590054737494535,
+        "simultaneous95_lower_ms": 3.2806612370627084
+      },
+      "resident/degree32": {
+        "graphs": 128,
+        "gain_ms": 3.742598960848732,
+        "simultaneous95_lower_ms": 1.3816756837059072
+      },
+      "resident/random32": {
+        "graphs": 128,
+        "gain_ms": 3.8307903386238547,
+        "simultaneous95_lower_ms": 1.483647349171709
+      },
+      "resident/witness32": {
+        "graphs": 25,
+        "gain_ms": 14.182179287050126,
+        "simultaneous95_lower_ms": 2.4640921015395887
+      }
+    },
+    "engineering_gates": {
+      "cold": true,
+      "resident": true
+    },
+    "unsat_mechanism_gates": {
+      "cold": true,
+      "resident": true
+    },
+    "learned_advantage": false,
+    "sha256": "a3c57bb3ad925f372fd88599e7b69b8fa52d648cf7f62c0b3f512cc96b4a4745",
+    "scope": "受限图编码的非学习精确搜索开发结果；不是独立确认、通用SAT或学习优势"
   }
 }</script><script>
 let data=JSON.parse(document.getElementById('snapshot').textContent);
@@ -7543,6 +8466,7 @@ function render(){
  renderNativeFirst();
  renderOvernight();
  renderTargeted();
+ renderExactSearch();
  const plan=data.performance_plan, pf=document.getElementById('plan-filter').value;
  document.getElementById('plan-summary').textContent=plan?`${plan.gaps.filter(g=>g.state==='部分改善').length} 项局部改善 · ${plan.gaps.filter(g=>g.state==='未解决').length} 项未解决 · ${plan.gaps.filter(g=>g.state==='已解决').length} 项全面解决。行动状态与科学缺口分开：试验完成不代表问题解决。`:'当前快照尚无性能计划';
  document.getElementById('plan-scope').textContent=plan?plan.scope:'';
@@ -7592,6 +8516,13 @@ function render(){
  const acceptance=Object.entries(n.acceptance||{}).map(([k,v])=>`${k.startsWith('rlaf')?'RLAF':'NeuroBack'}：${esc(accepted[v]||v)}`).join(' · ');
  const runtime=n.terminal_integrity==='verified'?'两项训练已完成；导出时已复核终态文件哈希。监督器按设计退出。':n.terminal_integrity==='not_verified'?'⚠ 终态凭据未通过当前核验，不能确认为完成':stale?'⚠ 监督快照陈旧 / 时钟异常，运行态未知':n.stage_alive?'训练阶段进程存活（以完成轮数判断进展）':'阶段进程未在该快照中确认存活';
  panel.innerHTML=`<b>${esc(n.stage)}${n.phase?' · '+esc(phases[n.phase]||n.phase):''}</b><p>${progress||'等待进度记录'}</p><p>${runtime}</p><p>${acceptance}</p><p class="muted">监督时间：${esc(n.observed)} · ${esc(n.scope)}</p>${n.alerts.length?`<p class="negative">告警：${n.alerts.map(esc).join(' · ')}</p>`:''}`;}
+}
+function renderExactSearch(){
+ const u=data.exact_search,target=document.getElementById('exact-search-progress');
+ if(!u){target.textContent='等待完整计时和审计；不将原型或正确性测试写成端到端优势。';return;}
+ const names={stock:'默认',degree32:'度数32',random32:'随机32',pair42:'模型42',pair43:'模型43',pair44:'模型44',witness32:'仅直接补全 SAT',exact:'精确搜索 + 直接补全'};
+ const gate=v=>v?'通过':'未通过';
+ target.innerHTML=`<p>针对E63残差，已实现补图团搜索与着色上界剪枝，不再只寻找更好的赋值。严格匹配受支持的顶点覆盖编码；完整搜索才可报告UNSAT，超时或编码不匹配回退原求解器。SAT辅助变量补全后，native和Python均检查整份CNF。</p><p>128张新图 × 3搜索种子 × 3轮 × 8策略 × 冷启动/驻留，共18,432次。统一1ms预处理预算、1s总截止时间；所有对照共用硬件优化和启动路径，包含加载、预热、退出及完整SAT检查。下表为全成本PAR-2（ms）。</p><div class="table"><table><thead><tr><th>策略</th><th>冷启动 ms</th><th>驻留 ms</th><th>冷/驻留求解数</th></tr></thead><tbody>${Object.entries(names).map(([arm,label])=>{const c=u.totals['cold/'+arm],r=u.totals['resident/'+arm];return `<tr><td>${label}</td><td>${c.par2_ms.toFixed(3)}</td><td>${r.par2_ms.toFixed(3)}</td><td>${c.solved}/${c.count} · ${r.solved}/${r.count}</td></tr>`;}).join('')}</tbody></table></div><p>非学习工程门（比全部廉价对照快≥10%、同时下界为正、各规模不退化）：冷启动${gate(u.engineering_gates.cold)}；驻留${gate(u.engineering_gates.resident)}。UNSAT机制门（相对仅补全SAT的对照）：冷启动${gate(u.unsat_mechanism_gates.cold)}；驻留${gate(u.unsat_mechanism_gates.resident)}。</p><p>穷举小图6,504个图/约束组合，独立求解器交叉检查；内存/未定义行为检查及错误剪枝注入测试通过。完整计时账目与每个SAT见证均事后重放核验。UNSAT未导出独立认证的证明证书。</p><p class="alert">这是新的非学习强基线，不是CAP-SAT学习策略优势，也不意味着随机SAT、工业泛化等七项缺口全面解决。3轮重复仍只有128张独立图；当前为开发评测，未作独立确认或生产路由切换。</p><p class="foot">${esc(u.scope)}。审计 SHA256 ${esc(u.sha256)}</p>`;
 }
 function renderTargeted(){
  const u=data.targeted,target=document.getElementById('targeted-progress');

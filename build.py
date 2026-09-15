@@ -1146,6 +1146,61 @@ def targeted_progress(repo):
     except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
 
 
+def exact_search_progress(repo):
+    """Terminal-only E64 aggregates, including denial of unsupported advantage claims."""
+    root=repo/'experiments/exact_search_20260915_e64'
+    try:
+        def read(name):return json.loads((root/name).read_text())
+        def digest(name):return hashlib.sha256((root/name).read_bytes()).hexdigest()
+        audit=read('AUDIT.json');raw=read('RESULTS.json');state=read('STATUS.json')
+        if state['phase']!='terminal' or audit['verdict']!='complete_accounting_and_witness_replay_pass':return None
+        for name in ['FROZEN.json','RESULTS.json','RECEIPT.json','TEST_RECEIPT.json','raw.jsonl.gz','charged.jsonl.gz']:
+            if digest(name)!=audit[name.replace('.','_')+'_sha256']:return None
+        if raw['receipt_sha256']!=audit['RECEIPT_json_sha256'] or state['receipt_sha256']!=raw['receipt_sha256']:return None
+        if raw['cells']!=18432 or audit['cells']!=18432 or raw['learned_advantage'] is not False:return None
+        def number(value):
+            if type(value) not in (float,int) or not math.isfinite(value):raise ValueError('invalid number')
+            return value
+        def summary(value,count=None):
+            n=value['count'];solved=value['solved']
+            if type(n) is not int or n<=0 or (count is not None and n!=count):raise ValueError('bad count')
+            if type(solved) is not int or not 0<=solved<=n:raise ValueError('bad solved')
+            result={k:number(value[k]) for k in ['count','solved','par2_ms','median_ms','stdev_ms']}
+            if any(v<0 for v in result.values()):raise ValueError('negative statistic')
+            return result
+        totals={};contrasts={}
+        arms=['stock','degree32','random32','pair42','pair43','pair44','witness32','exact']
+        for regime in ['cold','resident']:
+            for arm in arms:
+                key=f'{regime}/{arm}';value=raw['totals'][key]
+                totals[key]=summary(value,1152)
+                totals[key]['truth']={t:summary(value['truth'][t]) for t in ['10','20']}
+                if sum(t['count'] for t in totals[key]['truth'].values())!=1152:return None
+                totals[key]['scales']={n:summary(value['scales'][n],288) for n in ['24','32','48','64']}
+                if sum(t['solved'] for t in totals[key]['scales'].values())!=value['solved']:return None
+                if sum(t['solved'] for t in totals[key]['truth'].values())!=value['solved']:return None
+            for control in ['stock','degree32','random32','witness32']:
+                key=f'{regime}/{control}';value=raw['contrasts'][key]
+                expected_graphs=totals[f'{regime}/exact']['truth']['20']['count']//9 if control=='witness32' else 128
+                if type(value['graphs']) is not int or value['graphs']!=expected_graphs:return None
+                contrasts[key]={k:number(value[k]) for k in ['graphs','gain_ms','simultaneous95_lower_ms']}
+            target=totals[f'{regime}/exact'];expected=True
+            for control in ['stock','degree32','random32']:
+                other=totals[f'{regime}/{control}']
+                expected &= target['par2_ms']<=.9*other['par2_ms'] and target['solved']>=other['solved']
+                expected &= contrasts[f'{regime}/{control}']['simultaneous95_lower_ms']>0
+                expected &= all(target['scales'][n]['par2_ms']<=other['scales'][n]['par2_ms'] and target['scales'][n]['solved']>=other['scales'][n]['solved'] for n in target['scales'])
+            if raw['engineering_gates'][regime] is not bool(expected):return None
+            a=target['truth']['20'];b=totals[f'{regime}/witness32']['truth']['20']
+            expected=a['par2_ms']<=.9*b['par2_ms'] and a['solved']>=b['solved'] and contrasts[f'{regime}/witness32']['simultaneous95_lower_ms']>0
+            if raw['unsat_mechanism_gates'][regime] is not bool(expected):return None
+        return dict(cells=18432,graphs=128,totals=totals,contrasts=contrasts,
+                    engineering_gates={r:raw['engineering_gates'][r] for r in ['cold','resident']},
+                    unsat_mechanism_gates={r:raw['unsat_mechanism_gates'][r] for r in ['cold','resident']},
+                    learned_advantage=False,sha256=digest('AUDIT.json'),scope='受限图编码的非学习精确搜索开发结果；不是独立确认、通用SAT或学习优势')
+    except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1168,6 +1223,7 @@ def main():
     data['native_first']=native_first_progress(args.repo.resolve())
     data['overnight']=overnight_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
+    data['exact_search']=exact_search_progress(args.repo.resolve())
     args.out.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False)
     template = (HERE / 'template.html').read_text()

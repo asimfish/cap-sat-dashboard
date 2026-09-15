@@ -4,11 +4,45 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from build import stability_progress, overnight_progress, targeted_progress
+from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress
 from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_exact_search_hashes_scopes_and_gate_recomputation(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/exact_search_20260915_e64';root.mkdir(parents=True)
+            def save(name,obj):
+                body=json.dumps(obj).encode();(root/name).write_bytes(body);return hashlib.sha256(body).hexdigest()
+            audit={'verdict':'complete_accounting_and_witness_replay_pass','cells':18432}
+            for name in ['FROZEN.json','RECEIPT.json','TEST_RECEIPT.json','raw.jsonl.gz','charged.jsonl.gz']:
+                audit[name.replace('.','_')+'_sha256']=save(name,{'private':'PRIVATE'})
+            save('STATUS.json',dict(phase='terminal',receipt_sha256=audit['RECEIPT_json_sha256']))
+            def stats(count,ms):return dict(count=count,solved=count,par2_ms=ms,median_ms=ms,stdev_ms=.1)
+            raw=dict(cells=18432,learned_advantage=False,receipt_sha256=audit['RECEIPT_json_sha256'],totals={},contrasts={},
+                     engineering_gates=dict(cold=True,resident=True,private='PRIVATE'),unsat_mechanism_gates=dict(cold=True,resident=True))
+            for reg in ['cold','resident']:
+                for arm in ['stock','degree32','random32','pair42','pair43','pair44','witness32','exact']:
+                    ms=5 if arm=='exact' else 10
+                    raw['totals'][f'{reg}/{arm}']=dict(stats(1152,ms),scales={str(n):stats(288,ms) for n in [24,32,48,64]},
+                        truth={'10':stats(864,ms),'20':stats(288,ms)},private='PRIVATE')
+                for control in ['stock','degree32','random32','witness32']:
+                    raw['contrasts'][f'{reg}/{control}']=dict(graphs=32 if control=='witness32' else 128,gain_ms=5,simultaneous95_lower_ms=4)
+            def refresh():
+                audit['RESULTS_json_sha256']=save('RESULTS.json',raw);save('AUDIT.json',audit)
+            refresh();result=exact_search_progress(repo)
+            self.assertEqual(result['cells'],18432);self.assertNotIn('PRIVATE',json.dumps(result))
+            self.assertFalse(result['learned_advantage'])
+            raw['engineering_gates']['cold']=False;refresh();self.assertIsNone(exact_search_progress(repo))
+            raw['engineering_gates']['cold']=True
+            raw['unsat_mechanism_gates']['resident']=False;refresh();self.assertIsNone(exact_search_progress(repo))
+            raw['unsat_mechanism_gates']['resident']=True
+            raw['totals']['cold/exact']['par2_ms']=float('nan');refresh();self.assertIsNone(exact_search_progress(repo))
+            raw['totals']['cold/exact']['par2_ms']=5
+            raw['learned_advantage']=True;refresh();self.assertIsNone(exact_search_progress(repo))
+            raw['learned_advantage']=False;refresh()
+            (root/'raw.jsonl.gz').write_bytes(b'changed');self.assertIsNone(exact_search_progress(repo))
+
     def test_targeted_readout_requires_hashes_and_rejects_false_learning_gate(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/targeted_20260915_e62';root.mkdir(parents=True)
@@ -285,7 +319,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),18)
+        self.assertEqual(len(plan['actions']),19)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -307,6 +341,7 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('需另做全成本评估',actions['A16']['gate'])
         self.assertIn('不足8小时',actions['A16']['stop'])
         self.assertIn('学习净优势仍未通过',actions['A17']['status'])
+        self.assertIn('非学习优势',actions['A18']['status'])
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:

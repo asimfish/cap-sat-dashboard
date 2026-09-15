@@ -40,6 +40,7 @@ def main():
         unchanged = unchanged and old.get('stability') == current.get('stability')
         unchanged = unchanged and old.get('overnight') == current.get('overnight')
         unchanged = unchanged and old.get('targeted') == current.get('targeted')
+        unchanged = unchanged and old.get('exact_search') == current.get('exact_search')
         if unchanged and same_code and age < 3600:
             print('No change; next freshness export within one hour')
             return
