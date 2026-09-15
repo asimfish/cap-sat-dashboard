@@ -431,7 +431,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),27)
+        self.assertEqual(len(plan['actions']),28)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -477,6 +477,11 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('1.655→1.152',actions['A25']['stop'])
         self.assertIn('慢5.819微秒',actions['A25']['stop'])
         self.assertIn('不删校验',actions['A25']['stop'])
+        self.assertIn('困难驻留降6.62%',actions['A27']['status'])
+        self.assertIn('15/28',actions['A27']['gate'])
+        self.assertIn('1.193481→1.114467',actions['A27']['stop'])
+        self.assertIn('17.949微秒',actions['A27']['stop'])
+        self.assertIn('不是ExactSearch本身加速',actions['A27']['stop'])
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:
