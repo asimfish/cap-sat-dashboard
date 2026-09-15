@@ -403,7 +403,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),24)
+        self.assertEqual(len(plan['actions']),25)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -438,6 +438,11 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('随机驻留失败',actions['A23']['gate'])
         self.assertIn('6.891→6.096',actions['A23']['stop'])
         self.assertIn('线程启动39.955ms',actions['A23']['stop'])
+        self.assertIn('精确驻留降3.07%',actions['A24']['status'])
+        self.assertIn('仅补全SAT驻留失败',actions['A24']['gate'])
+        self.assertIn('整体6/10',actions['A24']['gate'])
+        self.assertIn('2.480→2.404',actions['A24']['stop'])
+        self.assertIn('逐原子句检查',actions['A24']['stop'])
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)
         for private in ['Bearer ','.whalent_tmp','/home/','ct-','Reviewer','Confidential']:

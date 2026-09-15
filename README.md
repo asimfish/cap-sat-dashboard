@@ -1,8 +1,9 @@
 # CAP-SAT Rebuttal Dashboard
 
-Latest audited update: A23's reaper-only study improves exact cold latency11.5%,
-but only6/10comparisons and3/5exit mechanisms pass. The shared repair is not
-promoted; the retained close tail and E65's stronger failure remain visible.
+Latest audited update: A24's compiled-witness study improves full exact-resident
+cost3.07%, with all four scales improving. Only6/10comparisons pass despite4/4
+completion-stage gains: strongest witness32 resident fails. Shared repair is not
+promoted; cold noninferiority, retained tails and E65's stronger failure stay explicit.
 
 Open-source, dependency-free research progress dashboard. MIT licensed.
 
@@ -38,11 +39,22 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Twenty-four actions have dependencies, costs, acceptance and stopping rules. Their
+Twenty-five actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
 The roadmap's review date and SHA256 are separate from live export freshness.
+
+`#action-A24` is a manually audited readout:64fresh graphs,3840full-cost cells
+and3120SAT witnesses replayed. Exact resident2.480→2.404ms(-3.07%) passes its
+prespecified gate; witness32 resident5.772→5.723ms fails the2%/interval/scale gate.
+Exact and witness32 cold pass noninferiority only; stock/degree/random cold fail.
+Compiled trusted Horn templates reduce witness completion~76%, without changing
+search or removing original-CNF checks. All five strategies get both profiles;
+fully charged warmups and tails are retained. A23's rejected reaper is not used.
+Next: profile the Python full checker (~39%of candidate exact-resident cost),
+retaining every original-clause check and charging conversion. Not launched.
+No learned advantage, overall repair, production switch or new confirmation.
 
 `#action-A23` is a manually audited readout, not an automatic collector:64fresh
 graphs,3840full-cost measurements and3180SAT witnesses replayed. Exact cold
