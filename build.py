@@ -1336,6 +1336,58 @@ def recognition_repair_progress(repo):
     except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
 
 
+def prefix_campaign_progress(repo, now=None):
+    """A26 operational receipts only; elapsed time is not performance success."""
+    root=repo/'experiments/shared_prefix_20260916_v2'
+    try:
+        frozen=(root/'FROZEN.json').read_bytes();cfg=json.loads(frozen)
+        raw=(root/'STATUS.json').read_bytes();state=json.loads(raw)
+        if state['frozen_sha256']!=hashlib.sha256(frozen).hexdigest() or cfg['duration_s']!=28800:return None
+        if state['duration_s']!=28800 or state['cpus']!=cfg['cpus'] or len(cfg['cpus'])!=2:return None
+        def number(v):
+            if type(v) not in (int,float) or not math.isfinite(v) or v<0:raise ValueError('invalid progress')
+            return v
+        def date(v):
+            value=dt.datetime.fromisoformat(v)
+            if value.tzinfo is None:raise ValueError('timezone required')
+            return value
+        started,observed,end=map(date,(state['started_at'],state['observed'],state['planned_end']))
+        elapsed=number(state['elapsed_s']);active=number(state['active_coverage_s'])
+        if abs((end-started).total_seconds()-28800)>.01 or active>elapsed+2 or elapsed>(observed-started).total_seconds()+2:return None
+        phase=state['phase'];terminal=phase in ('window_complete','stopped_incomplete')
+        if phase not in ('starting','running','window_complete','stopped_incomplete'):return None
+        if phase=='window_complete' and (elapsed<28800 or state.get('duration_target_met') is not True):return None
+        if len(state['completed'])>4096:return None
+        seen=set();witnesses=0
+        for row in state['completed']:
+            ident=row['id']
+            if not re.fullmatch(r'block-\d{5}',ident) or ident in seen:return None
+            seen.add(ident);dest=root/'jobs'/ident
+            receipt=json.loads((dest/'DONE.json').read_text())
+            if receipt!=row['receipt'] or receipt['cells']!=3840:return None
+            for name,key in [('RESULTS.json','results_sha256'),('AUDIT.json','audit_sha256')]:
+                if hashlib.sha256((dest/name).read_bytes()).hexdigest()!=receipt[key]:return None
+            audit=json.loads((dest/'AUDIT.json').read_text())
+            if audit['verdict']!='full_replay_pass' or audit['cells']!=3840:return None
+            witnesses+=number(receipt['sat_witnesses'])
+        if state['completed_jobs']!=len(seen) or state['completed_cells']!=3840*len(seen):return None
+        if state['failed_jobs']!=len(state['failed']) or len(state['running'])>2:return None
+        age=((now or dt.datetime.now(dt.timezone.utc))-observed).total_seconds()
+        if not terminal and not -5<=age<=120:phase='stale'
+        verdict='pending'
+        if terminal and (root/'READOUT.json').exists():
+            readout=json.loads((root/'READOUT.json').read_text())
+            if readout['state_sha256']==hashlib.sha256(raw).hexdigest() and readout['verdict'] in ('pending','gates_pass','gates_not_passed'):
+                verdict=readout['verdict']
+        return dict(phase=phase,observed=observed.isoformat(),started_at=started.isoformat(),planned_end=end.isoformat(),
+            elapsed_s=elapsed,active_coverage_s=active,duration_s=28800,completed_jobs=len(seen),
+            completed_cells=3840*len(seen),sat_witnesses=witnesses,failed_jobs=len(state['failed']),
+            running_jobs=len(state['running']),cpu_lanes=2,performance_verdict=verdict,
+            duration_target_met=phase=='window_complete',learned_advantage=False,
+            scope='同主机双CPU新数据与跨时段长尾检验；不是GPU训练、学习优势或跨主机确认')
+    except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1357,6 +1409,7 @@ def main():
     data['stability']=stability_progress(args.repo.resolve())
     data['native_first']=native_first_progress(args.repo.resolve())
     data['overnight']=overnight_progress(args.repo.resolve())
+    data['prefix_campaign']=prefix_campaign_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())

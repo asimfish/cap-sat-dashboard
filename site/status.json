@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-15T17:48:16.091982+00:00",
+  "generated": "2026-09-15T18:03:27.062277+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -7358,8 +7358,27 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-16T01:04:34.867001+00:00",
+    "earliest_target_at": "2026-09-16T01:19:45.478682+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
+  },
+  "prefix_campaign": {
+    "phase": "stopped_incomplete",
+    "observed": "2026-09-15T18:03:20.208109+00:00",
+    "started_at": "2026-09-15T18:02:54.299346+00:00",
+    "planned_end": "2026-09-16T02:02:54.299346+00:00",
+    "elapsed_s": 25.908807579427958,
+    "active_coverage_s": 25.052854974754155,
+    "duration_s": 28800,
+    "completed_jobs": 0,
+    "completed_cells": 0,
+    "sat_witnesses": 0,
+    "failed_jobs": 2,
+    "running_jobs": 0,
+    "cpu_lanes": 2,
+    "performance_verdict": "pending",
+    "duration_target_met": false,
+    "learned_advantage": false,
+    "scope": "同主机双CPU新数据与跨时段长尾检验；不是GPU训练、学习优势或跨主机确认"
   },
   "targeted": {
     "cells": 27648,

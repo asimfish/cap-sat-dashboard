@@ -1,13 +1,14 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-15T17:48:16.091982+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-15T18:03:27.062277+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
 </style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#performance-plan">05 · 性能改进计划</a><a href="#next">06 · 论文与审计</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
-<section id="overnight"><h2>E61 · 8 小时持续实验队列</h2><div id="overnight-progress" class="panel"></div></section>
+<section id="prefix-campaign"><h2>A26 · 共享 SAT 快路径 · 今晚 8 小时检验</h2><div id="prefix-campaign-progress" class="panel" aria-live="polite"></div></section>
+<section id="overnight"><h2>E61 · 历史队列（已停止，未满 8 小时）</h2><div id="overnight-progress" class="panel"></div></section>
 <section id="targeted"><h2>E62 · 定向修复：硬件位计数与学习空间核查</h2><div id="targeted-progress" class="panel"></div></section>
 <section id="exact-search"><h2>E64 · 精确搜索：直接降低不可满足判定成本</h2><div id="exact-search-progress" class="panel"></div></section>
 <section id="confirmation"><h2>E65 · 固定算法的新数据确认与适用边界</h2><div id="confirmation-progress" class="panel"></div></section>
@@ -32,7 +33,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-15T17:48:16.091982+00:00",
+  "generated": "2026-09-15T18:03:27.062277+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -7391,8 +7392,27 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-16T01:04:34.867001+00:00",
+    "earliest_target_at": "2026-09-16T01:19:45.478682+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
+  },
+  "prefix_campaign": {
+    "phase": "stopped_incomplete",
+    "observed": "2026-09-15T18:03:20.208109+00:00",
+    "started_at": "2026-09-15T18:02:54.299346+00:00",
+    "planned_end": "2026-09-16T02:02:54.299346+00:00",
+    "elapsed_s": 25.908807579427958,
+    "active_coverage_s": 25.052854974754155,
+    "duration_s": 28800,
+    "completed_jobs": 0,
+    "completed_cells": 0,
+    "sat_witnesses": 0,
+    "failed_jobs": 2,
+    "running_jobs": 0,
+    "cpu_lanes": 2,
+    "performance_verdict": "pending",
+    "duration_target_met": false,
+    "learned_advantage": false,
+    "scope": "同主机双CPU新数据与跨时段长尾检验；不是GPU训练、学习优势或跨主机确认"
   },
   "targeted": {
     "cells": 27648,
@@ -13064,12 +13084,23 @@ function renderTargeted(){
  target.innerHTML=`<p>旧重复队列已按用户新要求停止，保留全部结果；未跑满8小时，不再为累计时长追加旧模型重复评测。原二进制使用软件位计数，修复版仅启用 CPU 已支持的 POPCNT，所有对照同步优化。</p><p>128张新图 × 3种子 × 3轮 × 2二进制 × 6策略 × 冷启动/驻留，共${u.cells.toLocaleString()}次；100μs预处理预算，完整生命周期计费。下表为驻留全成本 PAR-2（ms，越低越好）。</p><div class="table"><table><thead><tr><th>策略</th><th>原实现</th><th>修复后</th><th>修复后候选</th></tr></thead><tbody>${Object.entries(names).map(([a,label])=>{const old=u.totals['old/resident/'+a],v=u.totals['popcnt/resident/'+a];return `<tr><td>${label}</td><td>${old.par2_ms.toFixed(3)}</td><td>${v.par2_ms.toFixed(3)}</td><td>${v.candidates}/${v.count}</td></tr>`}).join('')}</tbody></table></div><p>学习净优势门：冷启动${u.learning_gates.cold?'通过开发门':'未通过'}；驻留${u.learning_gates.resident?'通过开发门':'未通过'}。工程修复与模型优势分别判断，不能合并。</p><p>学习空间核查：在既有${u.headroom.count.toLocaleString()}张验证图上，不计成本、查看所有首步的理想选择最多比度数32多找到${u.headroom.additional}张可行候选（${(100*u.headroom.additional/u.headroom.count).toFixed(2)}个百分点）。这只是固定完成规则的覆盖上界，不是通用速度上界；不再扩大这一首步排序训练网格。</p>${residual}<p class="muted">${esc(u.scope)}。</p><p class="foot">审计 SHA256 ${esc(u.audit_sha256)}</p>`;
 }
 function renderOvernight(){
+ renderPrefixCampaign();
  const u=data.overnight,target=document.getElementById('overnight-progress');
  if(!u){target.textContent='尚无通过完整性检查的队列快照。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=age>120&&!['complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'有实验执行的运行快照',paused_resources:'资源保护：暂停新增任务',draining:'结束派发，等待当前任务收尾',complete:'已达到8小时有效运行',stopped_incomplete:'已停止，未跑满8小时',stale:'快照已陈旧，当前运行状态待下次导出确认'};
  target.innerHTML=`<b>${esc(labels[phase]||'状态未知')}</b><div class="cards"><div class="card"><b>${(u.active_s/3600).toFixed(2)} / 8 h</b><span>实际有实验执行的累计墙钟；不累加并发CPU小时</span></div><div class="card"><b>${u.counts.cpu_jobs} 批 / ${u.counts.cells.toLocaleString()} 次</b><span>已完成并核对结果摘要的全成本求解</span></div><div class="card"><b>${u.counts.training_jobs} / ${u.training_queue}</b><span>完成候选训练；${u.counts.training_steps.toLocaleString()} 个优化步</span></div></div><p>上次快照在执行：CPU ${u.running.cpu}/${u.cpu_slots} 路，GPU训练 ${u.running.train}/${u.gpu_slots} 路，数据准备 ${u.running.data} 路；失败任务 ${u.failed_jobs} 个。</p><p>CPU：四规模匹配对照、困难 n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算。GPU：8数据分片 × 2模型 × 3损失 × 3学习率 × 3种子，共432项候选；队列未派发项不算完成。</p><p>开始：${esc(new Date(u.started_at).toLocaleString())}；快照：${esc(new Date(u.observed).toLocaleString())}。服务器每15分钟导出；页面每分钟检查。资源空闲等待不计时，达到8小时后停止派发并收尾，安全中断如实标记。</p><p class="muted">新训练权重仍需后续完整成本评估。${esc(u.scope)}；本轮不改论文结论。</p><p class="foot">固定实验配置 SHA256 ${esc(u.frozen_sha256)}</p>`;
+}
+function renderPrefixCampaign(){
+ const u=data.prefix_campaign,target=document.getElementById('prefix-campaign-progress');
+ if(!u){target.textContent='等待通过启动检查的队列快照；不把计划或小试写成已跑满 8 小时。';return;}
+ const stale=(Date.now()-Date.parse(u.observed))/1000>120;
+ const phase=stale&&!['window_complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
+ const labels={starting:'启动中',running:'运行快照：双 CPU 实验执行中',stale:'快照已陈旧：当前状态待下次导出确认',window_complete:'8 小时窗口结束；另看性能验收',stopped_incomplete:'提前停止；未完成 8 小时窗口'};
+ const verdict={pending:'待完整读出，不宣称优势',gates_pass:'同主机实验门通过，仍非学习或普遍优势',gates_not_passed:'完整实验门未通过，问题尚未解决'};
+ const date=v=>new Date(v).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false});
+ target.innerHTML=`<b>${esc(labels[phase])}</b><div class="cards"><div class="card"><b>${(u.elapsed_s/3600).toFixed(2)} / 8 h</b><span>窗口已过墙钟；不等于 GPU/CPU 计算小时</span></div><div class="card"><b>${u.completed_jobs} 批</b><span>${u.completed_cells.toLocaleString()} 次完整计费与重放；${u.sat_witnesses.toLocaleString()} 个 SAT 见证</span></div><div class="card"><b>${u.running_jobs} / ${u.cpu_lanes} 路</b><span>上次快照执行中；失败/中断 ${u.failed_jobs} 批</span></div></div><p>北京时间：${esc(date(u.started_at))} → ${esc(date(u.planned_end))}。最后心跳 ${esc(date(u.observed))}；保守有任务覆盖 ${(u.active_coverage_s/3600).toFixed(2)} h。</p><p>先运行与 witness32 相同的最多 32 次廉价补全，失败才用剩余的 1 ms 总图预算进入精确搜索。五个策略、两配置、冷/驻留完整成本对照；每批 64 张新图 × 3 轮，共 3,840 次。正常分布与稀疏困难残余分开统计，所有长尾和超时保留。</p><p class="alert">${esc(verdict[u.performance_verdict])}。正确性失败或资源越界会安全停止，不为凑时长放宽门槛。v1 启动小试的报告接口错误已保留；修复版另行验证。没有重启 E61。</p><p class="muted">${esc(u.scope)}。服务器每 15 分钟导出，页面每分钟检查；超过 2 分钟的心跳显示陈旧，不能把网页更新时间当作进程活跃。</p>`;
 }
 function renderNativeFirst(){
  const u=data.native_first,target=document.getElementById('native-first-progress');
