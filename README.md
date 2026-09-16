@@ -1,11 +1,21 @@
 # CAP-SAT Rebuttal Dashboard
 
-Current campaign: A26 runs a fixed eight-hour, two-CPU-lane comparison of a shared
-SAT prefix and bounded exact residual search, with fresh matched and sparse-stress
-blocks. The live panel verifies heartbeat/process identity and audited completion
-receipts; stale exports do not claim live execution. Window completion does not
-mean performance success. Missing blocks forbid an unreserved pass. No GPU
-training or paper rewrite is claimed. Historical E61 remains stopped incomplete.
+Campaign status: A26 stopped at the disk safety floor after7h13m36s, before its
+fixed eight-hour window ended.1172blocks/4,500,480cells were audited; two partial
+blocks stopped, no workers remain. The terminal readout timed out and awaits
+recovery; it is not a performance pass. The original queue was not restarted.
+The live panel verifies heartbeat/process identity and audited completion
+receipts; stale exports do not claim execution. No GPU training or paper rewrite.
+Historical E61 remains stopped incomplete.
+
+Latest method diagnostic: A29 tests five coloring/branching priorities plus the
+actual inherited search on128reused+128new TRAINING graphs.61,440search calls
+are not independent instances or full-cost measurements. A28's matched/residual
+resident search stage is only0.6478%/0.2722%of the recorded full cost: deleting
+search alone cannot reach the5%hurdle if other stages stay fixed. The new residual
+degree rule reduces nodes8.8125→5.6719 but CPU time grows1.995→2.282us.
+No current-small-graph policy training launched; harder/general-CNF method work
+requires a separate protocol and an audit of existing RLAF/NeuroBack controls.
 
 Latest audited performance update: A28 omits unused SLS indices only in the guarded
 nonlearned entry. Matched exact-resident full cost falls19.60%
@@ -49,7 +59,7 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Twenty-nine actions have dependencies, costs, acceptance and stopping rules. Their
+Thirty actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.
