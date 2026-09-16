@@ -6,10 +6,37 @@ import tempfile
 import unittest
 from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress, local_feedback_progress
 from unittest.mock import patch
-from build import compact_distill_progress, boundary_screen_progress
+from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_coverage_screen_private_stale_counts_terminal_audit(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/coverage_literal_20260917_v1';root.mkdir(parents=True)
+            def save(name,obj):(root/name).write_text(json.dumps(obj))
+            labels=[f'{p}_{size}_{seed}' for p in ('tc_mixed','lit_mixed','lit_raw') for size in (384,1536) for seed in (42,43,44)]
+            rows=[dict(n=n,split=split) for split,k in [('train',512),('validation',48),('holdout',48),('development',48),('old_validation',24)] for n in (200,300,350) for _ in range(k)]
+            for i,r in enumerate(rows):r['index']=i
+            ident=dict(kind='bundle_digest',value='8'*64,scope='fresh_coverage_inputs')
+            cfg=dict(rows=rows,lanes=[dict(label=l) for l in labels],steps=6144,total_updates=110592)
+            state=dict(input_identity=ident,phase='running',stage='training_wave0',observed_unix=1000.,elapsed_s=30.,window_end_unix=1789608273,
+                training=[dict(label=labels[0],updates=64,target_updates=6144,phase='training',private='PRIVATE')],completed_updates=64,target_updates=110592,
+                teacher_records=1680,target_teacher_records=1680,receipts=[],supervisor=dict(private='PRIVATE'))
+            save('CONFIG.json',cfg);save('FROZEN.json',dict(input_identity=ident));save('STATUS.json',state)
+            with patch('build.joint_supervisor_alive',return_value=True):
+                out=coverage_screen_progress(repo,1000);self.assertEqual(out['completed_updates'],64);self.assertFalse(out['learned_advantage']);self.assertNotIn('PRIVATE',json.dumps(out))
+                self.assertEqual(coverage_screen_progress(repo,1121)['phase'],'stale')
+            state['completed_updates']=128;save('STATUS.json',state);self.assertIsNone(coverage_screen_progress(repo,1000))
+            state.update(phase='complete',stage='awaiting_independent_audit',completed_updates=110592,cleanup=dict(errors=[],unreaped=[]),
+                training=[dict(label=l,phase='complete',updates=6144,target_updates=6144) for l in labels],
+                receipts=[dict(label=l,returncode=0) for l in labels+[f'teacher{i}' for i in range(6)]+['targets']])
+            save('STATUS.json',state);save('FINAL.json',state)
+            self.assertFalse(coverage_screen_progress(repo,9999)['audited'])
+            save('AUDIT.json',dict(input_identity=ident,errors=[],updates=110592));self.assertTrue(coverage_screen_progress(repo,9999)['audited'])
+            state['receipts'][0]['returncode']=1;save('STATUS.json',state);save('FINAL.json',state);self.assertIsNone(coverage_screen_progress(repo,1000))
+            state.update(phase='failed',error='/home/PRIVATE');save('STATUS.json',state);save('FINAL.json',state)
+            self.assertEqual(coverage_screen_progress(repo,1000)['phase'],'failed')
+
     def test_boundary_screen_reused_private_stale_terminal(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/boundary_factorial_20260916_v1';root.mkdir(parents=True)
