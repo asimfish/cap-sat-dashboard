@@ -1564,6 +1564,45 @@ def compact_distill_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
 
 
+def boundary_screen_progress(repo, now=None):
+    """A34 reused-validation operations only; no proxy-to-performance promotion."""
+    root=repo/'experiments/boundary_factorial_20260916_v1'
+    try:
+        cfg=json.loads((root/'CONFIG.json').read_text());state=json.loads((root/'STATUS.json').read_text())
+        ident=json.loads((root/'FROZEN.json').read_text())['input_identity']
+        if ident.get('kind')!='bundle_digest' or ident.get('scope')!='boundary_screen_inputs' or not re.fullmatch('[0-9a-f]{64}',ident.get('value','')) or state['input_identity']!=ident:return None
+        labels={f'd{d}_{loss}{s}' for d in (3,6) for loss in ('base','boundary') for s in (42,43,44)}
+        if len(cfg['lanes'])!=12 or {r['label'] for r in cfg['lanes']}!=labels or len(set(cfg['gpus']))!=6:return None
+        if cfg['target_updates']!=13824 or cfg['updates_per_lane']!=1152 or cfg['epochs']!=24 or cfg['batch_size']!=8:return None
+        if len(cfg['rows'])!=456 or {r['index'] for r in cfg['rows']}!=set(range(456)):return None
+        if any(sum(r['split']==s and r['n']==n for r in cfg['rows'])!=k for n in (200,300,350) for s,k in [('train',128),('validation',24)]):return None
+        phase=state['phase'];stage=state['stage'];observed=state['observed_unix'];started=state['started_unix'];elapsed=state['elapsed_s']
+        if phase not in ('running','complete','failed') or stage not in ('starting','wave0','wave1','complete'):return None
+        if any(type(v) not in (int,float) or not math.isfinite(v) or v<0 for v in (observed,started,elapsed)) or abs(observed-started-elapsed)>2:return None
+        lanes=[];seen=set()
+        for r in state['training']:
+            label=r['label'];updates=r['updates'];epoch=r['epoch'];lp=r['phase']
+            if label not in labels or label in seen or lp not in ('training','complete'):return None
+            if type(updates) is not int or not 0<=updates<=1152 or updates%12 or type(epoch) is not int or not 0<=epoch<=24 or r['target_updates']!=1152:return None
+            if lp=='complete' and (epoch!=24 or updates!=1152):return None
+            seen.add(label);lanes.append(dict(label=label,updates=updates,epoch=epoch,phase=lp))
+        count=sum(r['updates'] for r in lanes)
+        if type(state['completed_updates']) is not int or state['completed_updates']!=count or state['target_updates']!=13824:return None
+        receipts=state['receipts'];rl=[r['label'] for r in receipts]
+        if len(rl)!=len(set(rl)) or not set(rl)<=labels:return None
+        if phase in ('complete','failed'):
+            if state!=json.loads((root/'FINAL.json').read_text()):return None
+            if phase=='complete' and (stage!='complete' or count!=13824 or seen!=labels or set(rl)!=labels or any(r['phase']!='complete' for r in lanes) or any(type(r['returncode']) is not int or r['returncode']!=0 for r in receipts) or state['cleanup']!={'errors':[],'unreaped':[]}):return None
+        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state,'owner.py'):
+            phase='stale'
+        return dict(phase=phase,stage=stage,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),elapsed_s=elapsed,
+                    training=sorted(lanes,key=lambda r:r['label']),completed_updates=count,target_updates=13824,
+                    completed_lanes=sum(r['phase']=='complete' for r in lanes),target_lanes=12,gpu_training_lanes=6,
+                    reused_training_formulas=384,reused_validation_formulas=72,solver_cells=0,
+                    performance_verdict='reused_validation_only',learned_advantage=False)
+    except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1589,6 +1628,7 @@ def main():
     data['joint_feedback']=joint_feedback_progress(args.repo.resolve())
     data['local_feedback']=local_feedback_progress(args.repo.resolve())
     data['compact_distill']=compact_distill_progress(args.repo.resolve())
+    data['boundary_screen']=boundary_screen_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())

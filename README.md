@@ -8,7 +8,14 @@ The live panel verifies heartbeat/process identity and audited completion
 receipts; stale exports do not claim execution. No GPU training or paper rewrite.
 Historical E61 remains stopped incomplete.
 
-Latest method pilot: A33 completed and passed raw-record audit, but failed both
+Current mechanism screen: A34 runs3/6layers × baseline/boundary-weighted loss ×
+three seeds,12scratch models,13,824updates, on REUSED A33 train/validation only.
+The common selection metric and all per-formula outputs are retained. This is
+neither new development nor end-to-end evaluation:0solver cells. No automatic
+extra epochs, preference fine-tuning or promotion. See `#boundary-screen` and
+`#action-A34`; operational completion and scientific gates stay separate.
+
+Previous method pilot: A33 completed and passed raw-record audit, but failed both
 family feasibility gates. A compact 3-layer, 166,530-parameter
 student distills the fixed RLAF teacher offline, with matched CAP/scratch
 initializations and three seeds each. 384 fresh training, 72 validation and 72
@@ -85,7 +92,7 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Thirty-four actions have dependencies, costs, acceptance and stopping rules. Their
+Thirty-five actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.

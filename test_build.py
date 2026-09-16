@@ -6,10 +6,39 @@ import tempfile
 import unittest
 from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress, local_feedback_progress
 from unittest.mock import patch
-from build import compact_distill_progress
+from build import compact_distill_progress, boundary_screen_progress
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_boundary_screen_reused_private_stale_terminal(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/boundary_factorial_20260916_v1';root.mkdir(parents=True)
+            def save(name,obj):(root/name).write_text(json.dumps(obj))
+            labels=[f'd{depth}_{loss}{seed}' for depth in (3,6) for loss in ('base','boundary') for seed in (42,43,44)]
+            rows=[dict(n=n,split=s) for s,k in [('train',128),('validation',24)] for n in (200,300,350) for _ in range(k)]
+            for i,r in enumerate(rows):r['index']=i
+            ident=dict(kind='bundle_digest',value='e'*64,scope='boundary_screen_inputs')
+            cfg=dict(lanes=[dict(label=l) for l in labels],gpus=list(range(6)),rows=rows,target_updates=13824,updates_per_lane=1152,epochs=24,batch_size=8)
+            state=dict(phase='running',stage='wave0',input_identity=ident,observed_unix=1100.,started_unix=1000.,elapsed_s=100.,
+                       training=[dict(label=labels[0],updates=12,target_updates=1152,epoch=1,phase='training',private='PRIVATE')],
+                       completed_updates=12,target_updates=13824,receipts=[],supervisor=dict(private='PRIVATE'))
+            save('FROZEN.json',dict(input_identity=ident));save('CONFIG.json',cfg);save('STATUS.json',state)
+            with patch('build.joint_supervisor_alive',return_value=True):
+                out=boundary_screen_progress(repo,1100);self.assertEqual(out['completed_updates'],12)
+                self.assertNotIn('PRIVATE',json.dumps(out));self.assertFalse(out['learned_advantage']);self.assertEqual(out['solver_cells'],0)
+                self.assertEqual(boundary_screen_progress(repo,1221)['phase'],'stale')
+            with patch('build.joint_supervisor_alive',return_value=False):self.assertEqual(boundary_screen_progress(repo,1100)['phase'],'stale')
+            state['completed_updates']=24;save('STATUS.json',state);self.assertIsNone(boundary_screen_progress(repo,1100))
+            state.update(phase='complete',stage='complete',completed_updates=13824,cleanup=dict(errors=[],unreaped=[]))
+            state['training']=[dict(label=l,phase='complete',updates=1152,target_updates=1152,epoch=24) for l in labels]
+            save('STATUS.json',state);save('FINAL.json',state);self.assertIsNone(boundary_screen_progress(repo,1100))
+            state['receipts']=[dict(label=l,returncode=0) for l in labels];save('STATUS.json',state);save('FINAL.json',state)
+            self.assertEqual(boundary_screen_progress(repo,9999)['phase'],'complete')
+            self.assertEqual(boundary_screen_progress(repo,9999)['performance_verdict'],'reused_validation_only')
+            state['receipts'][0]['returncode']=1;save('STATUS.json',state);save('FINAL.json',state);self.assertIsNone(boundary_screen_progress(repo,1100))
+            state.update(phase='failed',stage='wave0',error='/home/PRIVATE');save('STATUS.json',state);save('FINAL.json',state)
+            self.assertEqual(boundary_screen_progress(repo,1100)['phase'],'failed')
+
     def test_compact_distill_live_stale_private_and_terminal(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/compact_distill_20260916_v1';root.mkdir(parents=True)
@@ -532,12 +561,14 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),34)
+        self.assertEqual(len(plan['actions']),35)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
         self.assertIn('2448',actions['A32']['cost'])
         self.assertIn('6912',actions['A33']['cost'])
+        self.assertIn('13824',actions['A34']['cost'])
+        self.assertIn('机制筛选',actions['A34']['stop'])
         self.assertIn('描述性pilot',actions['A33']['gate'])
         self.assertIn('训练切片描述门',actions['A32']['gate'])
         self.assertIn('0/6过门',actions['A31']['status'])
