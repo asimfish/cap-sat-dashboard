@@ -161,7 +161,7 @@ function renderJointFeedback(){
  if(!u){target.textContent='暂无通过一致性检查的运行快照；不推断正在训练或已经完成。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
- const labels={running:'运行快照：队列执行中',stale:'快照已陈旧：当前活跃状态待确认',complete:'队列完成；性能仍待完整审计',failed:'队列中止；保留已完成记录'};
+ const labels={running:'运行快照：队列执行中',stale:'快照已陈旧：当前活跃状态待确认',complete:'队列已完成；性能结论见下方 A31 计划卡',failed:'队列中止；保留已完成记录'};
  const stages={starting:'启动',references:'独立公式核验',features:'特征准备',training:'训练 / 验证',development_predictions:'开发预测',native_baseline_prediction:'原生 RLAF 预测',development:'开发集全成本比较',complete:'队列结束'};
  target.innerHTML=`<b>${esc(labels[phase])}</b><p>阶段：${esc(stages[u.stage])} · 上次心跳 ${esc(new Date(u.observed).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}</p><div class="cards"><div class="card"><b>${u.training_completed_cells.toLocaleString()} / 27,648</b><span>真实求解训练反馈单元；不是独立公式数</span></div><div class="card"><b>${u.development_completed_cells.toLocaleString()} / 1,584</b><span>开发评测单元；训练完成后自动接续</span></div><div class="card"><b>${(u.elapsed_s/60).toFixed(1)} / 60 min</b><span>队列墙钟 / 上限；不是 GPU 计算时长</span></div></div><p>3 张共享 GPU、训练期最多 24 个求解线程；每张 GPU 设 10% 分配上限，不是利用率保证。${u.training.map(x=>`种子 ${x.seed}：${x.iteration}/48 轮`).join(' · ')||'尚未进入训练'}。</p><p>固定 CAP 编码器，训练同规模的结构特征头与 CAP 特征头；相位和变量权重联合更新。奖励来自计入预处理、预测、求解和完整 SAT 检查的成本；包含超时惩罚，不用相位准确率替代收益。</p><p class="alert">性能优势尚未验收。每个种子须超过默认、极性、度数和原生 RLAF；CAP 还须超过对应廉价学习头。${esc(u.caveat)}</p><p class="muted">${esc(u.scope)}。服务器每 15 分钟导出，页面每分钟检查；超过 2 分钟的运行心跳标为陈旧。训练阶段使用批次分摊预测计时，开发阶段另测单例完整预测；不改论文结论。</p>`;
 }

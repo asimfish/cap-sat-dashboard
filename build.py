@@ -1473,7 +1473,7 @@ def joint_feedback_progress(repo, now=None):
             started_at=dt.datetime.fromtimestamp(started,dt.timezone.utc).isoformat(),elapsed_s=elapsed,duration_limit_s=3600,
             gpu_lanes=3,solver_workers=24,running_lanes=running,training=sorted(lanes,key=lambda x:x['seed']),
             training_completed_cells=sum(x['completed_cells'] for x in lanes),training_target_cells=27648,
-            development_completed_cells=dev,development_target_cells=1584,performance_verdict='pending',learned_advantage=False,
+            development_completed_cells=dev,development_target_cells=1584,performance_verdict='not_evaluated_by_progress_collector',learned_advantage=False,
             scope='96训练/48验证/72开发新公式；单主机驻留组合成本；不是冷启动或独立确认',
             caveat='廉价控制包含不必要特征计算；边缘通过也须精简对照复测。退出成功不代替完整原始记录审计。')
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None

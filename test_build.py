@@ -24,7 +24,7 @@ class CollectorTests(unittest.TestCase):
                 out=joint_feedback_progress(repo,1100);self.assertEqual(out['phase'],'running')
                 self.assertEqual(out['training_completed_cells'],576)
                 self.assertNotIn('PRIVATE',json.dumps(out));self.assertNotIn('supervisor',out)
-                self.assertFalse(out['learned_advantage']);self.assertEqual(out['performance_verdict'],'pending')
+                self.assertFalse(out['learned_advantage']);self.assertEqual(out['performance_verdict'],'not_evaluated_by_progress_collector')
                 self.assertEqual(joint_feedback_progress(repo,1221)['phase'],'stale')
             with patch('build.joint_supervisor_alive',return_value=False):
                 self.assertEqual(joint_feedback_progress(repo,1100)['phase'],'stale')
@@ -40,7 +40,7 @@ class CollectorTests(unittest.TestCase):
                 ['references','feature0','feature1','feature2','train0','train1','train2','predict0','predict1','predict2','predict_rlaf','development']])
             save('STATUS.json',state);save('FINAL.json',state)
             out=joint_feedback_progress(repo,100000);self.assertEqual(out['phase'],'complete')
-            self.assertFalse(out['learned_advantage']);self.assertEqual(out['performance_verdict'],'pending')
+            self.assertFalse(out['learned_advantage']);self.assertEqual(out['performance_verdict'],'not_evaluated_by_progress_collector')
             state['receipts'][0]['returncode']=1;save('STATUS.json',state);save('FINAL.json',state)
             self.assertIsNone(joint_feedback_progress(repo,1100))
             state.update(phase='failed',error='/home/PRIVATE',stage='training')
@@ -475,7 +475,7 @@ class CollectorTests(unittest.TestCase):
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
-        self.assertIn('待审计',actions['A31']['status'])
+        self.assertIn('0/6过门',actions['A31']['status'])
         self.assertIn('27648',actions['A31']['cost'])
         self.assertIn('多余解析',actions['A31']['stop'])
         self.assertIn('E26',actions['A3']['status'])
