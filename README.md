@@ -8,14 +8,26 @@ The live panel verifies heartbeat/process identity and audited completion
 receipts; stale exports do not claim execution. No GPU training or paper rewrite.
 Historical E61 remains stopped incomplete.
 
-Latest method diagnostic: A29 tests five coloring/branching priorities plus the
+Latest method diagnostic: A30 finishes48new general-CNF development cases,
+12arms x2fixed-seed timing repeats=1152cells. On n200, cheap degree weights
+(.153714s PAR2) outperform native RLAF(.176290s), though both beat stock(.445378s).
+On n350, native RLAF solves6/24; replacing its phases with CAP solves2/24.
+All three CAP-containing candidates fail promotion. Both models' measured
+prediction costs are charged for their hybrid; setup/warmup are separate, so
+this is not cold lifecycle or independently timed per-request inference.
+376SAT outputs pass additive complete-assignment checks;11UNSAT formulas are
+independently corroborated. No retraining, new confirmation or paper rewrite.
+Next: design solver-cost-supervised joint heads with strong cheap/native-RLAF
+controls, not a direct combination of existing checkpoints. Not launched.
+
+Earlier method diagnostic: A29 tests five coloring/branching priorities plus the
 actual inherited search on128reused+128new TRAINING graphs.61,440search calls
 are not independent instances or full-cost measurements. A28's matched/residual
 resident search stage is only0.6478%/0.2722%of the recorded full cost: deleting
 search alone cannot reach the5%hurdle if other stages stay fixed. The new residual
 degree rule reduces nodes8.8125→5.6719 but CPU time grows1.995→2.282us.
-No current-small-graph policy training launched; harder/general-CNF method work
-requires a separate protocol and an audit of existing RLAF/NeuroBack controls.
+No current-small-graph policy training launched; the harder/general-CNF audit
+and separately frozen development mechanism study are now recorded as A30.
 
 Latest audited performance update: A28 omits unused SLS indices only in the guarded
 nonlearned entry. Matched exact-resident full cost falls19.60%
@@ -59,7 +71,7 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Thirty actions have dependencies, costs, acceptance and stopping rules. Their
+Thirty-one actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.

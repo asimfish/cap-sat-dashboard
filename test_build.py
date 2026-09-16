@@ -431,7 +431,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),30)
+        self.assertEqual(len(plan['actions']),31)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -492,6 +492,14 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('61440',actions['A29']['cost'])
         self.assertIn('两组绝对成本门都失败',actions['A29']['gate'])
         self.assertIn('406.044',actions['A29']['stop'])
+        self.assertIn('0/3晋级',actions['A30']['status'])
+        self.assertIn('1152',actions['A30']['cost'])
+        self.assertIn('376',actions['A30']['gate'])
+        self.assertIn('不是96实例',actions['A30']['method'])
+        self.assertIn('6/24',actions['A30']['stop'])
+        self.assertIn('2/24',actions['A30']['stop'])
+        self.assertIn('0.153714',actions['A30']['stop'])
+        self.assertIn('区间跨零',actions['A30']['stop'])
         self.assertIn('实际7小时13分36秒',actions['A26']['status'])
         self.assertRegex(plan['sha256'],r'^[0-9a-f]{64}$')
         payload=json.dumps(plan,ensure_ascii=False)

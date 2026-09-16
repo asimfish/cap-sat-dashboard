@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-16T06:15:46.515175+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-16T06:25:16.758364+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -33,7 +33,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-16T06:15:46.515175+00:00",
+  "generated": "2026-09-16T06:25:16.758364+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3059,7 +3059,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-16",
-    "scope": "人工审读的性能计划：A29完成分支优先级诊断，现有匹配/困难驻留搜索仅占完整成本0.6478%/0.2722%，未过5%成本空间门，不启动该小图学习训练。A28局部19.60%收益、困难14.71%退化及10/24整体失败保留。A26原8小时队列已因磁盘保护停止，未满时长、终态性能汇总待恢复；不重启或改时钟。七项缺口仍4部分改善、3未解决，不改论文或宣称学习优势。",
+    "scope": "人工审读的性能计划：A30在48个新一般CNF上完成1152单元权重/相位拆分；n200廉价度数权重比RLAF更快，n350原生RLAF解6/24，换CAP相位仅2/24，三个CAP候选均未晋级。联合收益训练是下一待设计变体，不直接拼接或扩大现有模型训练。A29小图搜索成本空间不足、A28整体失败和A26未满八小时/终态汇总待恢复保持。七项缺口仍4部分改善、3未解决，不改论文或宣称学习优势。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3098,9 +3098,10 @@
           "A26",
           "A27",
           "A28",
-          "A29"
+          "A29",
+          "A30"
         ],
-        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35；E64；E65；重排识别修复；lifecycle_20260915_v1；io_20260915_v1；spawn_20260915_v1；witness_20260916_v1；checker_20260916_v1；shared_prefix_20260916_v3；single_prefix_20260916_v1；lazy_index_20260916_v1；branch_headroom_20260916_v1",
+        "source": "rebuttal 全成本比较；native_comparison_20260911_v1 终态审计；E35；E64；E65；重排识别修复；lifecycle_20260915_v1；io_20260915_v1；spawn_20260915_v1；witness_20260916_v1；checker_20260916_v1；shared_prefix_20260916_v3；single_prefix_20260916_v1；lazy_index_20260916_v1；branch_headroom_20260916_v1；weight_phase_20260916_v1",
         "evidence_level": "历史报告 + 后续局部审计；E65同主机新数据复现对原廉价基线的收益，但包含新SAT补全对照的更强确认门未过；不是普遍加速"
       },
       {
@@ -3136,9 +3137,10 @@
           "A13",
           "A14",
           "A15",
-          "A29"
+          "A29",
+          "A30"
         ],
-        "source": "rebuttal 等成本比较与多解参考准确率限制；E33–E37 审计；A29节点数与耗时诊断",
+        "source": "rebuttal 等成本比较与多解参考准确率限制；E33–E37 审计；A29节点数与耗时诊断；A30权重/相位开发拆分",
         "evidence_level": "E37成对小策略通过所选验证的三种子/四规模门；尚无全成本开发或独立确认"
       },
       {
@@ -3151,9 +3153,10 @@
         "directions": [
           "A0",
           "A1",
-          "A3"
+          "A3",
+          "A30"
         ],
-        "source": "rebuttal Kissat/K% 测试；E22–E25 READOUT",
+        "source": "rebuttal Kissat/K% 测试；E22–E25 READOUT；A30有限预算Glucose拆分",
         "evidence_level": "局部缓解；单 seed 与接口适用范围保留"
       },
       {
@@ -3622,9 +3625,23 @@
         "method": "协议和输入先冻结。原index、逆序、补图度数高/低、固定hash五策略与实际继承ExactSearch对照；单CPU、每次5ms上限。release/ASan各6504小图约束组合、39024策略决定和故障注入通过；完整保留原数据。128新图仅为训练诊断，按节点选择的五策略事后最佳者不是可部署模型或全学习上界。",
         "gate": "预设：有限动作最佳者须比最强固定规则少至少10%节点，且现有完整计费中搜索阶段至少占5%，才考虑训练。新匹配节点空间39.31%，新困难仅1.93%；两组绝对成本门都失败。61440次搜索0未决，34080个SAT图见证检查；原index节点和见证与继承实现一致。没有端到端候选或学习优势。",
         "stop": "同一批A28完整记录中，匹配驻留1290.584微秒仅8.361微秒用于搜索，困难2362.667微秒仅6.431微秒用于搜索；其他阶段固定时，免费删掉搜索也只省0.6478%/0.2722%。困难现有均值目标还差406.044微秒，不能靠这6.431微秒填平。新困难图度数优先将节点8.8125→5.6719，但CPU时间1.995→2.282微秒反而增加；新匹配节点26.297→23.609，CPU4.655→7.884微秒。停止当前小图分支学习扩张，不宣称方法普遍无效。下一步另行审计现有RLAF/NeuroBack及原CAP较难CNF实验，确认真正搜索占主导后再设计成本驱动的变量优先级试验；尚未启动，不修改原论文。"
+      },
+      {
+        "id": "A30",
+        "title": "拆分变量权重与相位，验证CAP是否还有额外价值",
+        "priority": "机制拆分完成 · 停止直接拼接",
+        "status": "权重机制有信号；三个CAP候选0/3晋级，未建立学习净优势",
+        "cost": "48新开发CNF，n200/n350各24，共16生成簇；48公式×12臂×2计时重复=1152单元，求解阶段482秒；共享GPU完成两套现有模型预测，无重训",
+        "depends_on": [
+          "A29"
+        ],
+        "hypothesis": "区分权重、相位、持续覆盖损害及两模型互补。RLAF权重同时影响初始activity和后续冲突活动度更新，不是仅初始排序；不能把已有RLAF联合学习重新命名为新贡献。",
+        "method": "48个新未按标签筛选的公式，预先冻结3秒预算与12臂。比较原生RLAF、仅权重/仅相位/打乱权重、CAP初始/持续、RLAF权重+CAP、度数权重+CAP及默认/单位权重/极性/度数廉价控制。预测每公式实测一次并计入各臂，组合付两模型费用；setup和预热另报。两轮固定同一求解种子，只是计时重复，不是96实例或多种子确认。",
+        "gate": "三个CAP候选须比全部预定控制至少低5%PAR-2，两个规模和两轮都无均值/求解数损失；0/3通过。1152单元全部重放，376个SAT输出追加完整变量/原子句审计，11个UNSAT公式独立佐证；零错误。原请求检查是子句满足而非严格完整变量覆盖，追加审计不冒充已计费部署检查；3秒是计分预算，不是已证明的硬回收期限。",
+        "stop": "n200：默认0.445378s，RLAF0.176290s，仅权重0.161121s，廉价度数0.153714s；只看对默认收益会夸大学习价值。n350：RLAF6/24、4.612116s，替换CAP相位后2/24、5.507752s。组合整体2.841685s落后RLAF2.394203s，比较区间跨零，不称已证实伤害；初始CAP相对持续仅整体改善0.716%，不足5%。停止直接拼接；下一步在新训练/验证上设计联合求解成本反馈与廉价结构残差，必须对照原生RLAF和度数规则。新变体尚未训练/确认，不重用本48例当独立测试，不改论文或宣称工业、冷启动优势。"
       }
     ],
-    "sha256": "00b6be3a5f96ba9708ec160e76996539dec2e5465c2a8ad62a27e613bb74d5b3"
+    "sha256": "74c46102bbde81aaefc4df914c7f7411257424afbd01993e399725c98ca6ff9d"
   },
   "pilot": {
     "id": "E26",
@@ -7456,7 +7473,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-16T13:32:05.079049+00:00",
+    "earliest_target_at": "2026-09-16T13:41:35.055091+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
