@@ -1,12 +1,13 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-16T10:20:16.237330+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-16T10:35:30.818887+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
 </style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#performance-plan">05 · 性能改进计划</a><a href="#next">06 · 论文与审计</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
+<section id="local-feedback"><h2>A32 · 强策略局部修改 × 反馈预算校准</h2><div id="local-feedback-progress" class="panel" aria-live="polite"></div></section>
 <section id="joint-feedback"><h2>A31 · 联合求解成本反馈 · 三种子共享 GPU 训练</h2><div id="joint-feedback-progress" class="panel" aria-live="polite"></div></section>
 <section id="prefix-campaign"><h2>A26 · 共享 SAT 快路径 · 今晚 8 小时检验</h2><div id="prefix-campaign-progress" class="panel" aria-live="polite"></div></section>
 <section id="overnight"><h2>E61 · 历史队列（已停止，未满 8 小时）</h2><div id="overnight-progress" class="panel"></div></section>
@@ -34,7 +35,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-16T10:20:16.237330+00:00",
+  "generated": "2026-09-16T10:35:30.818887+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3140,9 +3141,10 @@
           "A15",
           "A29",
           "A30",
-          "A31"
+          "A31",
+          "A32"
         ],
-        "source": "rebuttal 等成本比较与多解参考准确率限制；E33–E37 审计；A29节点数与耗时诊断；A30权重/相位开发拆分；A31联合成本反馈协议（优势待审计）",
+        "source": "rebuttal 等成本比较与多解参考准确率限制；E33–E37 审计；A29节点数与耗时诊断；A30权重/相位开发拆分；A31联合成本反馈失败；A32局部动作/预算训练校准",
         "evidence_level": "E37成对小策略通过所选验证的三种子/四规模门；尚无全成本开发或独立确认"
       },
       {
@@ -3655,9 +3657,23 @@
         "method": "训练种子42/43/44，2402参数双输出小头，伯努利相位与LogNormal变量权重，组内成本优势加KL约束。训练奖励为0.75秒完整成本PAR-2，保留超时；每16轮在48验证公式上选检查点。开发按单例预测计费，3秒预算，对照默认、极性、度数、原生RLAF、原CAP及六个学习头。setup/预热另报，不是冷生命周期测试。",
         "gate": "30384条原始记录覆盖、费用和完整SAT/UNSAT一致性重放通过；开发471 SAT、242 UNSAT、871超时，零错误。每候选须比默认/极性/度数/RLAF至少快3%且各规模无害；CAP还须超过对应廉价学习头。六候选均失败，两family均未晋级。训练/验证batch-share无独立计时回执，只复核特征下限及分摊一致性；开发模型费用绑定预测原记录，廉价inline计时仍无独立回执。",
         "stop": "整体PAR-2：RLAF3.290074s，度数3.390365s，CAP42/43/44为3.380664/3.336710/3.295746s；各自相对廉价学习头点估计改善3.49%/3.18%/2.60%，但后两项探索区间跨零。三个CAP相对RLAF都仍慢且比较区间跨零，不称追平或优势。最接近seed44在n200仍0.222470s对RLAF0.149017s，n300仍4.359054s对4.137193s，不能只报总体0.17%差距。n350约91%采样组八次均无有效奖励，短预算反馈饱和；下一轮先用新训练样本校准困难规模预算/反馈，再降低特征开销，不原样盲目扩跑。本轮停止、不生成确认。廉价控制存在多余解析/邻域特征费用，冻结值保留，晋级前须实际最小控制复测。监督器通用清理异常风险仍在，本轮13个后期子进程身份和4个进程组终态检查无遗留；不是硬回收期限证明。不改论文，不称冷启动或工业优势。"
+      },
+      {
+        "id": "A32",
+        "title": "围绕强RLAF策略做局部修改，校准困难公式反馈预算",
+        "priority": "方法级辨别小试 · 不盲目扩训",
+        "status": "固定队列已启动；即时阶段见顶部心跳，尚无性能结论",
+        "cost": "24个新训练校准CNF，n200/300/350各8，6生成流；34动作×3预算=2448反馈单元。2共享GPU推理、24物理核反馈，40分钟监督上限；不是8小时或两卡持续训练。",
+        "depends_on": [
+          "A31"
+        ],
+        "hypothesis": "A31短预算下困难奖励饱和可能与全变量大范围扰动共同限制学习；需区分动作支持、预算截断和CAP增量信息，而非直接再跑相同训练。",
+        "method": "同一原生RLAF mode为基础，8个配对动作分别扰动全部、随机8、随机16、CAP分歧排名16变量；支持外严格不变。0.75/3/6秒预算复用相同动作，顺序预先随机。包含不修改和最小度数控制，CAP付RLAF与CAP双推理费。参考60秒CaDiCaL，未解保留，SAT完整检查。模型加载和预热另报。",
+        "gate": "H1：3秒随机16对全变量平均PAR2改善至少5%且信用数不降；H2：困难规模随机16从0.75到6秒全无信用组下降至少20个百分点。两者同时满足才提议新局部策略训练。H3：6秒CAP16还须对随机16快至少3%且各规模均值/信用无害。都是训练切片描述门，不是显著性或端到端确认。",
+        "stop": "先完整审计2448单元、原始判词/退出/费用、唯一矩阵和终态身份，再判门。固定队列结束就停止，不自动大量训练，不用事后最佳八选一宣称部署收益。局部或预算门失败不扩大此配置；论文、旧A31失败、0/7完全解决的结论保持。"
       }
     ],
-    "sha256": "8c88c6f713391fd0f93b83cfd62e7c76c3d6d5a85e68ca7fe094cb211f8ba269"
+    "sha256": "d6cb972d9895fd2ae7a80aa039b34a0b77ca34c5764c7f0539608fb61ae03aba"
   },
   "pilot": {
     "id": "E26",
@@ -7489,7 +7505,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-16T17:36:34.809287+00:00",
+    "earliest_target_at": "2026-09-16T17:51:49.241335+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -7549,6 +7565,21 @@
     "learned_advantage": false,
     "scope": "96训练/48验证/72开发新公式；单主机驻留组合成本；不是冷启动或独立确认",
     "caveat": "廉价控制包含不必要特征计算；边缘通过也须精简对照复测。退出成功不代替完整原始记录审计。"
+  },
+  "local_feedback": {
+    "phase": "running",
+    "stage": "feedback",
+    "completed_cells": 2108,
+    "target_cells": 2448,
+    "formulas": 24,
+    "generation_streams": 6,
+    "solver_workers": 24,
+    "gpu_inference_lanes": 2,
+    "elapsed_s": 226.69970630854368,
+    "duration_limit_s": 2400,
+    "observed": "2026-09-16T10:35:32.976887+00:00",
+    "performance_verdict": "training_calibration_not_confirmation",
+    "learned_advantage": false
   },
   "targeted": {
     "cells": 27648,
@@ -13222,12 +13253,22 @@ function renderTargeted(){
 function renderOvernight(){
  renderPrefixCampaign();
  renderJointFeedback();
+ renderLocalFeedback();
  const u=data.overnight,target=document.getElementById('overnight-progress');
  if(!u){target.textContent='尚无通过完整性检查的队列快照。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=age>120&&!['complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'有实验执行的运行快照',paused_resources:'资源保护：暂停新增任务',draining:'结束派发，等待当前任务收尾',complete:'已达到8小时有效运行',stopped_incomplete:'已停止，未跑满8小时',stale:'快照已陈旧，当前运行状态待下次导出确认'};
  target.innerHTML=`<b>${esc(labels[phase]||'状态未知')}</b><div class="cards"><div class="card"><b>${(u.active_s/3600).toFixed(2)} / 8 h</b><span>实际有实验执行的累计墙钟；不累加并发CPU小时</span></div><div class="card"><b>${u.counts.cpu_jobs} 批 / ${u.counts.cells.toLocaleString()} 次</b><span>已完成并核对结果摘要的全成本求解</span></div><div class="card"><b>${u.counts.training_jobs} / ${u.training_queue}</b><span>完成候选训练；${u.counts.training_steps.toLocaleString()} 个优化步</span></div></div><p>上次快照在执行：CPU ${u.running.cpu}/${u.cpu_slots} 路，GPU训练 ${u.running.train}/${u.gpu_slots} 路，数据准备 ${u.running.data} 路；失败任务 ${u.failed_jobs} 个。</p><p>CPU：四规模匹配对照、困难 n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算。GPU：8数据分片 × 2模型 × 3损失 × 3学习率 × 3种子，共432项候选；队列未派发项不算完成。</p><p>开始：${esc(new Date(u.started_at).toLocaleString())}；快照：${esc(new Date(u.observed).toLocaleString())}。服务器每15分钟导出；页面每分钟检查。资源空闲等待不计时，达到8小时后停止派发并收尾，安全中断如实标记。</p><p class="muted">新训练权重仍需后续完整成本评估。${esc(u.scope)}；本轮不改论文结论。</p><p class="foot">固定实验配置 SHA256 ${esc(u.frozen_sha256)}</p>`;
+}
+function renderLocalFeedback(){
+ const u=data.local_feedback,target=document.getElementById('local-feedback-progress');
+ if(!u){target.textContent='暂无通过一致性检查的校准快照；不推断实验已启动或完成。';return;}
+ const age=(Date.now()-Date.parse(u.observed))/1000;
+ const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
+ const labels={running:'校准执行中：尚无性能结论',stale:'快照已陈旧：当前运行态待确认',complete:'固定校准队列完成：科学判定见 A32 计划卡',failed:'校准中止：保留记录，不自动扩训'};
+ const stages={starting:'启动',references:'独立参考求解',predictions:'共享 GPU 模型推理',feedback:'24 路真实求解反馈',complete:'队列结束'};
+ target.innerHTML=`<b>${esc(labels[phase])}</b><p>阶段：${esc(stages[u.stage])} · 上次心跳 ${esc(new Date(u.observed).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}</p><div class="cards"><div class="card"><b>${u.completed_cells.toLocaleString()} / 2,448</b><span>完整反馈单元；不是独立样本数</span></div><div class="card"><b>24 个新公式</b><span>6 个生成流；仅训练校准，不是确认集</span></div><div class="card"><b>${(u.elapsed_s/60).toFixed(1)} / 40 min</b><span>队列墙钟 / 上限，不是 GPU 计算时长</span></div></div><p>相同 RLAF 基础策略：全变量、随机 8 / 16 变量、CAP 指引 16 变量修改；每组 8 个对齐动作，各测 0.75 / 3 / 6 秒完整成本。CAP 方案付两模型费用；超时和未解公式保留。</p><p>模型推理用 2 张共享 GPU，求解反馈最多 24 个 CPU 工作线程；不是两卡持续训练或利用率保证。不改论文，也不将事后挑出的最佳动作当成可部署策略。</p><p class="alert">端到端优势尚未达成。局部修改改善与有效反馈门同时通过，才考虑新训练；CAP 还必须超过同规模随机修改。队列完成不等于过门，未自动接续扩训。</p><p class="muted">每 15 分钟导出；运行心跳超过 2 分钟显示陈旧。完整结果审计前不展示部分样本排名。</p>`;
 }
 function renderJointFeedback(){
  const u=data.joint_feedback,target=document.getElementById('joint-feedback-progress');

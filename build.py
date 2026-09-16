@@ -1479,6 +1479,42 @@ def joint_feedback_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
 
 
+def local_feedback_progress(repo, now=None):
+    """A32 public operational snapshot; no private process/model/raw-data fields."""
+    root=repo/'experiments/local_feedback_20260916_v1'
+    try:
+        frozen=json.loads((root/'FROZEN.json').read_text())
+        cfg=json.loads((root/'CONFIG.json').read_text())
+        state=json.loads((root/'STATUS.json').read_text())
+        ident=frozen['input_identity']
+        if (ident.get('kind')!='bundle_digest' or ident.get('scope')!='calibration_inputs'
+                or not re.fullmatch('[0-9a-f]{64}',ident.get('value','')) or state['input_identity']!=ident):return None
+        if (cfg['target_cells']!=2448 or cfg['budgets']!=[.75,3.,6.] or cfg['families']!=['full','random8','random16','cap16']
+                or len(cfg['rows'])!=24 or len(set(cfg['cores']))!=24 or len(set(cfg['gpus']))!=2):return None
+        if {r['index'] for r in cfg['rows']}!=set(range(24)) or any(sum(r['n']==n for r in cfg['rows'])!=8 for n in [200,300,350]):return None
+        phase=state['phase']; stage=state['stage']; count=state['completed_cells']
+        if phase not in ['running','complete','failed'] or stage not in ['starting','references','predictions','feedback','complete']:return None
+        if type(count) is not int or not 0<=count<=2448 or count%34 or state['target_cells']!=2448:return None
+        observed=state['observed_unix']; started=state['started_unix']; elapsed=state['elapsed_s']
+        if any(type(x) not in (int,float) or not math.isfinite(x) or x<0 for x in [observed,started,elapsed]):return None
+        if abs(observed-started-elapsed)>2:return None
+        receipts=state['receipts']; labels=[r['label'] for r in receipts]
+        expected={'reference','predict_rlaf','predict_cap','feedback'}
+        if len(set(labels))!=len(labels) or not set(labels)<=expected:return None
+        if phase in ['complete','failed']:
+            if json.loads((root/'FINAL.json').read_text())!=state:return None
+            if phase=='complete' and (stage!='complete' or count!=2448 or set(labels)!=expected or
+                    any(type(r['returncode']) is not int or r['returncode']!=0 for r in receipts) or
+                    state['cleanup']!={'errors':[],'unreaped':[]}):return None
+        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state):
+            phase='stale'
+        return dict(phase=phase,stage=stage,completed_cells=count,target_cells=2448,formulas=24,
+                    generation_streams=6,solver_workers=24,gpu_inference_lanes=2,elapsed_s=elapsed,duration_limit_s=2400,
+                    observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),
+                    performance_verdict='training_calibration_not_confirmation',learned_advantage=False)
+    except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1502,6 +1538,7 @@ def main():
     data['overnight']=overnight_progress(args.repo.resolve())
     data['prefix_campaign']=prefix_campaign_progress(args.repo.resolve())
     data['joint_feedback']=joint_feedback_progress(args.repo.resolve())
+    data['local_feedback']=local_feedback_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())

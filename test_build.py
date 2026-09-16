@@ -4,11 +4,33 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress
+from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress, local_feedback_progress
 from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_local_feedback_fail_closed_and_private(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/local_feedback_20260916_v1';root.mkdir(parents=True)
+            def save(name,obj): (root/name).write_text(json.dumps(obj))
+            identity=dict(kind='bundle_digest',value='b'*64,scope='calibration_inputs')
+            cfg=dict(target_cells=2448,budgets=[.75,3.,6.],families=['full','random8','random16','cap16'],cores=list(range(24)),gpus=[3,5],rows=[dict(index=i,n=[200,300,350][i//8]) for i in range(24)])
+            state=dict(input_identity=identity,phase='running',stage='feedback',completed_cells=34,target_cells=2448,
+                       started_unix=1000.,observed_unix=1100.,elapsed_s=100.,receipts=[],supervisor={'private':'PRIVATE'})
+            save('FROZEN.json',dict(input_identity=identity));save('CONFIG.json',cfg);save('STATUS.json',state)
+            with patch('build.joint_supervisor_alive',return_value=True):
+                out=local_feedback_progress(repo,1100);self.assertEqual(out['completed_cells'],34)
+                self.assertNotIn('PRIVATE',json.dumps(out));self.assertFalse(out['learned_advantage'])
+                self.assertEqual(local_feedback_progress(repo,1221)['phase'],'stale')
+            state.update(phase='complete',stage='complete',completed_cells=2448,cleanup=dict(errors=[],unreaped=[]))
+            save('STATUS.json',state);save('FINAL.json',state)
+            self.assertIsNone(local_feedback_progress(repo,1100))
+            state['receipts']=[dict(label=x,returncode=0) for x in ['reference','predict_rlaf','predict_cap','feedback']]
+            save('STATUS.json',state);save('FINAL.json',state)
+            self.assertEqual(local_feedback_progress(repo,1100)['phase'],'complete')
+            state['cleanup']['unreaped']=[{'private':'PRIVATE'}];save('STATUS.json',state);save('FINAL.json',state)
+            self.assertIsNone(local_feedback_progress(repo,1100))
+
     def test_joint_feedback_live_stale_private_and_incomplete(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/joint_feedback_20260916_v1';root.mkdir(parents=True)
@@ -471,10 +493,12 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),32)
+        self.assertEqual(len(plan['actions']),33)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
+        self.assertIn('2448',actions['A32']['cost'])
+        self.assertIn('训练切片描述门',actions['A32']['gate'])
         self.assertIn('0/6过门',actions['A31']['status'])
         self.assertIn('27648',actions['A31']['cost'])
         self.assertIn('多余解析',actions['A31']['stop'])
