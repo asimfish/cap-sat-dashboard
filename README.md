@@ -1,5 +1,13 @@
 # CAP-SAT Rebuttal Dashboard
 
+Latest diagnosis A35 stopped at its128MiB root-disk floor:6of12checkpoint lanes
+have complete outputs. Their2,736records passed partial replay audit;16more
+records are incomplete, and no depth6 conclusion is available. Depth3 training
+agreement89.47–89.80%is close to validation89.22–89.50%(gap0.169–0.306points),
+so validation generalization is not the only problem. A36 tiny-fit mixed-loss
+versus raw-logit regression is implemented/tested but NOT frozen or launched.
+See A35/A36 plan cards; no new end-to-end gain is claimed.
+
 Campaign status: A26 stopped at the disk safety floor after7h13m36s, before its
 fixed eight-hour window ended.1172blocks/4,500,480cells were audited; two partial
 blocks stopped, no workers remain. The terminal readout timed out and awaits
@@ -98,7 +106,7 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Thirty-five actions have dependencies, costs, acceptance and stopping rules. Their
+Thirty-seven actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.

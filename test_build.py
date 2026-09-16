@@ -561,7 +561,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),35)
+        self.assertEqual(len(plan['actions']),37)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -569,6 +569,9 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('6912',actions['A33']['cost'])
         self.assertIn('13824',actions['A34']['cost'])
         self.assertIn('机制筛选',actions['A34']['stop'])
+        self.assertIn('整轮未完成',actions['A35']['status'])
+        self.assertIn('2736',actions['A35']['cost'])
+        self.assertIn('未启动',actions['A36']['status'])
         self.assertIn('描述性pilot',actions['A33']['gate'])
         self.assertIn('训练切片描述门',actions['A32']['gate'])
         self.assertIn('0/6过门',actions['A31']['status'])
