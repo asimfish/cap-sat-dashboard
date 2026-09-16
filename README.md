@@ -8,7 +8,21 @@ The live panel verifies heartbeat/process identity and audited completion
 receipts; stale exports do not claim execution. No GPU training or paper rewrite.
 Historical E61 remains stopped incomplete.
 
-Latest method diagnostic: A30 finishes48new general-CNF development cases,
+Latest method pilot: A33 completed and passed raw-record audit, but failed both
+family feasibility gates. A compact 3-layer, 166,530-parameter
+student distills the fixed RLAF teacher offline, with matched CAP/scratch
+initializations and three seeds each. 384 fresh training, 72 validation and 72
+development CNFs; 6,912 optimizer updates and 1,440 full-cost solver cells complete.
+Training shares six GPUs; singleton prediction timing is sequential on one GPU.
+Fidelity, inference cost, solver parity and potential advantage are separate
+gates. No automatic preference fine-tuning, paper rewrite or independent claim.
+The top `#compact-distill` panel exports operational counts only; audited science
+belongs in `#action-A33`. Prediction medians fell43.02–60.64%descriptively, but
+phase agreement is only89.54–90.40%; all students lose n350 solves vs teacher.
+Validation-only diagnosis localizes89.42–90.67%of phase errors to teacher |rho|<.1.
+No automatic extra epochs or preference training. A32 remains failed for expansion.
+
+Earlier method diagnostic: A30 finishes48new general-CNF development cases,
 12arms x2fixed-seed timing repeats=1152cells. On n200, cheap degree weights
 (.153714s PAR2) outperform native RLAF(.176290s), though both beat stock(.445378s).
 On n350, native RLAF solves6/24; replacing its phases with CAP solves2/24.
@@ -71,7 +85,7 @@ process heartbeat; last log timestamps are shown independently.
 
 `performance_plan.json` is the canonical, manually reviewed seven-gap roadmap.
 Each gap separates observed progress, remaining limitations and source maturity.
-Thirty-one actions have dependencies, costs, acceptance and stopping rules. Their
+Thirty-four actions have dependencies, costs, acceptance and stopping rules. Their
 reviewed status is distinct from automated experiment progress. E26 is the first
 bounded new pilot; historical K%-phase results still require complete row-level
 reconciliation before promotion to confirmed performance gains.

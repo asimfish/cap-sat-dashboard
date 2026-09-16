@@ -6,9 +6,48 @@ import tempfile
 import unittest
 from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress, local_feedback_progress
 from unittest.mock import patch
+from build import compact_distill_progress
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_compact_distill_live_stale_private_and_terminal(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/compact_distill_20260916_v1';root.mkdir(parents=True)
+            def save(name,obj):(root/name).write_text(json.dumps(obj))
+            ident=dict(kind='bundle_digest',value='c'*64,scope='distillation_inputs')
+            rows=[dict(n=n,split=s) for s,k in [('train',128),('validation',24),('development',24)] for n in (200,300,350) for _ in range(k)]
+            for i,r in enumerate(rows):r['index']=i
+            labels=[f'{f}{s}' for s in (42,43,44) for f in ('cap','scratch')]
+            cfg=dict(target_cells=1440,updates_per_lane=1152,epochs=24,depth=3,batch_size=8,
+                     cores=list(range(24)),gpus=list(range(6)),rows=rows,lanes=[dict(label=l) for l in labels])
+            state=dict(phase='running',stage='training',completed_cells=0,target_cells=1440,input_identity=ident,
+                       started_unix=1000.,observed_unix=1100.,elapsed_s=100.,receipts=[],supervisor={'private':'PRIVATE'},
+                       training=[dict(label=l,updates=12,epoch=1,phase='training',target_updates=1152,private='PRIVATE') for l in labels])
+            save('FROZEN.json',dict(input_identity=ident));save('CONFIG.json',cfg);save('STATUS.json',state)
+            with patch('build.joint_supervisor_alive',return_value=True) as alive:
+                out=compact_distill_progress(repo,1100);self.assertEqual(out['training_updates'],72)
+                alive.assert_called_with(repo,root,state,'owner.py')
+                self.assertNotIn('PRIVATE',json.dumps(out));self.assertFalse(out['learned_advantage'])
+                self.assertEqual(compact_distill_progress(repo,1221)['phase'],'stale')
+            with patch('build.joint_supervisor_alive',return_value=False):
+                self.assertEqual(compact_distill_progress(repo,1100)['phase'],'stale')
+            state['training'].append(state['training'][0]);save('STATUS.json',state)
+            self.assertIsNone(compact_distill_progress(repo,1100));state['training'].pop()
+            state.update(phase='complete',stage='complete',completed_cells=1440,cleanup=dict(errors=[],unreaped=[]))
+            for lane in state['training']:lane.update(phase='complete',updates=1152,epoch=24)
+            save('STATUS.json',state);save('FINAL.json',state)
+            self.assertIsNone(compact_distill_progress(repo,1100))
+            state['receipts']=[dict(label=l,returncode=0) for l in ['teacher_train','teacher_dev','references','evaluate']+[f'{s}{i}' for s in ('train','predict') for i in range(6)]]
+            save('STATUS.json',state);save('FINAL.json',state)
+            out=compact_distill_progress(repo,9999);self.assertEqual(out['phase'],'complete');self.assertEqual(out['training_updates'],6912)
+            self.assertEqual(out['performance_verdict'],'not_evaluated_by_progress_collector')
+            state['receipts'][0]['returncode']=1;save('STATUS.json',state);save('FINAL.json',state)
+            self.assertIsNone(compact_distill_progress(repo,1100))
+            state.update(phase='failed',stage='training',error='/home/PRIVATE');save('STATUS.json',state);save('FINAL.json',state)
+            self.assertEqual(compact_distill_progress(repo,1100)['phase'],'failed')
+            state['elapsed_s']=float('nan');save('STATUS.json',state);save('FINAL.json',state)
+            self.assertIsNone(compact_distill_progress(repo,1100))
+
     def test_local_feedback_fail_closed_and_private(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/local_feedback_20260916_v1';root.mkdir(parents=True)
@@ -493,11 +532,13 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),33)
+        self.assertEqual(len(plan['actions']),34)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
         self.assertIn('2448',actions['A32']['cost'])
+        self.assertIn('6912',actions['A33']['cost'])
+        self.assertIn('描述性pilot',actions['A33']['gate'])
         self.assertIn('训练切片描述门',actions['A32']['gate'])
         self.assertIn('0/6过门',actions['A31']['status'])
         self.assertIn('27648',actions['A31']['cost'])
