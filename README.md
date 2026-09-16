@@ -17,6 +17,13 @@ lanes and waits for192MiB root headroom before6remaining lanes;128MiB updatefloo
 unchanged, model/Adam/RNG saved on resourcepause. Original failed state retained.
 Night supervisorv2 alive until09:24:33; waiting is excluded from sampled activity.
 A40 is conditional/unfrozen, not an automatically launched experiment.
+A41 retained-output diagnosis:98.64–99.55% of literal errors are near-zero;
+three-seed voting only+.2365/+.3783points, no full-cost inference. A42 fits one
+phase threshold per model on training ONLY:raw seeds improve+.7932/+.2870/+.1412
+points to97.37–97.52%, mixed is inconsistent and no family passes98%. Independent
+NumPy audit replays9training optima/15120records. CPU decoder-only benchmarking
+does not establish end-to-end performance. Both analyses use exposed validation;
+no GPU updates, new labels or sealed holdout/development evaluation.
 No paper rewrite and no fully solved performance gap.
 
 Campaign status: A26 stopped at the disk safety floor after7h13m36s, before its
