@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-16T10:35:30.818887+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-16T10:42:39.008630+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -35,7 +35,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-16T10:35:30.818887+00:00",
+  "generated": "2026-09-16T10:42:39.008630+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3661,19 +3661,19 @@
       {
         "id": "A32",
         "title": "围绕强RLAF策略做局部修改，校准困难公式反馈预算",
-        "priority": "方法级辨别小试 · 不盲目扩训",
-        "status": "固定队列已启动；即时阶段见顶部心跳，尚无性能结论",
-        "cost": "24个新训练校准CNF，n200/300/350各8，6生成流；34动作×3预算=2448反馈单元。2共享GPU推理、24物理核反馈，40分钟监督上限；不是8小时或两卡持续训练。",
+        "priority": "完整审计完成 · 局部扰动改善但未超过强基线",
+        "status": "2448单元审计通过；H1通过，H2/H3失败，不自动扩训",
+        "cost": "24个新训练校准CNF，n200/300/350各8，6生成流；34动作×3预算=2448反馈单元。2共享GPU推理、24物理核反馈，实际约6分钟；不是8小时或两卡持续训练。938个观察身份与4进程组退出扫描无遗留。",
         "depends_on": [
           "A31"
         ],
         "hypothesis": "A31短预算下困难奖励饱和可能与全变量大范围扰动共同限制学习；需区分动作支持、预算截断和CAP增量信息，而非直接再跑相同训练。",
         "method": "同一原生RLAF mode为基础，8个配对动作分别扰动全部、随机8、随机16、CAP分歧排名16变量；支持外严格不变。0.75/3/6秒预算复用相同动作，顺序预先随机。包含不修改和最小度数控制，CAP付RLAF与CAP双推理费。参考60秒CaDiCaL，未解保留，SAT完整检查。模型加载和预热另报。",
         "gate": "H1：3秒随机16对全变量平均PAR2改善至少5%且信用数不降；H2：困难规模随机16从0.75到6秒全无信用组下降至少20个百分点。两者同时满足才提议新局部策略训练。H3：6秒CAP16还须对随机16快至少3%且各规模均值/信用无害。都是训练切片描述门，不是显著性或端到端确认。",
-        "stop": "先完整审计2448单元、原始判词/退出/费用、唯一矩阵和终态身份，再判门。固定队列结束就停止，不自动大量训练，不用事后最佳八选一宣称部署收益。局部或预算门失败不扩大此配置；论文、旧A31失败、0/7完全解决的结论保持。"
+        "stop": "3秒均值：RLAF不修改2.329876s、全变量3.323283s、随机8为2.394257s、随机16为2.502145s、CAP16为2.822839s。随机16对全变量改善24.71%，但对RLAF仍慢7.39%；随机8也仍慢2.76%。困难随机16全无信用组从62.5%降到50%，仅12.5个百分点，未达20点门；3→6秒只多1/128成功动作，反馈耗时总和增加81.64%。6秒CAP16对随机16仍慢7.67%。完整审计零错误；首次汇总误用另一Python环境导致浮点精确重放失败，换回生产虚拟环境全通过，未改结果或放宽检查。停止此扩训路线；下一候选是离线强策略蒸馏到单模型后再做求解偏好微调，尚未启动、须新协议；不改论文、旧失败和0/7完全解决结论。"
       }
     ],
-    "sha256": "d6cb972d9895fd2ae7a80aa039b34a0b77ca34c5764c7f0539608fb61ae03aba"
+    "sha256": "274904d1eb96ec56977cfd8c0c66040aab3a2a6df7570e5b1563ca3d7384786f"
   },
   "pilot": {
     "id": "E26",
@@ -7505,7 +7505,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-16T17:51:49.241335+00:00",
+    "earliest_target_at": "2026-09-16T17:58:57.395629+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -7567,17 +7567,17 @@
     "caveat": "廉价控制包含不必要特征计算；边缘通过也须精简对照复测。退出成功不代替完整原始记录审计。"
   },
   "local_feedback": {
-    "phase": "running",
-    "stage": "feedback",
-    "completed_cells": 2108,
+    "phase": "complete",
+    "stage": "complete",
+    "completed_cells": 2448,
     "target_cells": 2448,
     "formulas": 24,
     "generation_streams": 6,
     "solver_workers": 24,
     "gpu_inference_lanes": 2,
-    "elapsed_s": 226.69970630854368,
+    "elapsed_s": 359.714356332086,
     "duration_limit_s": 2400,
-    "observed": "2026-09-16T10:35:32.976887+00:00",
+    "observed": "2026-09-16T10:37:45.991537+00:00",
     "performance_verdict": "training_calibration_not_confirmation",
     "learned_advantage": false
   },

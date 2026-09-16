@@ -284,6 +284,8 @@ render-html skill; it is an archival snapshot, not the live exporter.
 rebuilds, synchronizes an explicit file allowlist, and pushes only when source
 content changes or the last exported snapshot is at least one hour old.
 It requires an authenticated Git checkout of this public dashboard repository.
+Add `--stage-only` to stop after staging the allowlist for review, without a
+commit or push. Review the staged diff before manually publishing it.
 `watch.py` runs this check every 15 minutes with a single-instance file lock and
 a 180-second per-export deadline. It can run in tmux; it does not survive host
 reboots unless a host scheduler starts it again. Run collector regression checks
@@ -297,3 +299,15 @@ flock -n /tmp/capsat-dashboard.lock python3 publish.py --repo /path/to/cap-sat -
 Do not serve the CAP-SAT experiment root. GitHub Pages serves `site/` through
 the included Actions workflow. The collector is read-only with respect to the
 experiment repository and never launches solver or training jobs.
+
+## A32 local-action / budget calibration
+
+The top A32 panel tracks 24 new training-calibration CNFs, 6 generation streams,
+and 2,448 feedback cells (not independent samples). It compares full/random8/
+random16/CAP-ranked16 perturbations around the same strong RLAF anchor at
+0.75/3/6 seconds, with unchanged-anchor and minimal-degree controls. Two shared
+GPUs only prepare predictions; up to 24 CPU workers produce solver feedback.
+The collector redacts process identities and paths, marks stale heartbeats, and
+never interprets queue completion as learned or end-to-end advantage. Audited
+scientific conclusions belong in the A32 plan card. This pilot does not train a
+new model, auto-expand the queue, or modify paper conclusions.

@@ -15,6 +15,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--repo', type=Path, required=True)
     p.add_argument('--checkout', type=Path, required=True)
+    p.add_argument('--stage-only', action='store_true', help='Stage the allowlist for review without committing or pushing')
     a = p.parse_args()
     source = a.repo.resolve() / 'dashboard'
     dest = a.checkout.resolve()
@@ -56,6 +57,9 @@ def main():
             (dest/name).parent.mkdir(parents=True,exist_ok=True)
             shutil.copy2(src,dest/name)
     run(['git','add','--']+[n for n in names if (dest/n).exists()],dest)
+    if a.stage_only:
+        print('Dashboard allowlist staged; commit and push withheld for review')
+        return
     if run(['git','diff','--cached','--name-only'],dest):
         run(['git','diff','--cached','--check'],dest)
         run(['git','commit','-m','[dashboard/chore]: refresh audited CAP-SAT progress'],dest)
