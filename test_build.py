@@ -4,11 +4,51 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress
+from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress
 from unittest.mock import patch
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_joint_feedback_live_stale_private_and_incomplete(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/joint_feedback_20260916_v1';root.mkdir(parents=True)
+            def save(name,obj):(root/name).write_text(json.dumps(obj))
+            identity=dict(kind='bundle_digest',value='a'*64,scope='evaluation_inputs')
+            cfg=dict(input_identity=identity,seeds=[42,43,44],iterations=48,training_cells=27648,
+                development_cells=1584,cores=list(range(24)),gpus=[0,3,7])
+            state=dict(input_identity=identity,phase='running',stage='training',started_unix=1000.,observed_unix=1100.,elapsed_s=100.,
+                supervisor={'pid':1,'private':'PRIVATE'},training=[dict(seed=s,iteration=1,completed_cells=192,training_target=9216,phase='training',private='PRIVATE') for s in [42,43,44]],
+                development_completed_cells=0,development_target_cells=1584,running=[{'private':'PRIVATE'}],receipts=[])
+            save('FROZEN.json',cfg);save('STATUS.json',state)
+            with patch('build.joint_supervisor_alive',return_value=True):
+                out=joint_feedback_progress(repo,1100);self.assertEqual(out['phase'],'running')
+                self.assertEqual(out['training_completed_cells'],576)
+                self.assertNotIn('PRIVATE',json.dumps(out));self.assertNotIn('supervisor',out)
+                self.assertFalse(out['learned_advantage']);self.assertEqual(out['performance_verdict'],'pending')
+                self.assertEqual(joint_feedback_progress(repo,1221)['phase'],'stale')
+            with patch('build.joint_supervisor_alive',return_value=False):
+                self.assertEqual(joint_feedback_progress(repo,1100)['phase'],'stale')
+            state['training'][0]['completed_cells']=193;save('STATUS.json',state)
+            self.assertIsNone(joint_feedback_progress(repo,1100))
+            state['training'][0]['completed_cells']=192
+            state.update(phase='complete',stage='complete',running=[])
+            save('STATUS.json',state);self.assertIsNone(joint_feedback_progress(repo,1100))
+            save('FINAL.json',state);save('DEVELOPMENT_COMPLETE.json',dict(cells=1584,formulas=72))
+            self.assertIsNone(joint_feedback_progress(repo,1100))
+            for lane in state['training']:lane.update(iteration=48,completed_cells=9216,phase='complete')
+            state.update(development_completed_cells=1584,receipts=[dict(label=x,returncode=0) for x in
+                ['references','feature0','feature1','feature2','train0','train1','train2','predict0','predict1','predict2','predict_rlaf','development']])
+            save('STATUS.json',state);save('FINAL.json',state)
+            out=joint_feedback_progress(repo,100000);self.assertEqual(out['phase'],'complete')
+            self.assertFalse(out['learned_advantage']);self.assertEqual(out['performance_verdict'],'pending')
+            state['receipts'][0]['returncode']=1;save('STATUS.json',state);save('FINAL.json',state)
+            self.assertIsNone(joint_feedback_progress(repo,1100))
+            state.update(phase='failed',error='/home/PRIVATE',stage='training')
+            save('STATUS.json',state);save('FINAL.json',state)
+            self.assertEqual(joint_feedback_progress(repo,1100)['phase'],'failed')
+            state['elapsed_s']=float('nan');save('STATUS.json',state);save('FINAL.json',state)
+            self.assertIsNone(joint_feedback_progress(repo,1100))
+
     def test_prefix_campaign_stale_terminal_and_public_allowlist(self):
         import datetime as dt
         with tempfile.TemporaryDirectory() as d:
@@ -431,10 +471,13 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),31)
+        self.assertEqual(len(plan['actions']),32)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
+        self.assertIn('待审计',actions['A31']['status'])
+        self.assertIn('27648',actions['A31']['cost'])
+        self.assertIn('多余解析',actions['A31']['stop'])
         self.assertIn('E26',actions['A3']['status'])
         self.assertIn('E27',actions['A6']['status'])
         self.assertIn('E28',actions['A4']['status'])

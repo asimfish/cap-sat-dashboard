@@ -1405,6 +1405,80 @@ def prefix_campaign_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
 
 
+def joint_supervisor_alive(repo, root, state):
+    """Accept only this supervisor, its start time and resolved script argument."""
+    try:
+        identity=state['supervisor'];pid=identity['pid']
+        if type(pid) is not int or pid<=1:return False
+        proc=Path('/proc')/str(pid)
+        fields=(proc/'stat').read_text().rsplit(')',1)[1].split()
+        boot=int(next(x.split()[1] for x in Path('/proc/stat').read_text().splitlines() if x.startswith('btime ')))
+        created=boot+int(fields[19])/os.sysconf('SC_CLK_TCK')
+        args=(proc/'cmdline').read_bytes().split(b'\0')
+        script=root/'supervisor.py'
+        absolute=str(script).encode() in args
+        relative=str(script.relative_to(repo)).encode() in args and (proc/'cwd').resolve()==repo.resolve()
+        return fields[0] not in ('Z','T','t','X','x') and abs(created-identity['create_time'])<.02 and (absolute or relative)
+    except (OSError,ValueError,KeyError,TypeError,IndexError,StopIteration):return False
+
+
+def joint_feedback_progress(repo, now=None):
+    """A31 operational allowlist. Completion never implies scientific acceptance."""
+    root=repo/'experiments/joint_feedback_20260916_v1'
+    try:
+        cfg=json.loads((root/'FROZEN.json').read_text())
+        state=json.loads((root/'STATUS.json').read_text())
+        identity=cfg['input_identity']
+        if (identity.get('kind')!='bundle_digest' or identity.get('scope')!='evaluation_inputs'
+                or not re.fullmatch('[0-9a-f]{64}',identity.get('value','')) or state['input_identity']!=identity):return None
+        if cfg['seeds']!=[42,43,44] or cfg['iterations']!=48 or cfg['training_cells']!=27648 or cfg['development_cells']!=1584:return None
+        if len(set(cfg['gpus']))!=3 or len(set(cfg['cores']))!=24:return None
+        def finite(v):
+            if type(v) not in (int,float) or not math.isfinite(v) or v<0:raise ValueError('invalid measurement')
+            return v
+        def count(v,limit):
+            if type(v) is not int or not 0<=v<=limit:raise ValueError('invalid count')
+            return v
+        started=finite(state['started_unix']);observed=finite(state['observed_unix']);elapsed=finite(state['elapsed_s'])
+        if abs(observed-started-elapsed)>2:return None
+        phase=state['phase'];stage=state['stage']
+        if phase not in ['running','complete','failed']:return None
+        if stage not in ['starting','references','features','training','development_predictions','native_baseline_prediction','development','complete']:return None
+        lanes=[];seeds=set()
+        for lane in state['training']:
+            seed=lane['seed']
+            if seed not in cfg['seeds'] or seed in seeds:return None
+            seeds.add(seed);iteration=count(lane['iteration'],48);cells=count(lane['completed_cells'],9216)
+            if cells!=iteration*192 or lane['training_target']!=9216:return None
+            if lane['phase'] not in ['training','validation','complete']:return None
+            lanes.append(dict(seed=seed,iteration=iteration,completed_cells=cells,phase=lane['phase']))
+        dev=count(state['development_completed_cells'],1584)
+        if dev%11 or state['development_target_cells']!=1584:return None
+        running=count(len(state['running']),3)
+        expected={'references','feature0','feature1','feature2','train0','train1','train2','predict0','predict1','predict2','predict_rlaf','development'}
+        receipts=state['receipts'];labels=[r['label'] for r in receipts]
+        if len(set(labels))!=len(labels) or not set(labels)<=expected:return None
+        failures=sum(type(r['returncode']) is not int or r['returncode']!=0 for r in receipts)
+        terminal=phase in ['complete','failed']
+        if terminal:
+            if json.loads((root/'FINAL.json').read_text())!=state:return None
+            if phase=='complete':
+                receipt=json.loads((root/'DEVELOPMENT_COMPLETE.json').read_text())
+                if (stage!='complete' or running or failures or set(labels)!=expected or len(lanes)!=3
+                        or any(x['phase']!='complete' or x['iteration']!=48 for x in lanes)
+                        or dev!=1584 or receipt!={'cells':1584,'formulas':72}):return None
+        age=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed
+        if not terminal and (not -5<=age<=120 or not joint_supervisor_alive(repo,root,state)):phase='stale'
+        return dict(phase=phase,stage=stage,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),
+            started_at=dt.datetime.fromtimestamp(started,dt.timezone.utc).isoformat(),elapsed_s=elapsed,duration_limit_s=3600,
+            gpu_lanes=3,solver_workers=24,running_lanes=running,training=sorted(lanes,key=lambda x:x['seed']),
+            training_completed_cells=sum(x['completed_cells'] for x in lanes),training_target_cells=27648,
+            development_completed_cells=dev,development_target_cells=1584,performance_verdict='pending',learned_advantage=False,
+            scope='96训练/48验证/72开发新公式；单主机驻留组合成本；不是冷启动或独立确认',
+            caveat='廉价控制包含不必要特征计算；边缘通过也须精简对照复测。退出成功不代替完整原始记录审计。')
+    except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1427,6 +1501,7 @@ def main():
     data['native_first']=native_first_progress(args.repo.resolve())
     data['overnight']=overnight_progress(args.repo.resolve())
     data['prefix_campaign']=prefix_campaign_progress(args.repo.resolve())
+    data['joint_feedback']=joint_feedback_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())
