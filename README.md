@@ -8,12 +8,18 @@ The live panel verifies heartbeat/process identity and audited completion
 receipts; stale exports do not claim execution. No GPU training or paper rewrite.
 Historical E61 remains stopped incomplete.
 
-Current mechanism screen: A34 runs3/6layers × baseline/boundary-weighted loss ×
+Current mechanism screen: A34 completed3/6layers × baseline/boundary-weighted loss ×
 three seeds,12scratch models,13,824updates, on REUSED A33 train/validation only.
 The common selection metric and all per-formula outputs are retained. This is
 neither new development nor end-to-end evaluation:0solver cells. No automatic
 extra epochs, preference fine-tuning or promotion. See `#boundary-screen` and
 `#action-A34`; operational completion and scientific gates stay separate.
+All12exit receipts and4,320validation records passed audit; queue234.49seconds.
+All4mechanism contrasts and4absolute family fidelity screens FAILED. Depth alone
+improved near-boundary agreement0.60–0.76percentage points, below the2point gate;
+boundary reweighting was inconsistent. Overall agreement89.22–90.05% remains well
+below98%. This branch stopped without a solver run. Fitability/train-validation
+diagnosis is the next separately specified frontier, not an active training queue.
 
 Previous method pilot: A33 completed and passed raw-record audit, but failed both
 family feasibility gates. A compact 3-layer, 166,530-parameter
