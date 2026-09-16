@@ -1644,6 +1644,41 @@ def coverage_screen_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
 
 
+def night_recovery_progress(repo, now=None):
+    """Publish supervision and resource pauses, never imply eight hours of compute."""
+    root=repo/'experiments/overnight_20260917_v1';trial=repo/'experiments/anneal_literal_20260917_v2'
+    try:
+        state=json.loads((root/'STATUS_V2.json').read_text());cfg=json.loads((root/'SUPERVISOR_V2.json').read_text())
+        if state['source_sha256']!=cfg['source_sha256'] or hashlib.sha256((root/'supervise_v2.py').read_bytes()).hexdigest()!=cfg['source_sha256']:return None
+        phase=state['phase'];observed=state['observed_unix']
+        if phase not in ('starting','running_task','observing_a38','awaiting_registered_work','waiting_resources','source_missing_terminal','draining','failed','stopped','window_ended'):return None
+        if state['window_start_unix']!=1789579473 or state['window_end_unix']!=1789608273:return None
+        if any(type(v) not in (int,float) or not math.isfinite(v) or v<0 for v in (observed,state['active_s'],state['started_unix'])):return None
+        allowed={'a38_audit','a39_recovery_owner','a39_recovery_audit','a39_owner','a39_audit','a40_owner','a40_audit','a41_owner','a41_audit','a42_owner','a42_audit'}
+        if not set(state['registered'])<=allowed or len(set(state['registered']))!=len(state['registered']) or state['current'] not in allowed|{None}:return None
+        terminal=phase in ('failed','stopped','window_ended')
+        if terminal:
+            if state!=json.loads((root/'FINAL_V2.json').read_text()):return None
+        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state,'supervise_v2.py'):phase='stale'
+        progress=None
+        if (trial/'STATUS.json').exists():
+            value=json.loads((trial/'STATUS.json').read_text());identity=json.loads((trial/'FROZEN.json').read_text())['input_identity']
+            if value['input_identity']!=identity or identity.get('scope')!='literal_anneal_recovery_inputs' or not re.fullmatch('[0-9a-f]{64}',identity.get('value','')):return None
+            new=value['new_updates'];reused=value['reused_updates']
+            if type(new)is not int or not 0<=new<=18432 or reused!=18432 or value['completed_updates']!=new+reused or value['target_updates']!=36864:return None
+            if sum(r['updates'] for r in value['training'])!=new+reused:return None
+            audited=False
+            if value['phase']=='complete':
+                if value!=json.loads((trial/'FINAL.json').read_text()) or new!=18432 or value['cleanup']!={'errors':[],'unreaped':[]}:return None
+                if (trial/'AUDIT.json').exists():
+                    audit=json.loads((trial/'AUDIT.json').read_text());audited=audit['input_identity']==identity and audit['errors']==[] and audit['updates']==36864 and audit['records']==28512
+            progress=dict(new_updates=new,reused_updates=reused,target_new_updates=18432,audited=audited)
+        return dict(phase=phase,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),current=state['current'],registered=len(state['registered']),
+            window_end=dt.datetime.fromtimestamp(state['window_end_unix'],dt.timezone.utc).isoformat(),recovery=progress,
+            has_error=state['error'] is not None,learned_advantage=False,solver_cells=0,waiting_is_compute=False)
+    except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1671,6 +1706,7 @@ def main():
     data['compact_distill']=compact_distill_progress(args.repo.resolve())
     data['boundary_screen']=boundary_screen_progress(args.repo.resolve())
     data['coverage_screen']=coverage_screen_progress(args.repo.resolve())
+    data['night_recovery']=night_recovery_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())

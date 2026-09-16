@@ -1,12 +1,13 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-16T18:26:24.005085+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-16T18:41:36.093332+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
 </style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#performance-plan">05 · 性能改进计划</a><a href="#next">06 · 论文与审计</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
+<section id="night-window"><h2>今晚监护 · 资源保护与恢复</h2><div id="night-window-progress" class="panel" aria-live="polite"></div></section>
 <section id="coverage-screen"><h2>A38 · 今晚的新数据与表示验证</h2><div id="coverage-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="boundary-screen"><h2>A34 · 表示深度 × 近零边界监督</h2><div id="boundary-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="compact-distill"><h2>A33 · 强策略离线蒸馏 → 单个紧凑模型</h2><div id="compact-distill-progress" class="panel" aria-live="polite"></div></section>
@@ -38,7 +39,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-16T18:26:24.005085+00:00",
+  "generated": "2026-09-16T18:41:36.093332+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3064,7 +3065,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-17",
-    "scope": "A35恢复5472记录审计通过，12模型均训练拟合不足。A36原TC连续回归负结果保留；A37正负文字分开表示使旧验证一致率升至93.20–94.02%，文字raw达95.65–96.28%，这是行为保真信号而非端到端加速。A38已完成1680新教师标签并启动18模型/110592更新的新数据验证；留出和开发封存。七项缺口仍4部分改善、3未解决，不改论文。",
+    "scope": "A38已完成18模型、110592更新及38016记录审计：文字表示新验证96.58%–97.43%，明显好于TC90.38%–90.78%，但仍无三种子逐规模98%过门，更未证明端到端优势。A39学习率对照因资源线中止，六模型已审计复用；恢复版等待根分区恢复192MiB再派发，监督到北京时间09:24。A40仅条件草案。七项缺口仍4部分改善、3未解决，不改论文。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3754,8 +3755,8 @@
       {
         "id": "A38",
         "title": "新数据覆盖 × 近等有效参数量的表示/损失验证",
-        "priority": "今晚主试验 · 已启动",
-        "status": "1680新教师标签已完成；18模型三批训练，实时计数见顶部",
+        "priority": "主试验 · 完成并审计",
+        "status": "18模型、110592更新、38016记录审计通过；表示门2/2，绝对保真门未通过",
         "cost": "384/1536嵌套新训练 × TCmixed/literalmixed/literalraw × 3种子；各6144步，共110592更新。144新验证、72旧验证；另144留出及144开发封存。",
         "depends_on": [
           "A37"
@@ -3763,10 +3764,38 @@
         "hypothesis": "区分表示包、训练覆盖、优化不足和泛化差距。A37正向旧验证信号必须在未使用的新验证上重现。",
         "method": "固定最终6144步，不挑检查点。全部scratch/dropout0、batch8、Adam与批次规则匹配。TC存储166530参/参与梯度154050参，文字模型154652参，比有效TC多0.391%，非同FLOPs。原TC五个无梯度张量保留。新目标逐条绑定公式/教师/运行环境；每规模分stream报告，嵌套样本非独立。",
         "gate": "表示与覆盖机制门分别判定；只有1536 family三种子在每规模新验证一致率≥98%、log权重RMSE≤0.15才可另行冻结留出/全成本开发协议。0求解单元，不自动变为性能优势。",
-        "stop": "用户窗口北京时间2026-09-17 01:24–09:24；六张共享GPU，一卡一路，单进程10%显存上限，原服务卡不动。A38阶段上限2小时且不越窗口，受STOP/磁盘/内存保护，身份限定清理。标签已完成、训练已启动不代表八小时已跑完。新验证/训练差距决定后续，不为填时长重复负分支。"
+        "stop": "18模型全完成，1059.75秒；38016记录重放零错误、26进程身份核对。文字模型新验证96.58%–97.43%，TC90.38%–90.78%；384与1536两种规模的表示对照都通过，但三项扩数据量对照均未通过，不能靠扩数据宣称修复。所有1536 family未达三种子逐规模98%门；训练≈验证，留出/开发仍封存，0求解单元。A39单独区分学习率噪声与额外步数；不得挑A38中间峰值报喜。"
+      },
+      {
+        "id": "A39",
+        "title": "同起点、同新增步数检验学习率退火",
+        "priority": "资源保护 · 恢复版等待空间",
+        "status": "原轮6/12完成后中止；六模型部分审计通过，恢复版已启动等待资源",
+        "cost": "原轮日志保留26074次更新（非完整试验）；六个完整模型14256评估记录通过部分审计。恢复版重用18432已完成更新，仅补六模型18432更新；最终矩阵36864步，丢弃的部分训练开销另列。",
+        "depends_on": [
+          "A38"
+        ],
+        "hypothesis": "固定学习率可能造成近零相位边界震荡；也可能表示信息仍不足。额外步数和重置Adam必须有同样的控制。",
+        "method": "从全部六个A38 literal1536最终权重出发，每个constant0.001对cosine0.0001→0.00001；双方都重置Adam，epoch33–48、batch8，各3072步，固定最终检查点。旧验证/新验证现在均为探索性复用；不读留出或开发标签。",
+        "gate": "退火须三种子相比同预算constant总体至少升0.5点且逐规模无损。晋级仍须每规模每种子≥98%且log权重RMSE≤0.15，不因中止或部分正向而放宽。",
+        "stop": "资源安全线触发后所有旧进程已清理，原失败冻结保留，不重跑六个完整模型。恢复版独立冻结、6项测试通过；根分区当前约128MiB，要求192MiB余量再派发。训练期间若低于128MiB，保存模型/Adam/RNG到大容量存储并暂停，恢复至192MiB再继续；等待不算计算。新标签路径明确复用A38，并校验完整目标清单，无新teacher/holdout/development目录。已知缓存迁移仍需用户确认。夜间监督至09:24，不保证空间不足时八小时都在计算。"
+      },
+      {
+        "id": "A40",
+        "title": "条件计划：近等有效参数量下增加文字消息传递深度",
+        "priority": "后备方向 · 草案已实现，未冻结启动",
+        "status": "等待A39完整审计；禁止越过前置门直接启动",
+        "cost": "拟6层宽56/10层宽44 × mixed/raw ×3种子，共12模型；各9216步、110592新增更新，复用A39三层退火模型作保留控制。",
+        "depends_on": [
+          "A39"
+        ],
+        "hypothesis": "A38的新表示已有约97%保真；若充分控制学习率后仍训练≈验证且低于98%，可能需要更长的信息传播范围，不是单纯增加数据。",
+        "method": "6层153946参、10层151230参，对照3层154652参，近等有效参数而非同FLOPs。相同1536训练、相同epoch1–48，前6144步原学习率，随后同样重置Adam并退火3072步；最终9216固定。",
+        "gate": "仅A39完整恢复审计且无family过98%门才允许冻结本草案。三种子逐规模保真门不变；与保留三层同预算对照比较近零与外侧指标。随后还须另行冻结真实全成本测试。",
+        "stop": "当前只是条件后备，不能计入运行或已完成实验。CPU模型/训练流程/重置边界/独立导入四项测试通过；冻结前还须完成资源暂停策略及GPU集成检查。不因填满八小时而绕过A39或重复无意义的深度网格。未做求解、未改论文。"
       }
     ],
-    "sha256": "63d11b126cdbdf06a825186438ec2ffcf3566c70f22bb0e2e0bfbc2f782a37d5"
+    "sha256": "10ec2ff9b288dabb501939ad01d837f3b921ddce551d39829e06453f6eb9ee17"
   },
   "pilot": {
     "id": "E26",
@@ -7598,7 +7627,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-17T01:42:42.716307+00:00",
+    "earliest_target_at": "2026-09-17T01:57:54.407805+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -7928,6 +7957,23 @@
     "solver_cells": 0,
     "learned_advantage": false,
     "performance_verdict": "fresh_validation_screen_only"
+  },
+  "night_recovery": {
+    "phase": "waiting_resources",
+    "observed": "2026-09-16T18:41:34.936932+00:00",
+    "current": "a39_recovery_owner",
+    "registered": 3,
+    "window_end": "2026-09-17T01:24:33+00:00",
+    "recovery": {
+      "new_updates": 0,
+      "reused_updates": 18432,
+      "target_new_updates": 18432,
+      "audited": false
+    },
+    "has_error": false,
+    "learned_advantage": false,
+    "solver_cells": 0,
+    "waiting_is_compute": false
   },
   "targeted": {
     "cells": 27648,
@@ -13605,12 +13651,23 @@ function renderOvernight(){
  renderCompactDistill();
  renderBoundaryScreen();
  renderCoverageScreen();
+ renderNightRecovery();
  const u=data.overnight,target=document.getElementById('overnight-progress');
  if(!u){target.textContent='尚无通过完整性检查的队列快照。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=age>120&&!['complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'有实验执行的运行快照',paused_resources:'资源保护：暂停新增任务',draining:'结束派发，等待当前任务收尾',complete:'已达到8小时有效运行',stopped_incomplete:'已停止，未跑满8小时',stale:'快照已陈旧，当前运行状态待下次导出确认'};
  target.innerHTML=`<b>${esc(labels[phase]||'状态未知')}</b><div class="cards"><div class="card"><b>${(u.active_s/3600).toFixed(2)} / 8 h</b><span>实际有实验执行的累计墙钟；不累加并发CPU小时</span></div><div class="card"><b>${u.counts.cpu_jobs} 批 / ${u.counts.cells.toLocaleString()} 次</b><span>已完成并核对结果摘要的全成本求解</span></div><div class="card"><b>${u.counts.training_jobs} / ${u.training_queue}</b><span>完成候选训练；${u.counts.training_steps.toLocaleString()} 个优化步</span></div></div><p>上次快照在执行：CPU ${u.running.cpu}/${u.cpu_slots} 路，GPU训练 ${u.running.train}/${u.gpu_slots} 路，数据准备 ${u.running.data} 路；失败任务 ${u.failed_jobs} 个。</p><p>CPU：四规模匹配对照、困难 n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算。GPU：8数据分片 × 2模型 × 3损失 × 3学习率 × 3种子，共432项候选；队列未派发项不算完成。</p><p>开始：${esc(new Date(u.started_at).toLocaleString())}；快照：${esc(new Date(u.observed).toLocaleString())}。服务器每15分钟导出；页面每分钟检查。资源空闲等待不计时，达到8小时后停止派发并收尾，安全中断如实标记。</p><p class="muted">新训练权重仍需后续完整成本评估。${esc(u.scope)}；本轮不改论文结论。</p><p class="foot">固定实验配置 SHA256 ${esc(u.frozen_sha256)}</p>`;
+}
+function renderNightRecovery(){
+ const u=data.night_recovery,target=document.getElementById('night-window-progress');
+ if(!u){target.textContent='尚无通过身份检查的夜间监护快照。';return;}
+ const age=(Date.now()-Date.parse(u.observed))/1000;
+ const phase=!['failed','stopped','window_ended'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
+ const labels={starting:'监督启动中',running_task:'执行已登记任务（可能为审计）',observing_a38:'观察 A38 运行',awaiting_registered_work:'等待下一项已审核任务',waiting_resources:'资源保护暂停：等待安全余量',source_missing_terminal:'前序终态尚未确认',draining:'截止前收尾',failed:'监督异常，须检查',stopped:'监督已停止',window_ended:'窗口结束，不代表试验全部完成',stale:'快照已陈旧，当前状态待确认'};
+ const tasks={a38_audit:'A38 独立审计',a39_recovery_owner:'A39 未完成六模型的恢复',a39_recovery_audit:'A39 完整矩阵独立审计',a40_owner:'A40 深度对照',a40_audit:'A40 审计'};
+ const r=u.recovery;
+ target.innerHTML=`<b>${esc(labels[phase])}</b><p>监护截止：北京时间 2026-09-17 09:24:33。当前登记任务：${esc(tasks[u.current]||u.current||'无任务在执行')}。</p>${r?`<div class="cards"><div class="card"><b>${r.reused_updates.toLocaleString()}</b><span>六个完整模型复用，不重跑</span></div><div class="card"><b>${r.new_updates.toLocaleString()} / 18,432</b><span>恢复版实际新增优化步</span></div><div class="card"><b>${r.audited?'已通过':'尚未通过'}</b><span>整轮独立原始记录审计</span></div></div>`:''}<p class="alert">等待不是计算。根分区达到 192 MiB 才恢复派发；训练低于 128 MiB 时保存模型、Adam 与随机状态并暂停。未删除实验数据，也不停止其他任务；未获批准的缓存迁移不执行。</p><p>A38 的新验证已提升到约 97%，仍未达到逐规模 98% 门，更不是端到端加速。A39 原失败保留，A40 仍是条件草案；不能把八小时监护写成八小时 GPU 满载或性能已解决。</p><p class="muted">心跳 ${esc(new Date(u.observed).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}；运行快照超过两分钟标陈旧。<a href="#action-A39">恢复边界与进度 ↗</a></p>`;
 }
 function renderCoverageScreen(){
  const u=data.coverage_screen,target=document.getElementById('coverage-screen-progress');

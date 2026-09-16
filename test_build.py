@@ -6,10 +6,22 @@ import tempfile
 import unittest
 from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress, local_feedback_progress
 from unittest.mock import patch
-from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress
+from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_night_waiting_is_not_compute_or_public_process_data(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/overnight_20260917_v1';root.mkdir(parents=True)
+            code='source';(root/'supervise_v2.py').write_text(code);sha=hashlib.sha256(code.encode()).hexdigest()
+            cfg=dict(source_sha256=sha);state=dict(source_sha256=sha,phase='waiting_resources',observed_unix=1000.,started_unix=900.,active_s=0.,
+                window_start_unix=1789579473,window_end_unix=1789608273,registered=['a39_recovery_owner'],current='a39_recovery_owner',error=None,supervisor=dict(private='/home/PRIVATE'))
+            (root/'SUPERVISOR_V2.json').write_text(json.dumps(cfg));(root/'STATUS_V2.json').write_text(json.dumps(state))
+            with patch('build.joint_supervisor_alive',return_value=True):
+                out=night_recovery_progress(repo,1000);self.assertEqual(out['phase'],'waiting_resources');self.assertFalse(out['waiting_is_compute']);self.assertFalse(out['learned_advantage']);self.assertNotIn('PRIVATE',json.dumps(out))
+                self.assertEqual(night_recovery_progress(repo,1121)['phase'],'stale')
+            (root/'supervise_v2.py').write_text('changed');self.assertIsNone(night_recovery_progress(repo,1000))
+
     def test_coverage_screen_private_stale_counts_terminal_audit(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/coverage_literal_20260917_v1';root.mkdir(parents=True)
@@ -588,7 +600,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),39)
+        self.assertEqual(len(plan['actions']),41)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -602,6 +614,9 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('表示预测门通过',actions['A37']['status'])
         self.assertIn('110592',actions['A38']['cost'])
         self.assertIn('非同FLOPs',actions['A38']['method'])
+        self.assertIn('26074',actions['A39']['cost'])
+        self.assertIn('等待',actions['A39']['status'])
+        self.assertIn('未冻结启动',actions['A40']['priority'])
         self.assertIn('描述性pilot',actions['A33']['gate'])
         self.assertIn('训练切片描述门',actions['A32']['gate'])
         self.assertIn('0/6过门',actions['A31']['status'])

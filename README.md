@@ -5,10 +5,18 @@ support in-sample underfit. A36 TC raw-logit loss underperforms mixed; negative
 result retained. A37 literal representation mixed improves old-validation
 agreement to93.20–94.02%(+8.00–9.50points), raw to95.65–96.28%. This is NOT a
 solver or end-to-end result. The zero-update v1 import failure is retained.
-A38 has1680new teacher labels and18models/110592updates on nested384/1536fresh
+A38 completed1680new teacher labels and18models/110592updates on nested384/1536fresh
 training formulas,144new validation,144sealed holdout and144sealed development.
 See the live A38 panel and plan cards. Six shared GPUs, bounded resources and
 window ending2026-09-17 09:24:33Asia/Shanghai; do not claim eight hours complete.
+All38016records audited. Literal newvalidation96.58–97.43% vsTC90.38–90.78%;
+both representation gates pass but no family reaches absolute98%. A39 learning-
+rate comparison stopped at a resource floor:6complete lanes/14256records accepted,
+26074loggedupdates including unfinished work. Recoveryv2 reuses all6complete
+lanes and waits for192MiB root headroom before6remaining lanes;128MiB updatefloor
+unchanged, model/Adam/RNG saved on resourcepause. Original failed state retained.
+Night supervisorv2 alive until09:24:33; waiting is excluded from sampled activity.
+A40 is conditional/unfrozen, not an automatically launched experiment.
 No paper rewrite and no fully solved performance gap.
 
 Campaign status: A26 stopped at the disk safety floor after7h13m36s, before its
