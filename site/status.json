@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-16T17:59:25.081530+00:00",
+  "generated": "2026-09-16T18:11:11.096173+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -7559,7 +7559,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-17T01:15:43.847896+00:00",
+    "earliest_target_at": "2026-09-17T01:27:29.544175+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -7782,16 +7782,26 @@
     "learned_advantage": false
   },
   "coverage_screen": {
-    "phase": "running",
-    "stage": "training_wave1",
-    "observed": "2026-09-16T17:59:29.226148+00:00",
-    "elapsed_s": 402.43777271267027,
+    "phase": "complete",
+    "stage": "awaiting_independent_audit",
+    "observed": "2026-09-16T18:10:26.534411+00:00",
+    "elapsed_s": 1059.7460361849517,
     "window_end": "2026-09-17T01:24:33+00:00",
     "training": [
       {
         "label": "lit_mixed_1536_42",
-        "updates": 768,
-        "phase": "training"
+        "updates": 6144,
+        "phase": "complete"
+      },
+      {
+        "label": "lit_mixed_1536_43",
+        "updates": 6144,
+        "phase": "complete"
+      },
+      {
+        "label": "lit_mixed_1536_44",
+        "updates": 6144,
+        "phase": "complete"
       },
       {
         "label": "lit_mixed_384_42",
@@ -7805,13 +7815,23 @@
       },
       {
         "label": "lit_mixed_384_44",
-        "updates": 1536,
-        "phase": "training"
+        "updates": 6144,
+        "phase": "complete"
       },
       {
         "label": "lit_raw_1536_42",
-        "updates": 704,
-        "phase": "training"
+        "updates": 6144,
+        "phase": "complete"
+      },
+      {
+        "label": "lit_raw_1536_43",
+        "updates": 6144,
+        "phase": "complete"
+      },
+      {
+        "label": "lit_raw_1536_44",
+        "updates": 6144,
+        "phase": "complete"
       },
       {
         "label": "lit_raw_384_42",
@@ -7825,13 +7845,23 @@
       },
       {
         "label": "lit_raw_384_44",
-        "updates": 1536,
-        "phase": "training"
+        "updates": 6144,
+        "phase": "complete"
       },
       {
         "label": "tc_mixed_1536_42",
-        "updates": 384,
-        "phase": "training"
+        "updates": 6144,
+        "phase": "complete"
+      },
+      {
+        "label": "tc_mixed_1536_43",
+        "updates": 6144,
+        "phase": "complete"
+      },
+      {
+        "label": "tc_mixed_1536_44",
+        "updates": 6144,
+        "phase": "complete"
       },
       {
         "label": "tc_mixed_384_42",
@@ -7845,13 +7875,13 @@
       },
       {
         "label": "tc_mixed_384_44",
-        "updates": 576,
-        "phase": "training"
+        "updates": 6144,
+        "phase": "complete"
       }
     ],
-    "completed_updates": 42368,
+    "completed_updates": 110592,
     "target_updates": 110592,
-    "completed_lanes": 6,
+    "completed_lanes": 18,
     "target_lanes": 18,
     "teacher_records": 1680,
     "target_teacher_records": 1680,
