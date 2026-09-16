@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-16T13:05:48.057191+00:00",
+  "generated": "2026-09-16T13:21:04.133713+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -7469,7 +7469,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-16T20:22:06.467167+00:00",
+    "earliest_target_at": "2026-09-16T20:37:22.605649+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -7543,6 +7543,62 @@
     "duration_limit_s": 2400,
     "observed": "2026-09-16T10:37:45.991537+00:00",
     "performance_verdict": "training_calibration_not_confirmation",
+    "learned_advantage": false
+  },
+  "compact_distill": {
+    "phase": "running",
+    "stage": "training",
+    "observed": "2026-09-16T13:21:06.014285+00:00",
+    "elapsed_s": 126.42106886766851,
+    "duration_limit_s": 3000,
+    "training": [
+      {
+        "label": "cap42",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      },
+      {
+        "label": "cap43",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      },
+      {
+        "label": "cap44",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      },
+      {
+        "label": "scratch42",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      },
+      {
+        "label": "scratch43",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      },
+      {
+        "label": "scratch44",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      }
+    ],
+    "training_updates": 6912,
+    "target_updates": 6912,
+    "completed_cells": 0,
+    "target_cells": 1440,
+    "training_formulas": 384,
+    "validation_formulas": 72,
+    "development_formulas": 72,
+    "gpu_training_lanes": 6,
+    "solver_workers": 24,
+    "performance_verdict": "not_evaluated_by_progress_collector",
     "learned_advantage": false
   },
   "targeted": {

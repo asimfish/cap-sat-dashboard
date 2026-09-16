@@ -1,12 +1,13 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-16T13:05:48.057191+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-16T13:21:04.133713+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
 :root{color-scheme:light;--ink:#182e36;--muted:#62767b;--line:#dae3e3;--accent:#087e82;--paper:#f4f7f6}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,-apple-system,"PingFang SC",sans-serif}a{color:var(--accent)}.shell{display:grid;grid-template-columns:215px 1fr;max-width:1550px;margin:auto}nav{position:sticky;top:0;height:100vh;padding:35px 22px;border-right:1px solid var(--line)}nav strong{font-size:22px;letter-spacing:-1px}nav a{display:block;padding:10px 0;text-decoration:none;color:var(--muted)}nav small{display:block;margin:24px 0;color:var(--muted)}main{padding:40px 48px;min-width:0}.eyebrow{font:12px ui-monospace,monospace;letter-spacing:2px;color:var(--accent)}h1{font-size:38px;line-height:1.2;letter-spacing:-1.5px;margin:12px 0}h2{font-size:23px;letter-spacing:-.5px;margin:36px 0 15px}p{margin:10px 0}.muted{color:var(--muted);font-size:13px}.hero{max-width:850px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:26px 0}.card,.issue,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:22px}.card b{display:block;font-size:32px;line-height:1.4}.card span{font-size:13px;color:var(--muted)}.alert{border-left:4px solid #cc7848;background:#fff4eb;padding:16px 20px;border-radius:0 9px 9px 0}.issues{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.issue h3{font-size:16px;margin:12px 0}.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:30px;background:#edf2f2;color:#52676c}.good{background:#e2f3ee;color:#187659}.bad{background:#fff0e8;color:#a34628}.partial{background:#fff4d9;color:#836112}.issue p{font-size:14px}.table{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{background:#eaf0ef;color:var(--muted);font-size:12px}td,th{padding:11px 16px;border-bottom:1px solid var(--line)}td{font-size:14px}progress{accent-color:var(--accent);width:105px;height:7px}button,select{font:inherit;border:1px solid var(--line);background:white;border-radius:7px;padding:7px 12px;color:var(--ink);cursor:pointer}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}.positive{color:#187659}.negative{color:#ac4f32}.number{font-variant-numeric:tabular-nums;font-family:ui-monospace,monospace}.foot{overflow-wrap:anywhere;border-top:1px solid var(--line);padding-top:20px;margin-top:35px;font-size:12px;color:var(--muted)}details{margin-top:12px}summary{cursor:pointer;color:var(--accent)}@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:16px 22px}nav a{display:inline-block;margin-right:15px}nav small{display:none}main{padding:25px 20px}.issues{grid-template-columns:1fr}h1{font-size:30px}}@media(max-width:500px){.cards{grid-template-columns:1fr}.card b{font-size:26px}}
 </style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#performance-plan">05 · 性能改进计划</a><a href="#next">06 · 论文与审计</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
+<section id="compact-distill"><h2>A33 · 强策略离线蒸馏 → 单个紧凑模型</h2><div id="compact-distill-progress" class="panel" aria-live="polite"></div></section>
 <section id="local-feedback"><h2>A32 · 强策略局部修改 × 反馈预算校准</h2><div id="local-feedback-progress" class="panel" aria-live="polite"></div></section>
 <section id="joint-feedback"><h2>A31 · 联合求解成本反馈 · 三种子共享 GPU 训练</h2><div id="joint-feedback-progress" class="panel" aria-live="polite"></div></section>
 <section id="prefix-campaign"><h2>A26 · 共享 SAT 快路径 · 今晚 8 小时检验</h2><div id="prefix-campaign-progress" class="panel" aria-live="polite"></div></section>
@@ -35,7 +36,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-16T13:05:48.057191+00:00",
+  "generated": "2026-09-16T13:21:04.133713+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -7505,7 +7506,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-16T20:22:06.467167+00:00",
+    "earliest_target_at": "2026-09-16T20:37:22.605649+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -7579,6 +7580,62 @@
     "duration_limit_s": 2400,
     "observed": "2026-09-16T10:37:45.991537+00:00",
     "performance_verdict": "training_calibration_not_confirmation",
+    "learned_advantage": false
+  },
+  "compact_distill": {
+    "phase": "running",
+    "stage": "training",
+    "observed": "2026-09-16T13:21:06.014285+00:00",
+    "elapsed_s": 126.42106886766851,
+    "duration_limit_s": 3000,
+    "training": [
+      {
+        "label": "cap42",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      },
+      {
+        "label": "cap43",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      },
+      {
+        "label": "cap44",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      },
+      {
+        "label": "scratch42",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      },
+      {
+        "label": "scratch43",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      },
+      {
+        "label": "scratch44",
+        "updates": 1152,
+        "epoch": 24,
+        "phase": "complete"
+      }
+    ],
+    "training_updates": 6912,
+    "target_updates": 6912,
+    "completed_cells": 0,
+    "target_cells": 1440,
+    "training_formulas": 384,
+    "validation_formulas": 72,
+    "development_formulas": 72,
+    "gpu_training_lanes": 6,
+    "solver_workers": 24,
+    "performance_verdict": "not_evaluated_by_progress_collector",
     "learned_advantage": false
   },
   "targeted": {
@@ -13254,12 +13311,22 @@ function renderOvernight(){
  renderPrefixCampaign();
  renderJointFeedback();
  renderLocalFeedback();
+ renderCompactDistill();
  const u=data.overnight,target=document.getElementById('overnight-progress');
  if(!u){target.textContent='尚无通过完整性检查的队列快照。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=age>120&&!['complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'有实验执行的运行快照',paused_resources:'资源保护：暂停新增任务',draining:'结束派发，等待当前任务收尾',complete:'已达到8小时有效运行',stopped_incomplete:'已停止，未跑满8小时',stale:'快照已陈旧，当前运行状态待下次导出确认'};
  target.innerHTML=`<b>${esc(labels[phase]||'状态未知')}</b><div class="cards"><div class="card"><b>${(u.active_s/3600).toFixed(2)} / 8 h</b><span>实际有实验执行的累计墙钟；不累加并发CPU小时</span></div><div class="card"><b>${u.counts.cpu_jobs} 批 / ${u.counts.cells.toLocaleString()} 次</b><span>已完成并核对结果摘要的全成本求解</span></div><div class="card"><b>${u.counts.training_jobs} / ${u.training_queue}</b><span>完成候选训练；${u.counts.training_steps.toLocaleString()} 个优化步</span></div></div><p>上次快照在执行：CPU ${u.running.cpu}/${u.cpu_slots} 路，GPU训练 ${u.running.train}/${u.gpu_slots} 路，数据准备 ${u.running.data} 路；失败任务 ${u.failed_jobs} 个。</p><p>CPU：四规模匹配对照、困难 n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算。GPU：8数据分片 × 2模型 × 3损失 × 3学习率 × 3种子，共432项候选；队列未派发项不算完成。</p><p>开始：${esc(new Date(u.started_at).toLocaleString())}；快照：${esc(new Date(u.observed).toLocaleString())}。服务器每15分钟导出；页面每分钟检查。资源空闲等待不计时，达到8小时后停止派发并收尾，安全中断如实标记。</p><p class="muted">新训练权重仍需后续完整成本评估。${esc(u.scope)}；本轮不改论文结论。</p><p class="foot">固定实验配置 SHA256 ${esc(u.frozen_sha256)}</p>`;
+}
+function renderCompactDistill(){
+ const u=data.compact_distill,target=document.getElementById('compact-distill-progress');
+ if(!u){target.textContent='暂无通过一致性检查的蒸馏快照；不推断已启动或完成。';return;}
+ const age=(Date.now()-Date.parse(u.observed))/1000;
+ const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
+ const labels={running:'蒸馏试验运行中：尚无性能结论',stale:'快照已陈旧：当前运行态待确认',complete:'固定队列完成：性能判定见 A33 计划卡',failed:'试验中止：保留证据，不自动扩训'};
+ const stages={starting:'启动',prepare:'离线教师标注',training:'六路训练 / 验证与独立参考',predictions:'同卡串行预测计时',evaluation:'24 路完整成本评测',complete:'队列结束'};
+ target.innerHTML=`<b>${esc(labels[phase])}</b><p>阶段：${esc(stages[u.stage])} · 上次心跳 ${esc(new Date(u.observed).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}</p><div class="cards"><div class="card"><b>${u.training_updates.toLocaleString()} / 6,912</b><span>实际优化步；6 模型 × 1,152 步</span></div><div class="card"><b>${u.completed_cells.toLocaleString()} / 1,440</b><span>完整成本评测单元；72 个开发公式</span></div><div class="card"><b>${(u.elapsed_s/60).toFixed(1)} / 50 min</b><span>队列墙钟 / 上限，不是累计 GPU 时长</span></div></div><p>384 新训练公式、72 验证、72 开发；3 层、166,530 参数。CAP 初始化与相同架构随机初始化各 3 种子，编码器和策略头共同训练。${u.training.map(x=>`${esc(x.label)}：${x.updates}/1152 步`).join(' · ')||'尚未进入训练'}。</p><p>训练共享 6 张 GPU，每进程 10% 分配器上限；开发预测在同一 GPU 串行计时，CPU 最多 24 路。不是利用率保证。学生部署只调用自身，不付教师推理费；模型加载 / 预热另报，单例预处理、预测和求解检查计费。</p><p class="alert">端到端优势尚未证实。必须同时保住教师策略质量、完整成本与求解数，并降低预测开销；相位准确率和训练损失不能代替求解优势。不自动追加偏好微调、不改论文。</p><p class="muted">共享主机、随机模型块计时，仅描述性小试；每 15 分钟导出，运行心跳超过 2 分钟显示陈旧。完整审计前不展示部分样本排名。</p><a href="#action-A33">查看冻结门槛与读出 ↗</a>`;
 }
 function renderLocalFeedback(){
  const u=data.local_feedback,target=document.getElementById('local-feedback-progress');

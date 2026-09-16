@@ -1405,7 +1405,7 @@ def prefix_campaign_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError):return None
 
 
-def joint_supervisor_alive(repo, root, state):
+def joint_supervisor_alive(repo, root, state, script_name='supervisor.py'):
     """Accept only this supervisor, its start time and resolved script argument."""
     try:
         identity=state['supervisor'];pid=identity['pid']
@@ -1415,7 +1415,7 @@ def joint_supervisor_alive(repo, root, state):
         boot=int(next(x.split()[1] for x in Path('/proc/stat').read_text().splitlines() if x.startswith('btime ')))
         created=boot+int(fields[19])/os.sysconf('SC_CLK_TCK')
         args=(proc/'cmdline').read_bytes().split(b'\0')
-        script=root/'supervisor.py'
+        script=root/script_name
         absolute=str(script).encode() in args
         relative=str(script.relative_to(repo)).encode() in args and (proc/'cwd').resolve()==repo.resolve()
         return fields[0] not in ('Z','T','t','X','x') and abs(created-identity['create_time'])<.02 and (absolute or relative)
@@ -1515,6 +1515,55 @@ def local_feedback_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
 
 
+def compact_distill_progress(repo, now=None):
+    """A33 operational allowlist, never infer scientific success from completion."""
+    root=repo/'experiments/compact_distill_20260916_v1'
+    try:
+        frozen=json.loads((root/'FROZEN.json').read_text());cfg=json.loads((root/'CONFIG.json').read_text())
+        state=json.loads((root/'STATUS.json').read_text());ident=frozen['input_identity']
+        if (ident.get('kind')!='bundle_digest' or ident.get('scope')!='distillation_inputs'
+                or not re.fullmatch('[0-9a-f]{64}',ident.get('value','')) or state['input_identity']!=ident):return None
+        if (cfg['target_cells']!=1440 or cfg['updates_per_lane']!=1152 or cfg['epochs']!=24
+                or cfg['depth']!=3 or cfg['batch_size']!=8 or len(set(cfg['cores']))!=24 or len(set(cfg['gpus']))!=6):return None
+        rows=cfg['rows'];labels={f'{f}{s}' for f in ('cap','scratch') for s in (42,43,44)}
+        if len(rows)!=528 or {r['index'] for r in rows}!=set(range(528)):return None
+        if any(sum(r['n']==n and r['split']==split for r in rows)!=count
+               for n in (200,300,350) for split,count in [('train',128),('validation',24),('development',24)]):return None
+        if len(cfg['lanes'])!=6 or {r['label'] for r in cfg['lanes']}!=labels:return None
+        phase=state['phase'];stage=state['stage'];count=state['completed_cells']
+        if phase not in ('running','complete','failed') or stage not in ('starting','prepare','training','predictions','evaluation','complete'):return None
+        if type(count) is not int or not 0<=count<=1440 or count%10 or state['target_cells']!=1440:return None
+        observed=state['observed_unix'];started=state['started_unix'];elapsed=state['elapsed_s']
+        if any(type(x) not in (int,float) or not math.isfinite(x) or x<0 for x in (observed,started,elapsed)):return None
+        if abs(observed-started-elapsed)>2:return None
+        lanes=[];seen=set()
+        for lane in state['training']:
+            label=lane['label'];updates=lane['updates'];epoch=lane['epoch'];lp=lane['phase']
+            if label not in labels or label in seen or lp not in ('training','complete'):return None
+            if (type(updates) is not int or not 0<=updates<=1152 or lane['target_updates']!=1152
+                    or type(epoch) is not int or not 0<=epoch<=24 or updates%12):return None
+            if lp=='complete' and (updates!=1152 or epoch!=24):return None
+            seen.add(label);lanes.append(dict(label=label,updates=updates,epoch=epoch,phase=lp))
+        receipts=state['receipts'];rl=[r['label'] for r in receipts]
+        expected={'teacher_train','teacher_dev','references','evaluate'}|{f'{s}{i}' for s in ('train','predict') for i in range(6)}
+        if len(rl)!=len(set(rl)) or not set(rl)<=expected:return None
+        if phase in ('complete','failed'):
+            if json.loads((root/'FINAL.json').read_text())!=state:return None
+            if phase=='complete' and (stage!='complete' or count!=1440 or set(rl)!=expected or seen!=labels
+                    or any(x['phase']!='complete' for x in lanes)
+                    or any(type(r['returncode']) is not int or r['returncode']!=0 for r in receipts)
+                    or state['cleanup']!={'errors':[],'unreaped':[]}):return None
+        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state,'owner.py'):
+            phase='stale'
+        return dict(phase=phase,stage=stage,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),
+                    elapsed_s=elapsed,duration_limit_s=3000,training=sorted(lanes,key=lambda x:x['label']),
+                    training_updates=sum(x['updates'] for x in lanes),target_updates=6912,
+                    completed_cells=count,target_cells=1440,training_formulas=384,validation_formulas=72,
+                    development_formulas=72,gpu_training_lanes=6,solver_workers=24,
+                    performance_verdict='not_evaluated_by_progress_collector',learned_advantage=False)
+    except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1539,6 +1588,7 @@ def main():
     data['prefix_campaign']=prefix_campaign_progress(args.repo.resolve())
     data['joint_feedback']=joint_feedback_progress(args.repo.resolve())
     data['local_feedback']=local_feedback_progress(args.repo.resolve())
+    data['compact_distill']=compact_distill_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())
