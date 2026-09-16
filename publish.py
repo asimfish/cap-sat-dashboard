@@ -45,6 +45,7 @@ def main():
         unchanged = unchanged and old.get('local_feedback') == current.get('local_feedback')
         unchanged = unchanged and old.get('compact_distill') == current.get('compact_distill')
         unchanged = unchanged and old.get('boundary_screen') == current.get('boundary_screen')
+        unchanged = unchanged and old.get('coverage_screen') == current.get('coverage_screen')
         unchanged = unchanged and old.get('targeted') == current.get('targeted')
         unchanged = unchanged and old.get('exact_search') == current.get('exact_search')
         unchanged = unchanged and old.get('confirmation') == current.get('confirmation')

@@ -1603,6 +1603,47 @@ def boundary_screen_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
 
 
+def coverage_screen_progress(repo, now=None):
+    """A38 allowlisted operations; no raw paths, process IDs, labels or outputs."""
+    root=repo/'experiments/coverage_literal_20260917_v1'
+    try:
+        cfg=json.loads((root/'CONFIG.json').read_text());state=json.loads((root/'STATUS.json').read_text())
+        ident=json.loads((root/'FROZEN.json').read_text())['input_identity']
+        if ident.get('kind')!='bundle_digest' or ident.get('scope')!='fresh_coverage_inputs' or not re.fullmatch('[0-9a-f]{64}',ident.get('value','')) or state['input_identity']!=ident:return None
+        labels={f'{p}_{size}_{seed}' for p in ('tc_mixed','lit_mixed','lit_raw') for size in (384,1536) for seed in (42,43,44)}
+        if len(cfg['lanes'])!=18 or {l['label'] for l in cfg['lanes']}!=labels or cfg['steps']!=6144 or cfg['total_updates']!=110592:return None
+        rows=cfg['rows']
+        if len(rows)!=2040 or {r['index'] for r in rows}!=set(range(2040)):return None
+        if any(sum(r['split']==split and r['n']==n for r in rows)!=k for n in (200,300,350) for split,k in [('train',512),('validation',48),('holdout',48),('development',48),('old_validation',24)]):return None
+        observed=state['observed_unix'];elapsed=state['elapsed_s'];end=state['window_end_unix'];phase=state['phase'];stage=state['stage']
+        if phase not in ('running','complete','failed') or stage not in ('starting','teacher','targets','training_wave0','training_wave1','training_wave2','awaiting_independent_audit'):return None
+        if any(type(v) not in (int,float) or not math.isfinite(v) or v<0 for v in (observed,elapsed,end)) or end!=1789608273:return None
+        lanes=[];seen=set()
+        for r in state['training']:
+            label=r['label'];steps=r['updates'];lp=r['phase']
+            if label not in labels or label in seen or lp not in ('training','complete') or r['target_updates']!=6144:return None
+            if type(steps) is not int or not 0<=steps<=6144 or steps%64 or (lp=='complete' and steps!=6144):return None
+            seen.add(label);lanes.append(dict(label=label,updates=steps,phase=lp))
+        count=sum(r['updates'] for r in lanes);teacher=state['teacher_records']
+        if type(state['completed_updates']) is not int or state['completed_updates']!=count or state['target_updates']!=110592:return None
+        if type(teacher) is not int or not 0<=teacher<=1680 or state['target_teacher_records']!=1680:return None
+        expected=labels|{f'teacher{i}' for i in range(6)}|{'targets'};receipts=state['receipts'];rl=[r['label'] for r in receipts]
+        if len(rl)!=len(set(rl)) or not set(rl)<=expected:return None
+        audited=False
+        if phase in ('complete','failed'):
+            if state!=json.loads((root/'FINAL.json').read_text()):return None
+            if phase=='complete':
+                if stage!='awaiting_independent_audit' or count!=110592 or teacher!=1680 or seen!=labels or set(rl)!=expected or any(r['phase']!='complete' for r in lanes) or any(type(r['returncode']) is not int or r['returncode']!=0 for r in receipts) or state['cleanup']!={'errors':[],'unreaped':[]}:return None
+                if (root/'AUDIT.json').exists():
+                    audit=json.loads((root/'AUDIT.json').read_text());audited=audit['input_identity']==ident and audit['errors']==[] and audit['updates']==110592
+        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state,'owner.py'):phase='stale'
+        return dict(phase=phase,stage=stage,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),elapsed_s=elapsed,
+            window_end=dt.datetime.fromtimestamp(end,dt.timezone.utc).isoformat(),training=sorted(lanes,key=lambda r:r['label']),completed_updates=count,target_updates=110592,
+            completed_lanes=sum(r['phase']=='complete' for r in lanes),target_lanes=18,teacher_records=teacher,target_teacher_records=1680,audited=audited,
+            solver_cells=0,learned_advantage=False,performance_verdict='fresh_validation_screen_only')
+    except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--repo', type=Path, default=HERE.parent)
@@ -1629,6 +1670,7 @@ def main():
     data['local_feedback']=local_feedback_progress(args.repo.resolve())
     data['compact_distill']=compact_distill_progress(args.repo.resolve())
     data['boundary_screen']=boundary_screen_progress(args.repo.resolve())
+    data['coverage_screen']=coverage_screen_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())
