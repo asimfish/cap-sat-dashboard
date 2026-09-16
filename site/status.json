@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-16T09:34:28.420791+00:00",
+  "generated": "2026-09-16T09:35:48.120562+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -7454,7 +7454,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-16T16:50:47.032744+00:00",
+    "earliest_target_at": "2026-09-16T16:52:06.651953+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -7479,9 +7479,9 @@
   "joint_feedback": {
     "phase": "running",
     "stage": "development",
-    "observed": "2026-09-16T09:34:35.384678+00:00",
+    "observed": "2026-09-16T09:35:50.523149+00:00",
     "started_at": "2026-09-16T09:16:25.057532+00:00",
-    "elapsed_s": 1090.3271469408646,
+    "elapsed_s": 1165.4656199309975,
     "duration_limit_s": 3600,
     "gpu_lanes": 3,
     "solver_workers": 24,
@@ -7508,7 +7508,7 @@
     ],
     "training_completed_cells": 27648,
     "training_target_cells": 27648,
-    "development_completed_cells": 0,
+    "development_completed_cells": 539,
     "development_target_cells": 1584,
     "performance_verdict": "pending",
     "learned_advantage": false,
