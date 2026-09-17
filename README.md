@@ -27,10 +27,17 @@ imitation, not SAT accuracy or end-to-end advantage; depth AND width change.
 A43 audited432prediction requests: teacher18.0249ms versus10.0526/11.2612/11.0761ms,
 all seeds/scales pass80%latency and98%fidelity gates. Full singleton prediction
 includes read/parse/build/transfer/forward/decode, but no solver and no cold start.
-A44 now opens144previously unused development formulas, NOT144held-out formulas:
-1152new predictions and2016full-cost native cells, stock/polarity/minimal-degree/
-teacher/all3fixed students. See the full-cost panel; no performance conclusion
-before raw terminal audit. Owner+audit bounded by2026-09-17T16:40:00Z.
+A44 completed1152new predictions and2016full-cost native cells on144previously
+unused development formulas. All audited: students improve12.9–15.1% over stock,
+but remain0.56–3.21% slower than teacher and4.04–6.78% slower than minimal degree.
+All strict feasibility/advantage family gates fail. Full prediction drops from
+21.72ms to12.63–13.03ms and fidelity remains99.714–99.749%; search losses persist.
+A44 did NOT capture actual-send payload hashes; action/input binding is frozen
+code-path review, not independent historical input-receipt replay. A45 separately
+captures these receipts while diagnosing phase versus weight errors on ALL144
+now-exposed development formulas:3168solver-only oracle-factorial cells. Equal
+zero prediction charge isolates actions; it is NOT a deployable speedup benchmark.
+Held-out144 remain sealed. Bounded end2026-09-17T16:40:00Z, no paper rewrite.
 New stages are not retroactively counted as the original eight-hour window.
 A41 retained-output diagnosis:98.64–99.55% of literal errors are near-zero;
 three-seed voting only+.2365/+.3783points, no full-cost inference. A42 fits one
