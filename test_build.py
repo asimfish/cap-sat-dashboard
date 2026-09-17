@@ -6,10 +6,28 @@ import tempfile
 import unittest
 from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress, local_feedback_progress
 from unittest.mock import patch
-from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress, recovery_v3_progress, depth_screen_progress, literal_fullcost_progress, weight_precision_progress
+from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress, recovery_v3_progress, depth_screen_progress, literal_fullcost_progress, weight_precision_progress, head_refit_progress
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_head_refit_receipts_stale_counts_and_no_promotion(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/head_refit_20260918_v1';root.mkdir(parents=True)
+            def save(name,value):(root/name).write_text(json.dumps(value))
+            labels=[f'{a}_{s}' for a in ('original','balanced') for s in (42,43,44)];ident=dict(kind='bundle_digest',scope='head_refit_inputs',value='e'*64)
+            cfg=dict(lanes=[dict(label=l) for l in labels],target_fits=6,records=21024,end_unix=1789673400)
+            state=dict(input_identity=ident,phase='running',stage='fitting',observed_unix=1000.,elapsed_s=20.,window_end_unix=1789673400,lanes=[],completed_fits=0,target_fits=6,supervisor=dict(private='/home/PRIVATE'))
+            save('CONFIG.json',cfg);save('FROZEN.json',dict(input_identity=ident));save('STATUS.json',state)
+            with patch('build.joint_supervisor_alive',return_value=True):
+                result=head_refit_progress(repo,1000);self.assertEqual(result['completed_fits'],0);self.assertFalse(result['audited']);self.assertNotIn('PRIVATE',json.dumps(result))
+                self.assertEqual(head_refit_progress(repo,1121)['phase'],'stale')
+                state.update(phase='complete',stage='summary',completed_fits=6,lanes=[dict(label=l,captured=1752,target_formulas=1752,completed_fits=1,phase='complete') for l in labels],cleanup=dict(errors=[],unreaped=[]),receipts=[dict(label=f'{s}_{l}',returncode=0) for s in ('fit','audit') for l in labels]+[dict(label='summary',returncode=0)])
+                save('STATUS.json',state);save('FINAL.json',state);self.assertFalse(head_refit_progress(repo,9999)['audited'])
+                save('AUDIT.json',dict(input_identity=ident,errors=[],fits=6,records=21024))
+                save('RESULTS.json',dict(input_identity=ident,records=21024,solver_cells=0,end_to_end_advantage=False,independently_confirmed=False,all_seeds_pass=False))
+                result=head_refit_progress(repo,9999);self.assertTrue(result['audited']);self.assertFalse(result['repair_screen']);self.assertFalse(result['learned_advantage'])
+                state['receipts'].pop();save('STATUS.json',state);save('FINAL.json',state);self.assertIsNone(head_refit_progress(repo,9999))
+
     def test_weight_precision_no_premature_promotion_or_private_fields(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/weight_precision_20260918_v1';root.mkdir(parents=True)

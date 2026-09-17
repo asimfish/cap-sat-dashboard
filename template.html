@@ -8,6 +8,7 @@
 </style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#performance-plan">05 · 性能改进计划</a><a href="#next">06 · 论文与审计</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
 <section id="night-window"><h2>实验监护 · 资源保护与恢复</h2><div id="night-window-progress" class="panel" aria-live="polite"></div></section>
+<section id="head-refit"><h2>A47 · 冻结表示，精修权重输出头</h2><div id="head-refit-progress" class="panel" aria-live="polite"></div></section>
 <section id="weight-precision"><h2>A46 · 针对已定位的权重误差修复</h2><div id="weight-precision-progress" class="panel" aria-live="polite"></div></section>
 <section id="literal-fullcost"><h2>A44 · 高保真轻量模型的端到端开发评测</h2><div id="literal-fullcost-progress" class="panel" aria-live="polite"></div></section>
 <section id="depth-screen"><h2>A40 · 近等参数量的文字传播深度对照</h2><div id="depth-screen-progress" class="panel" aria-live="polite"></div></section>
@@ -165,12 +166,22 @@ function renderOvernight(){
  renderDepthScreen();
  renderLiteralFullcost();
  renderWeightPrecision();
+ renderHeadRefit();
  const u=data.overnight,target=document.getElementById('overnight-progress');
  if(!u){target.textContent='尚无通过完整性检查的队列快照。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=age>120&&!['complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'有实验执行的运行快照',paused_resources:'资源保护：暂停新增任务',draining:'结束派发，等待当前任务收尾',complete:'已达到8小时有效运行',stopped_incomplete:'已停止，未跑满8小时',stale:'快照已陈旧，当前运行状态待下次导出确认'};
  target.innerHTML=`<b>${esc(labels[phase]||'状态未知')}</b><div class="cards"><div class="card"><b>${(u.active_s/3600).toFixed(2)} / 8 h</b><span>实际有实验执行的累计墙钟；不累加并发CPU小时</span></div><div class="card"><b>${u.counts.cpu_jobs} 批 / ${u.counts.cells.toLocaleString()} 次</b><span>已完成并核对结果摘要的全成本求解</span></div><div class="card"><b>${u.counts.training_jobs} / ${u.training_queue}</b><span>完成候选训练；${u.counts.training_steps.toLocaleString()} 个优化步</span></div></div><p>上次快照在执行：CPU ${u.running.cpu}/${u.cpu_slots} 路，GPU训练 ${u.running.train}/${u.gpu_slots} 路，数据准备 ${u.running.data} 路；失败任务 ${u.failed_jobs} 个。</p><p>CPU：四规模匹配对照、困难 n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算。GPU：8数据分片 × 2模型 × 3损失 × 3学习率 × 3种子，共432项候选；队列未派发项不算完成。</p><p>开始：${esc(new Date(u.started_at).toLocaleString())}；快照：${esc(new Date(u.observed).toLocaleString())}。服务器每15分钟导出；页面每分钟检查。资源空闲等待不计时，达到8小时后停止派发并收尾，安全中断如实标记。</p><p class="muted">新训练权重仍需后续完整成本评估。${esc(u.scope)}；本轮不改论文结论。</p><p class="foot">固定实验配置 SHA256 ${esc(u.frozen_sha256)}</p>`;
+}
+function renderHeadRefit(){
+ const u=data.head_refit,target=document.getElementById('head-refit-progress');
+ if(!u){target.textContent='尚无通过身份及计数校验的 A47 快照；准备或计划不计为运行。';return;}
+ const age=(Date.now()-Date.parse(u.observed))/1000;
+ const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
+ const labels={running:'正在执行固定队列',waiting_resources:'资源等待，不计为拟合',complete:u.audited?'拟合及独立重放审计完成':'队列完成，等待审计',failed:'已停止，存在未通过检查',stale:'快照已陈旧，当前运行状态待确认'};
+ const stages={starting:'准备',fitting:'六模型权重拟合',independent_replay:'独立完整网络与数值重放',summary:'终态汇总'};
+ target.innerHTML=`<b>${esc(labels[phase])}</b><div class="cards"><div class="card"><b>${u.completed_fits} / 6</b><span>完成的固定输出头拟合</span></div><div class="card"><b>${u.audited?'21,024':'待审计'}</b><span>前后逐公式记录；非独立实例数</span></div><div class="card"><b>${u.repair_screen===null?'尚未判定':u.repair_screen?'精度门通过':'精度门未过'}</b><span>不是端到端优势</span></div></div><p>${esc(stages[u.stage])}。只改变现有最后一层权重输出行，保持相位参数和部署结构不变；训练公式等权、固定正则，不选最好种子。晋级指标来自折回模型完整前向。</p><p>0 次新求解；即使精度门通过，也须另行冻结全成本对照。教师自身仍未超过廉价度数，不能把模仿修复称为最终突破。</p><p class="muted">${u.lanes.map(r=>`${esc(r.label)} ${r.captured}/1752`).join(' · ')}。截止 ${esc(new Date(u.window_end).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}；心跳 ${esc(new Date(u.observed).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}。</p><a href="#action-A47">方法、结果与停止条件 ↗</a>`;
 }
 function renderWeightPrecision(){
  const u=data.weight_precision,target=document.getElementById('weight-precision-progress');

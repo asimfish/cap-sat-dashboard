@@ -51,8 +51,13 @@ but the prespecified50%reduction gate fails for all seeds. Clipping occurs0times
 per original arm and1/2/1times per balanced arm; train/validation errors are close.
 No solver or independent-confirmation claim. New bounded end17:20UTC (Sep18
 01:20Beijing) was not an old-window extension; this fixed queue already completed.
-A47 is a PLANNED frozen-representation weight-head residual-fit diagnostic,
-not running. No grid expansion, holdout opening or paper rewrite.
+A47 is newly authorized and frozen: six existing model heads, train-only
+formula-balanced float64 residual ridge1e-8, folded into the same architecture.
+Actual folded-network predictions determine the precision screen; independent CPU
+fit/GPU full-network replay and exact same-hidden phase checks are separate.
+CPU/GPU7tests each pass; target21024before/after records,0solver cells. Current
+execution follows the identity-checked heartbeat, not this static description.
+Absolute end19:30UTC (Sep18 03:30Beijing), no grid expansion, holdout or paper edit.
 New stages are not retroactively counted as the original eight-hour window.
 A41 retained-output diagnosis:98.64–99.55% of literal errors are near-zero;
 three-seed voting only+.2365/+.3783points, no full-cost inference. A42 fits one

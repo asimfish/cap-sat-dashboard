@@ -1681,6 +1681,42 @@ def literal_fullcost_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
 
 
+def head_refit_progress(repo, now=None):
+    """A47 operational counts and explicit non-promotion; private identities stay local."""
+    root=repo/'experiments/head_refit_20260918_v1'
+    try:
+        state=json.loads((root/'STATUS.json').read_text());cfg=json.loads((root/'CONFIG.json').read_text());ident=json.loads((root/'FROZEN.json').read_text())['input_identity']
+        labels={f'{a}_{s}' for a in ('original','balanced') for s in (42,43,44)}
+        if state['input_identity']!=ident or ident.get('kind')!='bundle_digest' or ident.get('scope')!='head_refit_inputs' or not re.fullmatch('[0-9a-f]{64}',ident.get('value','')):return None
+        if len(cfg['lanes'])!=6 or {r['label'] for r in cfg['lanes']}!=labels or cfg['target_fits']!=6 or cfg['records']!=21024:return None
+        phase=state['phase'];stage=state['stage'];observed=state['observed_unix'];elapsed=state['elapsed_s'];end=state['window_end_unix']
+        if phase not in ('running','waiting_resources','complete','failed') or stage not in ('starting','fitting','independent_replay','summary') or end!=1789673400 or cfg['end_unix']!=end:return None
+        if any(type(v) not in (int,float) or not math.isfinite(v) or v<0 for v in (observed,elapsed)):return None
+        seen=set();lanes=[]
+        for row in state['lanes']:
+            label=row['label'];captured=row['captured'];done=row['completed_fits'];lp=row['phase']
+            if label not in labels or label in seen or type(captured)is not int or not 0<=captured<=1752 or row['target_formulas']!=1752 or lp not in ('capturing','fitting','complete'):return None
+            if type(done)is not int or done!=int(lp=='complete') or (done and captured!=1752):return None
+            seen.add(label);lanes.append(dict(label=label,captured=captured,phase=lp,completed_fits=done))
+        count=sum(r['completed_fits'] for r in lanes)
+        if state['completed_fits']!=count or state['target_fits']!=6:return None
+        audited=False;screen=None
+        if phase in ('complete','failed'):
+            if state!=json.loads((root/'FINAL.json').read_text()):return None
+            if phase=='complete':
+                expected={f'{s}_{l}' for s in ('fit','audit') for l in labels}|{'summary'}
+                receipts=state['receipts']
+                if count!=6 or seen!=labels or state['cleanup']!={'errors':[],'unreaped':[]} or len(receipts)!=13 or {r['label'] for r in receipts}!=expected or any(r['returncode']!=0 for r in receipts):return None
+                if (root/'AUDIT.json').exists():
+                    audit=json.loads((root/'AUDIT.json').read_text());result=json.loads((root/'RESULTS.json').read_text())
+                    if audit['input_identity']!=ident or audit['errors']!=[] or audit['records']!=21024 or audit['fits']!=6 or result['input_identity']!=ident or result['records']!=21024 or result['solver_cells']!=0 or result['end_to_end_advantage']is not False or result['independently_confirmed']is not False or type(result['all_seeds_pass'])is not bool:return None
+                    audited=True;screen=result['all_seeds_pass']
+        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state,'owner.py'):phase='stale'
+        return dict(phase=phase,stage=stage,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),window_end=dt.datetime.fromtimestamp(end,dt.timezone.utc).isoformat(),elapsed_s=elapsed,
+                    lanes=sorted(lanes,key=lambda r:r['label']),completed_fits=count,target_fits=6,audited=audited,repair_screen=screen,solver_cells=0,learned_advantage=False)
+    except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
+
+
 def weight_precision_progress(repo, now=None):
     root=repo/'experiments/weight_precision_20260918_v1'
     try:
@@ -1858,6 +1894,7 @@ def main():
     data['depth_screen']=depth_screen_progress(args.repo.resolve())
     data['literal_fullcost']=literal_fullcost_progress(args.repo.resolve())
     data['weight_precision']=weight_precision_progress(args.repo.resolve())
+    data['head_refit']=head_refit_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())
