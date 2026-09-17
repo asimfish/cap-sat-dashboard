@@ -1644,9 +1644,54 @@ def coverage_screen_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
 
 
+def recovery_v3_progress(repo, now=None):
+    """New bounded recovery after approved cleanup; old window remains historical."""
+    root=repo/'experiments/anneal_literal_20260917_v3'
+    try:
+        state=json.loads((root/'SUPERVISION_STATUS.json').read_text());cfg=json.loads((root/'CONFIG.json').read_text())
+        frozen=json.loads((root/'FROZEN.json').read_text());ident=frozen['input_identity'];value=json.loads((root/'STATUS.json').read_text())
+        if ident.get('scope')!='literal_anneal_recovery_v3_inputs' or ident.get('kind')!='bundle_digest' or not re.fullmatch('[0-9a-f]{64}',ident.get('value','')) or state['input_identity']!=ident or value['input_identity']!=ident:return None
+        if state['window_end_unix']!=1789663200 or cfg['end_unix']!=state['window_end_unix'] or value['window_end_unix']!=state['window_end_unix']:return None
+        phase=state['phase'];observed=state['observed_unix'];current=state['current']
+        if phase not in ('running_owner','running_audit','waiting_resources','complete','failed') or current not in ('owner.py','audit.py',None):return None
+        if type(observed) not in (int,float) or not math.isfinite(observed) or observed<0:return None
+        labels={f'{package}_{arm}_{seed}' for package in ('lit_mixed','lit_raw') for arm in ('constant','anneal') for seed in (42,43,44)}
+        if len(cfg['lanes'])!=12 or {r['label'] for r in cfg['lanes']}!=labels:return None
+        origins={r['label']:r['origin'] for r in cfg['lanes']}
+        if sum(v=='reused' for v in origins.values())!=6 or sum(v=='new' for v in origins.values())!=6:return None
+        seen=set();new=0;reused=0
+        for lane in value['training']:
+            label=lane['label'];steps=lane['updates']
+            if label in seen or label not in labels or type(steps)is not int or not 0<=steps<=3072 or steps%64 or lane['target_updates']!=3072 or lane['phase'] not in ('training','complete'):return None
+            if lane['phase']=='complete' and steps!=3072:return None
+            seen.add(label)
+            if origins[label]=='reused':reused+=steps
+            else:new+=steps
+        if reused!=18432 or value['reused_updates']!=reused or value['new_updates']!=new or value['completed_updates']!=new+reused or value['target_updates']!=36864:return None
+        audited=False
+        if value['phase'] in ('complete','failed'):
+            if value!=json.loads((root/'FINAL.json').read_text()):return None
+        if value['phase']=='complete':
+            receipts=value['receipts']
+            if new!=18432 or seen!=labels or value['cleanup']!={'errors':[],'unreaped':[]} or len(receipts)!=12 or {r['label'] for r in receipts}!=labels or any(r['returncode']!=0 for r in receipts):return None
+            if (root/'AUDIT.json').exists():
+                audit=json.loads((root/'AUDIT.json').read_text());audited=audit['input_identity']==ident and audit['errors']==[] and audit['records']==28512 and audit['updates']==36864 and audit['new_updates']==18432
+        if phase in ('complete','failed'):
+            terminal=json.loads((root/'SUPERVISION_FINAL.json').read_text())
+            if any(terminal.get(k)!=v for k,v in state.items()) or terminal['cleanup']!={'errors':[],'unreaped':[]}:return None
+            if phase=='complete' and (not audited or len(state['receipts'])!=2 or [r['script'] for r in state['receipts']]!=['owner.py','audit.py'] or any(r['returncode']!=0 for r in state['receipts'])):return None
+        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state,'supervise.py'):phase='stale'
+        public_phase={'running_owner':'running_task','running_audit':'running_task'}.get(phase,phase)
+        return dict(phase=public_phase,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),current={'owner.py':'a39_recovery_owner','audit.py':'a39_recovery_audit',None:None}[current],registered=2,
+            window_end=dt.datetime.fromtimestamp(state['window_end_unix'],dt.timezone.utc).isoformat(),recovery=dict(new_updates=new,reused_updates=reused,target_new_updates=18432,audited=audited),
+            has_error=state['error'] is not None,learned_advantage=False,solver_cells=0,waiting_is_compute=False,recovery_version=3,prior_window_ended=True)
+    except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
+
+
 def night_recovery_progress(repo, now=None):
     """Publish supervision and resource pauses, never imply eight hours of compute."""
     root=repo/'experiments/overnight_20260917_v1';trial=repo/'experiments/anneal_literal_20260917_v2'
+    if (repo/'experiments/anneal_literal_20260917_v3/SUPERVISION_STATUS.json').exists():return recovery_v3_progress(repo,now)
     try:
         state=json.loads((root/'STATUS_V2.json').read_text());cfg=json.loads((root/'SUPERVISOR_V2.json').read_text())
         if state['source_sha256']!=cfg['source_sha256'] or hashlib.sha256((root/'supervise_v2.py').read_bytes()).hexdigest()!=cfg['source_sha256']:return None

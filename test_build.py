@@ -6,10 +6,31 @@ import tempfile
 import unittest
 from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress, local_feedback_progress
 from unittest.mock import patch
-from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress
+from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress, recovery_v3_progress
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_recovery_v3_counts_stale_terminal_and_privacy(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/anneal_literal_20260917_v3';root.mkdir(parents=True)
+            def save(name,value):(root/name).write_text(json.dumps(value))
+            labels=[f'{p}_{arm}_{seed}' for p in ('lit_mixed','lit_raw') for arm in ('constant','anneal') for seed in (42,43,44)]
+            ident=dict(kind='bundle_digest',scope='literal_anneal_recovery_v3_inputs',value='a'*64)
+            lanes=[dict(label=l,origin='reused' if i<6 else 'new') for i,l in enumerate(labels)]
+            cfg=dict(end_unix=1789663200,lanes=lanes);state=dict(input_identity=ident,window_end_unix=1789663200,phase='running_owner',current='owner.py',observed_unix=1000.,error=None,supervisor=dict(private='/home/PRIVATE'),receipts=[])
+            training=[dict(label=l,updates=3072,target_updates=3072,phase='complete') for l in labels[:6]]
+            owner=dict(input_identity=ident,window_end_unix=1789663200,phase='running',new_updates=0,reused_updates=18432,completed_updates=18432,target_updates=36864,training=training)
+            save('FROZEN.json',dict(input_identity=ident));save('CONFIG.json',cfg);save('SUPERVISION_STATUS.json',state);save('STATUS.json',owner)
+            with patch('build.joint_supervisor_alive',return_value=True):
+                result=recovery_v3_progress(repo,1000);self.assertEqual(result['recovery']['new_updates'],0);self.assertTrue(result['prior_window_ended']);self.assertNotIn('PRIVATE',json.dumps(result));self.assertFalse(result['learned_advantage'])
+                self.assertEqual(recovery_v3_progress(repo,1121)['phase'],'stale')
+                owner['new_updates']=64;save('STATUS.json',owner);self.assertIsNone(recovery_v3_progress(repo,1000))
+                owner.update(new_updates=18432,completed_updates=36864,phase='complete',cleanup=dict(errors=[],unreaped=[]),receipts=[dict(label=l,returncode=0) for l in labels],training=[dict(label=l,updates=3072,target_updates=3072,phase='complete') for l in labels]);save('STATUS.json',owner);save('FINAL.json',owner)
+                state.update(phase='complete',current=None,receipts=[dict(script=s,returncode=0) for s in ('owner.py','audit.py')]);save('SUPERVISION_STATUS.json',state);save('SUPERVISION_FINAL.json',dict(state,cleanup=dict(errors=[],unreaped=[])))
+                self.assertIsNone(recovery_v3_progress(repo,1000))
+                save('AUDIT.json',dict(input_identity=ident,errors=[],records=28512,updates=36864,new_updates=18432))
+                result=recovery_v3_progress(repo,9999);self.assertEqual(result['phase'],'complete');self.assertTrue(result['recovery']['audited']);self.assertFalse(result['learned_advantage'])
+
     def test_night_waiting_is_not_compute_or_public_process_data(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/overnight_20260917_v1';root.mkdir(parents=True)
