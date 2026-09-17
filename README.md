@@ -45,8 +45,14 @@ Prior16:40UTC window ended with all A40–A45 complete. Following the user's new
 continue request, A46 is separately frozen: six paired continuations/18432steps,
 original versus train-only scale-balanced weight MSE (coefficient53.8409449).
 Same source weights/data/schedule, fixed final3072, six sharedGPUs, no teacher at
-deployment. New bounded end17:20UTC (Sep18 01:20Beijing), not an old-window extension.
-See weight-precision panel; no solver or independent-confirmation claim.
+deployment. All18432updates/14256records now audited: weight RMSE decreases
+31.98/37.76/32.64% overall (31.05–38.70% across scales), phase protection passes,
+but the prespecified50%reduction gate fails for all seeds. Clipping occurs0times
+per original arm and1/2/1times per balanced arm; train/validation errors are close.
+No solver or independent-confirmation claim. New bounded end17:20UTC (Sep18
+01:20Beijing) was not an old-window extension; this fixed queue already completed.
+A47 is a PLANNED frozen-representation weight-head residual-fit diagnostic,
+not running. No grid expansion, holdout opening or paper rewrite.
 New stages are not retroactively counted as the original eight-hour window.
 A41 retained-output diagnosis:98.64–99.55% of literal errors are near-zero;
 three-seed voting only+.2365/+.3783points, no full-cost inference. A42 fits one

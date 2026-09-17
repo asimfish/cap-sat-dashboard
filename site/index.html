@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-17T16:47:51.944977+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-17T16:54:19.230335+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -42,7 +42,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-17T16:47:51.944977+00:00",
+  "generated": "2026-09-17T16:54:19.230335+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3068,7 +3068,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-18",
-    "scope": "严格端到端优势仍未达到：A44三学生比默认快12.9%–15.1%，但仍比教师慢0.56%–3.21%、比廉价度数慢4.04%–6.78%。A45已完成3168诊断单元，换回教师权重可恢复89.6%–99.7%额外搜索损失，只修相位几乎无效，已定位权重精度方向。按新的继续请求，A46六GPU配对训练已冻结启动，18432更新，对照原权重损失与训练数据尺度平衡损失；新截止北京时间01:20。旧00:40窗口已结束，不续写；独立留出封存，不改论文。",
+    "scope": "端到端严格优势仍未达成：A44比默认快12.9%–15.1%，但落后教师及廉价度数。A45的3168单元确认优先修权重而非相位；A46已完成六模型18432更新与14256记录审计，各规模权重误差下降31%–39%，相位质量守住，但预定减半门未过。已定位并部分缓解权重精度问题；A47冻结表示的权重输出头精修仅列计划、尚未运行。独立留出封存，所有本轮已启动队列均完成，不把计划或等待写成正在运行。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3871,8 +3871,8 @@
       {
         "id": "A46",
         "title": "用训练数据尺度平衡损失，提高变量权重精度",
-        "priority": "定向方法修复 · 已冻结启动",
-        "status": "六模型配对训练运行中，固定最终3072步；不是端到端结果",
+        "priority": "定向方法修复 · 部分改善，减半门未过",
+        "status": "六模型18432更新/14256记录审计通过；权重误差降31%–39%，三种子未达减半门",
         "cost": "三固定A40模型 × 原损失/权重尺度平衡 × 3072步=18432新增更新，六共享GPU；1536原训练/144复用验证，0求解单元。",
         "depends_on": [
           "A40",
@@ -3881,10 +3881,24 @@
         "hypothesis": "原相位回归经尺度归一化、权重回归却用原始MSE，权重梯度可能被相位任务压制；训练目标的相对尺度可修复已经定位的搜索损失来源。",
         "method": "各对照起点、数据、三种子、架构、优化步数完全相同，双方重置Adam，epoch49–64、学习率3e-5→3e-6。原权重系数1对训练公式内log权重标准差倒平方53.8409449，不使用开发或留出选择系数；无新推理计算。CPU和真实GPU各5项测试通过后冻结，192MiB准入/128MiB暂停保存。",
         "gate": "全部种子每个规模的log权重RMSE比同额外步数原损失至少减半；相位一致率≥98%且相比控制退化≤0.1百分点。仅固定最终3072判定，序列化权重误差另报；即使训练门通过仍须新的全成本开发协议。",
-        "stop": "单轮18432更新及原始记录审计或新窗口北京时间01:20截止即停。原A40–A45和00:40旧截止不改。验证已暴露、无独立确认；失败不继续同系数网格、不挑最好种子、不自动开留出，不改论文。"
+        "stop": "最终验证权重RMSE：原损失0.001172954/0.001255149/0.001247081，平衡损失0.000797873/0.000781177/0.000840081，整体降31.98/37.76/32.64%；逐规模降31.05%–38.70%，未达预定50%。相位99.7115/99.7488/99.7257%，全部守住无损门。序列化权重不同比例仅从约94%–95%降至约91.6%，仍需真实求解检验。原三臂各0次梯度裁剪，平衡臂1/2/1次且全在前192步，训练≈验证；不支持频繁裁剪是主限，也不证明头容量不足。所有进程退出，0求解单元，不扩大系数网格、不改门槛；A47另列尚未启动的输出头辨别。"
+      },
+      {
+        "id": "A47",
+        "title": "冻结表示与相位，只精修现有权重输出头",
+        "priority": "下一步机制辨别 · 计划中",
+        "status": "尚未冻结或运行，不计为训练进度",
+        "cost": "拟复用全部6个A46固定最终模型，训练数据拟合现有最后一行权重；预算与数值条件须在新协议冻结，0已执行更新/求解。",
+        "depends_on": [
+          "A46"
+        ],
+        "hypothesis": "剩余权重误差可能来自最后一层的优化不足，也可能由共享表示信息不足限制；冻结表示后的线性拟合可以区分，不再扫描整网损失系数。",
+        "method": "拟用1536训练公式等权的float64残差最小二乘，仅更新现有最后一层权重输出行与偏置；预先固定正则/病态处理，将修正折回原模型，保持相位参数和部署结构不变。所有种子和原/平衡两种表示均保留，不按验证挑正则。",
+        "gate": "冻结协议后核对训练求解残差、float32折回误差、相位输出逐项不变、各规模连续及四位序列化权重误差。只能判定输出头可修复空间；新全成本验证及廉价对照仍不可省略。",
+        "stop": "当前仅列计划，无活跃进程；不把线性下界当一般网络容量证明，不自动打开独立留出、不补造搜索收益，不修改A46冻结结论。"
       }
     ],
-    "sha256": "8745fbe8df47c844b17dd6c3b4c986baf5904e13c3549d9e1892b0f73e5a603e"
+    "sha256": "97e621695d65d99b4433a062eb11107a290fb08efbf67721ba23b05a24fc02d7"
   },
   "pilot": {
     "id": "E26",
@@ -7716,7 +7730,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-18T00:04:10.313593+00:00",
+    "earliest_target_at": "2026-09-18T00:10:37.427571+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -8351,7 +8365,7 @@
     "target_updates": 18432,
     "completed_lanes": 6,
     "target_lanes": 6,
-    "audited": false,
+    "audited": true,
     "solver_cells": 0,
     "learned_advantage": false,
     "performance_verdict": "reused_validation_only"
@@ -14049,7 +14063,9 @@ function renderWeightPrecision(){
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
  const labels={running:'权重精度配对训练快照',waiting_resources:'资源等待，不算训练',complete:u.audited?'固定训练及原始记录审计完成':'训练完成，等待审计',failed:'已停止，检查失败原因',stale:'快照已陈旧，当前状态待确认'};
+ const verdict=document.createElement('p');verdict.textContent=(data.performance_plan.actions.find(a=>a.id==='A46')||{}).status||'性能判定见计划卡';
  target.innerHTML=`<b>${esc(labels[phase])}</b><div class="cards"><div class="card"><b>${u.completed_updates.toLocaleString()} / 18,432</b><span>本轮新优化步，六模型</span></div><div class="card"><b>${u.completed_lanes} / 6</b><span>相同起点 / 步数的三种子配对</span></div><div class="card"><b>${u.audited?'已通过':'尚未通过'}</b><span>终态记录审计，不等于性能过门</span></div></div><p>A45 已完成 3,168 个诊断单元：仅替换成教师权重可恢复三个学生额外搜索损失的 97.7% / 99.7% / 89.6%；只修相位几乎无改善。理想修复需要教师信息，不是免费可部署算法。</p><p>A46 从相同 d6_raw 固定最终权重出发，对比原损失与权重尺度平衡损失。系数约 53.8409 完全由训练数据确定；六共享 GPU、10% 分配上限，固定最终 3,072 步，不选峰值。</p><p class="alert">本轮 0 求解单元。需要各规模各种子权重 RMSE 至少减半，并守住相位无损门；即使通过，还需新冻结的全成本检验。独立留出不动，论文不改。</p><p>旧窗口已结束。本次继续请求对应新有界任务，截止北京时间 ${esc(new Date(u.window_end).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}。</p><p class="muted">心跳 ${esc(new Date(u.observed).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}；${u.training.map(r=>`${esc(r.label)} ${r.updates}/3072`).join(' · ')}。<a href="#action-A46">验收判据 ↗</a></p>`;
+ target.appendChild(verdict);
 }
 function renderLiteralFullcost(){
  const u=data.literal_fullcost,target=document.getElementById('literal-fullcost-progress');

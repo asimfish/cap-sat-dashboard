@@ -178,7 +178,9 @@ function renderWeightPrecision(){
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
  const labels={running:'权重精度配对训练快照',waiting_resources:'资源等待，不算训练',complete:u.audited?'固定训练及原始记录审计完成':'训练完成，等待审计',failed:'已停止，检查失败原因',stale:'快照已陈旧，当前状态待确认'};
+ const verdict=document.createElement('p');verdict.textContent=(data.performance_plan.actions.find(a=>a.id==='A46')||{}).status||'性能判定见计划卡';
  target.innerHTML=`<b>${esc(labels[phase])}</b><div class="cards"><div class="card"><b>${u.completed_updates.toLocaleString()} / 18,432</b><span>本轮新优化步，六模型</span></div><div class="card"><b>${u.completed_lanes} / 6</b><span>相同起点 / 步数的三种子配对</span></div><div class="card"><b>${u.audited?'已通过':'尚未通过'}</b><span>终态记录审计，不等于性能过门</span></div></div><p>A45 已完成 3,168 个诊断单元：仅替换成教师权重可恢复三个学生额外搜索损失的 97.7% / 99.7% / 89.6%；只修相位几乎无改善。理想修复需要教师信息，不是免费可部署算法。</p><p>A46 从相同 d6_raw 固定最终权重出发，对比原损失与权重尺度平衡损失。系数约 53.8409 完全由训练数据确定；六共享 GPU、10% 分配上限，固定最终 3,072 步，不选峰值。</p><p class="alert">本轮 0 求解单元。需要各规模各种子权重 RMSE 至少减半，并守住相位无损门；即使通过，还需新冻结的全成本检验。独立留出不动，论文不改。</p><p>旧窗口已结束。本次继续请求对应新有界任务，截止北京时间 ${esc(new Date(u.window_end).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}。</p><p class="muted">心跳 ${esc(new Date(u.observed).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}；${u.training.map(r=>`${esc(r.label)} ${r.updates}/3072`).join(' · ')}。<a href="#action-A46">验收判据 ↗</a></p>`;
+ target.appendChild(verdict);
 }
 function renderLiteralFullcost(){
  const u=data.literal_fullcost,target=document.getElementById('literal-fullcost-progress');
