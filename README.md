@@ -12,11 +12,17 @@ window ending2026-09-17 09:24:33Asia/Shanghai; do not claim eight hours complete
 All38016records audited. Literal newvalidation96.58–97.43% vsTC90.38–90.78%;
 both representation gates pass but no family reaches absolute98%. A39 learning-
 rate comparison stopped at a resource floor:6complete lanes/14256records accepted,
-26074loggedupdates including unfinished work. Recoveryv2 reuses all6complete
-lanes and waits for192MiB root headroom before6remaining lanes;128MiB updatefloor
+26074loggedupdates including unfinished work. Recoveryv2 reused all6complete
+lanes and waited for192MiB root headroom before6remaining lanes;128MiB updatefloor
 unchanged, model/Adam/RNG saved on resourcepause. Original failed state retained.
-Night supervisorv2 alive until09:24:33; waiting is excluded from sampled activity.
-A40 is conditional/unfrozen, not an automatically launched experiment.
+Old supervisorv2 ended at09:24:33 with zero new recovery updates; waiting is not
+compute. Approved109MiB HFmodelcache relocation and9duplicate screenshots cleanup
+completed; model bytes/original path and identical screenshot copies retained.
+A39v3 completed six remaining lanes (18432new+18432reused),28512records audited.
+Anneal agreement97.51–97.58%, no family passes98% EACHseed/EACHscale. A40 now
+frozen/launched:12depth-width models,110592updates vs retained3layer anneal controls.
+Owner+audit bounded by2026-09-17T16:40:00Z (Sep18 00:40Beijing); see depth panel.
+New stages are not retroactively counted as the original eight-hour window.
 A41 retained-output diagnosis:98.64–99.55% of literal errors are near-zero;
 three-seed voting only+.2365/+.3783points, no full-cost inference. A42 fits one
 phase threshold per model on training ONLY:raw seeds improve+.7932/+.2870/+.1412

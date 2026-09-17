@@ -6,10 +6,27 @@ import tempfile
 import unittest
 from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress, local_feedback_progress
 from unittest.mock import patch
-from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress, recovery_v3_progress
+from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress, recovery_v3_progress, depth_screen_progress
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_depth_progress_rejects_counts_and_does_not_promote_partial(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/depth_literal_20260917_v1';root.mkdir(parents=True)
+            def save(name,value):(root/name).write_text(json.dumps(value))
+            labels=[f'{p}_{s}' for p in ('d6_mixed','d6_raw','d10_mixed','d10_raw') for s in (42,43,44)]
+            ident=dict(kind='bundle_digest',scope='literal_depth_inputs',value='b'*64)
+            cfg=dict(lanes=[dict(label=l) for l in labels],steps=9216,total_updates=110592,end_unix=1789663200)
+            state=dict(input_identity=ident,phase='running',observed_unix=1000.,elapsed_s=20.,window_end_unix=1789663200,training=[dict(label=labels[0],updates=64,phase='training',target_updates=9216,private='/home/PRIVATE')],completed_updates=64,target_updates=110592,supervisor=dict(private='PRIVATE'))
+            save('CONFIG.json',cfg);save('FROZEN.json',dict(input_identity=ident));save('STATUS.json',state)
+            with patch('build.joint_supervisor_alive',return_value=True):
+                result=depth_screen_progress(repo,1000);self.assertEqual(result['completed_updates'],64);self.assertFalse(result['audited']);self.assertFalse(result['learned_advantage']);self.assertNotIn('PRIVATE',json.dumps(result))
+                self.assertEqual(depth_screen_progress(repo,1121)['phase'],'stale')
+                state['completed_updates']=128;save('STATUS.json',state);self.assertIsNone(depth_screen_progress(repo,1000))
+                state.update(phase='complete',completed_updates=110592,training=[dict(label=l,updates=9216,phase='complete',target_updates=9216) for l in labels],cleanup=dict(errors=[],unreaped=[]),receipts=[dict(label=l,returncode=0) for l in labels]);save('STATUS.json',state);save('FINAL.json',state)
+                self.assertFalse(depth_screen_progress(repo,9999)['audited'])
+                save('AUDIT.json',dict(input_identity=ident,errors=[],updates=110592,records=28512))
+                self.assertTrue(depth_screen_progress(repo,9999)['audited'])
     def test_recovery_v3_counts_stale_terminal_and_privacy(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/anneal_literal_20260917_v3';root.mkdir(parents=True)
@@ -636,8 +653,8 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('110592',actions['A38']['cost'])
         self.assertIn('非同FLOPs',actions['A38']['method'])
         self.assertIn('26074',actions['A39']['cost'])
-        self.assertIn('等待',actions['A39']['status'])
-        self.assertIn('未冻结启动',actions['A40']['priority'])
+        self.assertIn('28512',actions['A39']['status'])
+        self.assertIn('已冻结启动',actions['A40']['priority'])
         self.assertIn('98.64%',actions['A41']['stop'])
         self.assertIn('15120',actions['A42']['status'])
         self.assertIn('无family过98%',actions['A42']['stop'])

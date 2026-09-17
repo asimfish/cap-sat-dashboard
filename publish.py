@@ -47,6 +47,7 @@ def main():
         unchanged = unchanged and old.get('boundary_screen') == current.get('boundary_screen')
         unchanged = unchanged and old.get('coverage_screen') == current.get('coverage_screen')
         unchanged = unchanged and old.get('night_recovery') == current.get('night_recovery')
+        unchanged = unchanged and old.get('depth_screen') == current.get('depth_screen')
         unchanged = unchanged and old.get('targeted') == current.get('targeted')
         unchanged = unchanged and old.get('exact_search') == current.get('exact_search')
         unchanged = unchanged and old.get('confirmation') == current.get('confirmation')

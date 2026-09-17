@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-17T14:45:48.239763+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-17T14:48:38.789624+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -8,6 +8,7 @@
 </style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#performance-plan">05 · 性能改进计划</a><a href="#next">06 · 论文与审计</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
 <section id="night-window"><h2>实验监护 · 资源保护与恢复</h2><div id="night-window-progress" class="panel" aria-live="polite"></div></section>
+<section id="depth-screen"><h2>A40 · 近等参数量的文字传播深度对照</h2><div id="depth-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="coverage-screen"><h2>A38 · 今晚的新数据与表示验证</h2><div id="coverage-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="boundary-screen"><h2>A34 · 表示深度 × 近零边界监督</h2><div id="boundary-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="compact-distill"><h2>A33 · 强策略离线蒸馏 → 单个紧凑模型</h2><div id="compact-distill-progress" class="panel" aria-live="polite"></div></section>
@@ -39,7 +40,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-17T14:45:48.239763+00:00",
+  "generated": "2026-09-17T14:48:38.789624+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3065,7 +3066,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-17",
-    "scope": "A38已完成18模型、110592更新及38016记录审计：文字表示新验证96.58%–97.43%，明显好于TC90.38%–90.78%，但仍无三种子逐规模98%过门，更未证明端到端优势。A39恢复版等待根分区恢复192MiB再派发，监督到北京时间09:24；A40仅条件草案。等待期间完成A41误差解剖和A42训练集阈值校准：raw三种子改善0.79/0.29/0.14点，至97.37%–97.52%，mixed不一致，仍未过98%门。七项缺口仍4部分改善、3未解决，不改论文。",
+    "scope": "缓存迁移和去重清理已完成，A39恢复补齐六模型18432更新，完整36864更新/28512记录审计通过。退火一致率97.51%–97.58%，仍无三种子逐规模98%过门，未证明端到端优势。A40已冻结并启动6层/10层近等有效参数对照，实时进度见上方面板；原八小时窗口已结束，新有界任务截至北京时间9月18日00:40。A41/A42局部诊断结果保留，七缺口仍4部分改善/3未解决。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3769,8 +3770,8 @@
       {
         "id": "A39",
         "title": "同起点、同新增步数检验学习率退火",
-        "priority": "资源保护 · 恢复版等待空间",
-        "status": "原轮6/12完成后中止；六模型部分审计通过，恢复版已启动等待资源",
+        "priority": "恢复完成 · 独立审计通过，保真门失败",
+        "status": "12/12模型完整矩阵、36864更新、28512记录审计通过；无family过98%门",
         "cost": "原轮日志保留26074次更新（非完整试验）；六个完整模型14256评估记录通过部分审计。恢复版重用18432已完成更新，仅补六模型18432更新；最终矩阵36864步，丢弃的部分训练开销另列。",
         "depends_on": [
           "A38"
@@ -3778,21 +3779,21 @@
         "hypothesis": "固定学习率可能造成近零相位边界震荡；也可能表示信息仍不足。额外步数和重置Adam必须有同样的控制。",
         "method": "从全部六个A38 literal1536最终权重出发，每个constant0.001对cosine0.0001→0.00001；双方都重置Adam，epoch33–48、batch8，各3072步，固定最终检查点。旧验证/新验证现在均为探索性复用；不读留出或开发标签。",
         "gate": "退火须三种子相比同预算constant总体至少升0.5点且逐规模无损。晋级仍须每规模每种子≥98%且log权重RMSE≤0.15，不因中止或部分正向而放宽。",
-        "stop": "资源安全线触发后所有旧进程已清理，原失败冻结保留，不重跑六个完整模型。恢复版独立冻结、6项测试通过；根分区当前约128MiB，要求192MiB余量再派发。训练期间若低于128MiB，保存模型/Adam/RNG到大容量存储并暂停，恢复至192MiB再继续；等待不算计算。新标签路径明确复用A38，并校验完整目标清单，无新teacher/holdout/development目录。已知缓存迁移仍需用户确认。夜间监督至09:24，不保证空间不足时八小时都在计算。"
+        "stop": "v2旧窗口结束且0新增更新，失败记录保留。用户批准后迁移109MiB缓存保留原路径、删除9张重复截图各留相同副本；v3只补六模型18432更新，训练107.72秒，完整28512记录审计零错误。退火mixed三种子97.5556/97.5377/97.5066%，raw97.5572/97.5833/97.5498%。与constant差值仅raw44过单种子0.5点门；两目标三种子一致改善门均失败，全部family仍未过逐规模98%。训练≈验证，进入A40深度辨别；0求解单元，不延长旧八小时记录。"
       },
       {
         "id": "A40",
         "title": "条件计划：近等有效参数量下增加文字消息传递深度",
-        "priority": "后备方向 · 草案已实现，未冻结启动",
-        "status": "等待A39完整审计；禁止越过前置门直接启动",
-        "cost": "拟6层宽56/10层宽44 × mixed/raw ×3种子，共12模型；各9216步、110592新增更新，复用A39三层退火模型作保留控制。",
+        "priority": "方法对照 · 已冻结启动",
+        "status": "A39前置审计通过且无family过门；12模型有界运行，详见实时面板",
+        "cost": "6层宽56/10层宽44 × mixed/raw ×3种子，共12模型；各9216步、110592新增更新，复用A39三层退火模型作保留控制。",
         "depends_on": [
           "A39"
         ],
         "hypothesis": "A38的新表示已有约97%保真；若充分控制学习率后仍训练≈验证且低于98%，可能需要更长的信息传播范围，不是单纯增加数据。",
         "method": "6层153946参、10层151230参，对照3层154652参，近等有效参数而非同FLOPs。相同1536训练、相同epoch1–48，前6144步原学习率，随后同样重置Adam并退火3072步；最终9216固定。",
         "gate": "仅A39完整恢复审计且无family过98%门才允许冻结本草案。三种子逐规模保真门不变；与保留三层同预算对照比较近零与外侧指标。随后还须另行冻结真实全成本测试。",
-        "stop": "当前只是条件后备，不能计入运行或已完成实验。CPU模型/训练流程/重置边界/独立导入四项测试通过；冻结前还须完成资源暂停策略及GPU集成检查。不因填满八小时而绕过A39或重复无意义的深度网格。未做求解、未改论文。"
+        "stop": "A39完整审计及无family过门条件均已满足；CPU和真实GPU训练/暂停状态/重置边界/独立导入等5项测试通过后冻结启动。六共享GPU两波，10%显存上限、192MiB准入/128MiB暂停保存；自动训练后独立审计，最迟北京时间9月18日00:40停止。运行和中途峰值不是保真或性能通过；固定最终9216判定。原A39失败不删，未做求解、未改论文。"
       },
       {
         "id": "A41",
@@ -3823,7 +3824,7 @@
         "stop": "raw三种子分别提升0.7932/0.2870/0.1412点，达到97.3715/97.5231/97.4304%，九个种子/规模格均改善；mixed为-0.0673/+0.0942/+0.0312点，含n300退化0.1944点。无family过98%门，原假设失败。CPU解码中位数约72微秒，仅局部微基准，不能声称端到端无成本或加速。下一步优先完成A39，不改冻结结果或论文。"
       }
     ],
-    "sha256": "37d3afa44af9295b65ca47d1f76588707c92b117ad1f9d0c4f1b877d738d8329"
+    "sha256": "eb40c7349723939617a8b41d1f4cc990a3c991216da0ec8ed78618f7d0e31c02"
   },
   "pilot": {
     "id": "E26",
@@ -7655,7 +7656,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-17T22:02:06.544192+00:00",
+    "earliest_target_at": "2026-09-17T22:04:56.975313+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -8004,6 +8005,52 @@
     "waiting_is_compute": false,
     "recovery_version": 3,
     "prior_window_ended": true
+  },
+  "depth_screen": {
+    "phase": "running",
+    "observed": "2026-09-17T14:48:42.049476+00:00",
+    "window_end": "2026-09-17T16:40:00+00:00",
+    "elapsed_s": 245.1868463056162,
+    "training": [
+      {
+        "label": "d10_mixed_42",
+        "updates": 7488,
+        "phase": "training"
+      },
+      {
+        "label": "d10_raw_42",
+        "updates": 8960,
+        "phase": "training"
+      },
+      {
+        "label": "d6_mixed_42",
+        "updates": 9216,
+        "phase": "complete"
+      },
+      {
+        "label": "d6_mixed_43",
+        "updates": 9216,
+        "phase": "complete"
+      },
+      {
+        "label": "d6_raw_42",
+        "updates": 9216,
+        "phase": "complete"
+      },
+      {
+        "label": "d6_raw_43",
+        "updates": 9216,
+        "phase": "complete"
+      }
+    ],
+    "completed_updates": 53312,
+    "target_updates": 110592,
+    "completed_lanes": 4,
+    "target_lanes": 12,
+    "audited": false,
+    "solver_cells": 0,
+    "learned_advantage": false,
+    "performance_verdict": "reused_validation_only"
   },
   "targeted": {
     "cells": 27648,
@@ -13682,12 +13729,21 @@ function renderOvernight(){
  renderBoundaryScreen();
  renderCoverageScreen();
  renderNightRecovery();
+ renderDepthScreen();
  const u=data.overnight,target=document.getElementById('overnight-progress');
  if(!u){target.textContent='尚无通过完整性检查的队列快照。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=age>120&&!['complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'有实验执行的运行快照',paused_resources:'资源保护：暂停新增任务',draining:'结束派发，等待当前任务收尾',complete:'已达到8小时有效运行',stopped_incomplete:'已停止，未跑满8小时',stale:'快照已陈旧，当前运行状态待下次导出确认'};
  target.innerHTML=`<b>${esc(labels[phase]||'状态未知')}</b><div class="cards"><div class="card"><b>${(u.active_s/3600).toFixed(2)} / 8 h</b><span>实际有实验执行的累计墙钟；不累加并发CPU小时</span></div><div class="card"><b>${u.counts.cpu_jobs} 批 / ${u.counts.cells.toLocaleString()} 次</b><span>已完成并核对结果摘要的全成本求解</span></div><div class="card"><b>${u.counts.training_jobs} / ${u.training_queue}</b><span>完成候选训练；${u.counts.training_steps.toLocaleString()} 个优化步</span></div></div><p>上次快照在执行：CPU ${u.running.cpu}/${u.cpu_slots} 路，GPU训练 ${u.running.train}/${u.gpu_slots} 路，数据准备 ${u.running.data} 路；失败任务 ${u.failed_jobs} 个。</p><p>CPU：四规模匹配对照、困难 n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算。GPU：8数据分片 × 2模型 × 3损失 × 3学习率 × 3种子，共432项候选；队列未派发项不算完成。</p><p>开始：${esc(new Date(u.started_at).toLocaleString())}；快照：${esc(new Date(u.observed).toLocaleString())}。服务器每15分钟导出；页面每分钟检查。资源空闲等待不计时，达到8小时后停止派发并收尾，安全中断如实标记。</p><p class="muted">新训练权重仍需后续完整成本评估。${esc(u.scope)}；本轮不改论文结论。</p><p class="foot">固定实验配置 SHA256 ${esc(u.frozen_sha256)}</p>`;
+}
+function renderDepthScreen(){
+ const u=data.depth_screen,target=document.getElementById('depth-screen-progress');
+ if(!u){target.textContent='尚无通过校验的 A40 运行快照。';return;}
+ const age=(Date.now()-Date.parse(u.observed))/1000;
+ const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
+ const labels={running:'深度对照运行快照',waiting_resources:'安全资源等待，不算计算',complete:'固定预算训练完成',failed:'已停止，须检查失败原因',stale:'快照已陈旧，当前状态待确认'};
+ target.innerHTML=`<b>${esc(labels[phase])}</b><div class="cards"><div class="card"><b>${u.completed_updates.toLocaleString()} / 110,592</b><span>本轮实际更新，不含保留控制</span></div><div class="card"><b>${u.completed_lanes} / 12</b><span>固定最终检查点完成</span></div><div class="card"><b>${u.audited?'已通过':'尚未通过'}</b><span>完整原始记录审计，不等于性能通过</span></div></div><p>6 层宽 56 / 10 层宽 44 × mixed / raw × 三种子；相同训练与优化步数，与 A39 三层退火结果比较。有效参数近似匹配，非同 FLOPs；不应用 A42 校准、不选中途峰值。</p><p class="alert">本轮仍是 0 求解单元，复用验证仅作方法筛选。达到逐种子逐规模 98% 后，也必须另测推理成本、完整求解时间及廉价对照，才能讨论端到端优势。</p><p class="muted">截止 ${esc(new Date(u.window_end).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}；心跳 ${esc(new Date(u.observed).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}。${u.training.map(r=>`${esc(r.label)} ${r.updates}/9216`).join(' · ')}</p><a href="#action-A40">方法与判据 ↗</a>`;
 }
 function renderNightRecovery(){
  const u=data.night_recovery,target=document.getElementById('night-window-progress');

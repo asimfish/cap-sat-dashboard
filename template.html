@@ -8,6 +8,7 @@
 </style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#performance-plan">05 · 性能改进计划</a><a href="#next">06 · 论文与审计</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
 <section id="night-window"><h2>实验监护 · 资源保护与恢复</h2><div id="night-window-progress" class="panel" aria-live="polite"></div></section>
+<section id="depth-screen"><h2>A40 · 近等参数量的文字传播深度对照</h2><div id="depth-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="coverage-screen"><h2>A38 · 今晚的新数据与表示验证</h2><div id="coverage-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="boundary-screen"><h2>A34 · 表示深度 × 近零边界监督</h2><div id="boundary-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="compact-distill"><h2>A33 · 强策略离线蒸馏 → 单个紧凑模型</h2><div id="compact-distill-progress" class="panel" aria-live="polite"></div></section>
@@ -159,12 +160,21 @@ function renderOvernight(){
  renderBoundaryScreen();
  renderCoverageScreen();
  renderNightRecovery();
+ renderDepthScreen();
  const u=data.overnight,target=document.getElementById('overnight-progress');
  if(!u){target.textContent='尚无通过完整性检查的队列快照。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=age>120&&!['complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'有实验执行的运行快照',paused_resources:'资源保护：暂停新增任务',draining:'结束派发，等待当前任务收尾',complete:'已达到8小时有效运行',stopped_incomplete:'已停止，未跑满8小时',stale:'快照已陈旧，当前运行状态待下次导出确认'};
  target.innerHTML=`<b>${esc(labels[phase]||'状态未知')}</b><div class="cards"><div class="card"><b>${(u.active_s/3600).toFixed(2)} / 8 h</b><span>实际有实验执行的累计墙钟；不累加并发CPU小时</span></div><div class="card"><b>${u.counts.cpu_jobs} 批 / ${u.counts.cells.toLocaleString()} 次</b><span>已完成并核对结果摘要的全成本求解</span></div><div class="card"><b>${u.counts.training_jobs} / ${u.training_queue}</b><span>完成候选训练；${u.counts.training_steps.toLocaleString()} 个优化步</span></div></div><p>上次快照在执行：CPU ${u.running.cpu}/${u.cpu_slots} 路，GPU训练 ${u.running.train}/${u.gpu_slots} 路，数据准备 ${u.running.data} 路；失败任务 ${u.failed_jobs} 个。</p><p>CPU：四规模匹配对照、困难 n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算。GPU：8数据分片 × 2模型 × 3损失 × 3学习率 × 3种子，共432项候选；队列未派发项不算完成。</p><p>开始：${esc(new Date(u.started_at).toLocaleString())}；快照：${esc(new Date(u.observed).toLocaleString())}。服务器每15分钟导出；页面每分钟检查。资源空闲等待不计时，达到8小时后停止派发并收尾，安全中断如实标记。</p><p class="muted">新训练权重仍需后续完整成本评估。${esc(u.scope)}；本轮不改论文结论。</p><p class="foot">固定实验配置 SHA256 ${esc(u.frozen_sha256)}</p>`;
+}
+function renderDepthScreen(){
+ const u=data.depth_screen,target=document.getElementById('depth-screen-progress');
+ if(!u){target.textContent='尚无通过校验的 A40 运行快照。';return;}
+ const age=(Date.now()-Date.parse(u.observed))/1000;
+ const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
+ const labels={running:'深度对照运行快照',waiting_resources:'安全资源等待，不算计算',complete:'固定预算训练完成',failed:'已停止，须检查失败原因',stale:'快照已陈旧，当前状态待确认'};
+ target.innerHTML=`<b>${esc(labels[phase])}</b><div class="cards"><div class="card"><b>${u.completed_updates.toLocaleString()} / 110,592</b><span>本轮实际更新，不含保留控制</span></div><div class="card"><b>${u.completed_lanes} / 12</b><span>固定最终检查点完成</span></div><div class="card"><b>${u.audited?'已通过':'尚未通过'}</b><span>完整原始记录审计，不等于性能通过</span></div></div><p>6 层宽 56 / 10 层宽 44 × mixed / raw × 三种子；相同训练与优化步数，与 A39 三层退火结果比较。有效参数近似匹配，非同 FLOPs；不应用 A42 校准、不选中途峰值。</p><p class="alert">本轮仍是 0 求解单元，复用验证仅作方法筛选。达到逐种子逐规模 98% 后，也必须另测推理成本、完整求解时间及廉价对照，才能讨论端到端优势。</p><p class="muted">截止 ${esc(new Date(u.window_end).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}；心跳 ${esc(new Date(u.observed).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}。${u.training.map(r=>`${esc(r.label)} ${r.updates}/9216`).join(' · ')}</p><a href="#action-A40">方法与判据 ↗</a>`;
 }
 function renderNightRecovery(){
  const u=data.night_recovery,target=document.getElementById('night-window-progress');
