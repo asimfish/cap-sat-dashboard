@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-17T15:01:01.889131+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-17T15:16:17.496459+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -8,6 +8,7 @@
 </style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#performance-plan">05 · 性能改进计划</a><a href="#next">06 · 论文与审计</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
 <section id="night-window"><h2>实验监护 · 资源保护与恢复</h2><div id="night-window-progress" class="panel" aria-live="polite"></div></section>
+<section id="literal-fullcost"><h2>A44 · 高保真轻量模型的端到端开发评测</h2><div id="literal-fullcost-progress" class="panel" aria-live="polite"></div></section>
 <section id="depth-screen"><h2>A40 · 近等参数量的文字传播深度对照</h2><div id="depth-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="coverage-screen"><h2>A38 · 今晚的新数据与表示验证</h2><div id="coverage-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="boundary-screen"><h2>A34 · 表示深度 × 近零边界监督</h2><div id="boundary-screen-progress" class="panel" aria-live="polite"></div></section>
@@ -40,7 +41,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-17T15:01:01.889131+00:00",
+  "generated": "2026-09-17T15:16:17.496459+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3066,7 +3067,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-17",
-    "scope": "缓存迁移和去重清理已完成，A39恢复补齐六模型18432更新，完整36864更新/28512记录审计通过。退火一致率97.51%–97.58%，仍无三种子逐规模98%过门，未证明端到端优势。A40已冻结并启动6层/10层近等有效参数对照，实时进度见上方面板；原八小时窗口已结束，新有界任务截至北京时间9月18日00:40。A41/A42局部诊断结果保留，七缺口仍4部分改善/3未解决。",
+    "scope": "A40已完成12模型/110592更新及28512记录审计，教师动作一致率99.61%–99.75%；预定选择d6_raw三种子约99.73%–99.74%。A43完整单例推理18.02→10.05–11.26ms，降低37.5%–44.2%，三种子逐规模速度/保真门通过。A44已冻结启动144未调参开发公式的2016单元全成本评测；尚不能称端到端优势，144独立留出仍封存。七缺口仍4部分改善/3未解决；原八小时窗口不延长，新有界任务截止北京时间9月18日00:40。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3783,9 +3784,9 @@
       },
       {
         "id": "A40",
-        "title": "条件计划：近等有效参数量下增加文字消息传递深度",
-        "priority": "方法对照 · 已冻结启动",
-        "status": "A39前置审计通过且无family过门；12模型有界运行，详见实时面板",
+        "title": "近等有效参数量下增加文字消息传递深度",
+        "priority": "方法对照 · 完成并审计，保真门通过",
+        "status": "12模型110592更新/28512记录审计通过；4个family均过保真门",
         "cost": "6层宽56/10层宽44 × mixed/raw ×3种子，共12模型；各9216步、110592新增更新，复用A39三层退火模型作保留控制。",
         "depends_on": [
           "A39"
@@ -3793,7 +3794,7 @@
         "hypothesis": "A38的新表示已有约97%保真；若充分控制学习率后仍训练≈验证且低于98%，可能需要更长的信息传播范围，不是单纯增加数据。",
         "method": "6层153946参、10层151230参，对照3层154652参，近等有效参数而非同FLOPs。相同1536训练、相同epoch1–48，前6144步原学习率，随后同样重置Adam并退火3072步；最终9216固定。",
         "gate": "仅A39完整恢复审计且无family过98%门才允许冻结本草案。三种子逐规模保真门不变；与保留三层同预算对照比较近零与外侧指标。随后还须另行冻结真实全成本测试。",
-        "stop": "A39完整审计及无family过门条件均已满足；CPU和真实GPU训练/暂停状态/重置边界/独立导入等5项测试通过后冻结启动。六共享GPU两波，10%显存上限、192MiB准入/128MiB暂停保存；自动训练后独立审计，最迟北京时间9月18日00:40停止。运行和中途峰值不是保真或性能通过；固定最终9216判定。原A39失败不删，未做求解、未改论文。"
+        "stop": "固定最终9216步全完成，28,512记录零错误、13进程身份退出核对。12模型验证一致率99.6123%–99.7479%；预定最差规模/种子规则选d6_raw，三种子99.7278/99.7407/99.7391%，最差单规模99.7222%。四个深宽包机制对照和四个family保真门通过；只说明复用验证的教师动作模仿改善，不是SAT正确率或端到端优势。全部scratch且深宽共同变化，不支持CAP预训练贡献或纯深度因果。A43后续另测推理，A44另测求解；原失败保留，不改论文。"
       },
       {
         "id": "A41",
@@ -3822,9 +3823,38 @@
         "method": "变量权重4200/n使公式等权，精确扫描训练误差最小阈值；并列取最接近0者。先保存训练拟合，再评估验证，不按验证选择阈值或最好种子。推理仅float64相位分数比较，原权重解码不变。",
         "gate": "六个literal模型均提升≥0.25点且逐规模最多退0.1点，并至少一family逐规模逐种子≥98%才支持充分修复；否则保留局部收益和退化，不通用替换。真实完整耗时必须另行测量。",
         "stop": "raw三种子分别提升0.7932/0.2870/0.1412点，达到97.3715/97.5231/97.4304%，九个种子/规模格均改善；mixed为-0.0673/+0.0942/+0.0312点，含n300退化0.1944点。无family过98%门，原假设失败。CPU解码中位数约72微秒，仅局部微基准，不能声称端到端无成本或加速。下一步优先完成A39，不改冻结结果或论文。"
+      },
+      {
+        "id": "A43",
+        "title": "固定轻量模型的完整单例推理成本",
+        "priority": "计时筛选 · 三种子逐规模全部通过",
+        "status": "432预测请求/144公式-模型组合审计通过；完整推理快37.5%–44.2%",
+        "cost": "36已暴露验证stream heads、每规模12个 × 教师及3固定学生 × 3重复=432请求，0求解单元。",
+        "depends_on": [
+          "A40"
+        ],
+        "hypothesis": "更高保真必须同时保持较低的实际部署推理成本，不能用参数量或内核时间代替。",
+        "method": "在计时前按A40预定规则锁定d6_raw所有3种子固定最终权重；同GPU1/CPU40交错成对计时，包括读图/构图/传输/前向/原生动作解码与同步。setup和训练公式预热另报，不挑最快family或seed，不应用A42阈值。",
+        "gate": "每个种子每个规模及整体推理中位数≤教师80%，每规模动作一致率≥98%、log权重RMSE≤0.15；全部记录、原动作一致性、退出核对。仅暴露验证上的描述性计时筛选。",
+        "stop": "教师18.0249ms；三学生10.0526/11.2612/11.0761ms，整体比率0.5577/0.6248/0.6145，全部规模≤0.6480。速度和保真均通过，与A40固定最终动作相位零漂移；0求解单元，非冷服务，不等于端到端胜出。进入另行冻结A44全成本开发。"
+      },
+      {
+        "id": "A44",
+        "title": "高保真轻量模型能否获得完整求解优势",
+        "priority": "端到端开发 · 已冻结启动",
+        "status": "144未调参开发公式、2016原生求解单元运行中，详见实时面板",
+        "cost": "144公式/36生成流 × 2计时重复 × 7臂=2016单元；1152次独立新预测各自计费，24物理核。0新增训练，144独立留出不打开。",
+        "depends_on": [
+          "A40",
+          "A43"
+        ],
+        "hypothesis": "保真接近99.7%且推理节省约40%后，剩余动作误差是否仍破坏求解；须直接对比教师及廉价控制。",
+        "method": "固定三组d6_raw最终权重，不选择种子/阈值。原始求解器、极性、最小度数、教师及三学生；3秒全墙钟、超时/未知/迟到PAR-2=6秒。预测含构图与动作提取；序列化、求解和原CNF完整SAT核验均计费，UNSAT须独立Cadical佐证。GPU推理交错顺序、24不同物理核求解、生成流bootstrap区间；驻留串行组合非冷服务。",
+        "gate": "三种子逐规模保真≥98%、推理≤0.8教师；整体PAR-2≤1.02教师，各规模≤1.05且解出不减。更强开发优势门要求每种子整体胜过教师/默认/极性/度数至少3%，每规模均值/求解数无害。即便过门仍需独立确认，不代表七个缺点全部修复。",
+        "stop": "5项输入身份/完整矩阵/逐种子逐规模门/原生真实计费重放/截止检查通过后冻结启动。最迟北京时间9月18日00:40停止；完整原始记录审计前不公布局部胜出。失败不放宽门、不自动打开留出、不改论文；没有等成本WalkSAT或工业/跨后端确认。"
       }
     ],
-    "sha256": "eb40c7349723939617a8b41d1f4cc990a3c991216da0ec8ed78618f7d0e31c02"
+    "sha256": "fd766857ed6a6b441960a77b15fdefb8eb4aeaef3dd1e1b88dca8908427bb0e4"
   },
   "pilot": {
     "id": "E26",
@@ -7656,7 +7686,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-17T22:17:20.140107+00:00",
+    "earliest_target_at": "2026-09-17T22:32:35.767208+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -8081,6 +8111,174 @@
     "solver_cells": 0,
     "learned_advantage": false,
     "performance_verdict": "reused_validation_only"
+  },
+  "literal_fullcost": {
+    "phase": "complete",
+    "stage": "awaiting_audit",
+    "observed": "2026-09-17T15:14:36.839948+00:00",
+    "elapsed_s": 359.791115087457,
+    "completed_cells": 2016,
+    "target_cells": 2016,
+    "completed_predictions": 1152,
+    "target_predictions": 1152,
+    "audited": true,
+    "summary": {
+      "scales": {
+        "ALL": {
+          "stock": {
+            "cells": 288,
+            "solved": 110,
+            "mean_par2_s": 3.952698997532328
+          },
+          "polarity": {
+            "cells": 288,
+            "solved": 110,
+            "mean_par2_s": 3.9408835585474864
+          },
+          "degree": {
+            "cells": 288,
+            "solved": 143,
+            "mean_par2_s": 3.2252902522288625
+          },
+          "teacher": {
+            "cells": 288,
+            "solved": 139,
+            "mean_par2_s": 3.3369154372744054
+          },
+          "d6_raw_42": {
+            "cells": 288,
+            "solved": 137,
+            "mean_par2_s": 3.355673219122562
+          },
+          "d6_raw_43": {
+            "cells": 288,
+            "solved": 138,
+            "mean_par2_s": 3.3631461370354776
+          },
+          "d6_raw_44": {
+            "cells": 288,
+            "solved": 132,
+            "mean_par2_s": 3.444036941008461
+          }
+        },
+        "200": {
+          "stock": {
+            "cells": 96,
+            "solved": 96,
+            "mean_par2_s": 0.4327140783910484
+          },
+          "polarity": {
+            "cells": 96,
+            "solved": 96,
+            "mean_par2_s": 0.4766609577345662
+          },
+          "degree": {
+            "cells": 96,
+            "solved": 96,
+            "mean_par2_s": 0.14103388264387226
+          },
+          "teacher": {
+            "cells": 96,
+            "solved": 96,
+            "mean_par2_s": 0.1502721429472634
+          },
+          "d6_raw_42": {
+            "cells": 96,
+            "solved": 96,
+            "mean_par2_s": 0.1380937940266449
+          },
+          "d6_raw_43": {
+            "cells": 96,
+            "solved": 96,
+            "mean_par2_s": 0.13795470188294226
+          },
+          "d6_raw_44": {
+            "cells": 96,
+            "solved": 96,
+            "mean_par2_s": 0.1366413899619753
+          }
+        },
+        "300": {
+          "stock": {
+            "cells": 96,
+            "solved": 9,
+            "mean_par2_s": 5.615880937713276
+          },
+          "polarity": {
+            "cells": 96,
+            "solved": 10,
+            "mean_par2_s": 5.497228869557148
+          },
+          "degree": {
+            "cells": 96,
+            "solved": 35,
+            "mean_par2_s": 4.1768508533326285
+          },
+          "teacher": {
+            "cells": 96,
+            "solved": 28,
+            "mean_par2_s": 4.656690724814932
+          },
+          "d6_raw_42": {
+            "cells": 96,
+            "solved": 27,
+            "mean_par2_s": 4.691351135610603
+          },
+          "d6_raw_43": {
+            "cells": 96,
+            "solved": 27,
+            "mean_par2_s": 4.719875719883324
+          },
+          "d6_raw_44": {
+            "cells": 96,
+            "solved": 22,
+            "mean_par2_s": 4.923003195377532
+          }
+        },
+        "350": {
+          "stock": {
+            "cells": 96,
+            "solved": 5,
+            "mean_par2_s": 5.809501976492659
+          },
+          "polarity": {
+            "cells": 96,
+            "solved": 4,
+            "mean_par2_s": 5.848760848350746
+          },
+          "degree": {
+            "cells": 96,
+            "solved": 12,
+            "mean_par2_s": 5.3579860207100864
+          },
+          "teacher": {
+            "cells": 96,
+            "solved": 15,
+            "mean_par2_s": 5.203783444061021
+          },
+          "d6_raw_42": {
+            "cells": 96,
+            "solved": 14,
+            "mean_par2_s": 5.237574727730437
+          },
+          "d6_raw_43": {
+            "cells": 96,
+            "solved": 15,
+            "mean_par2_s": 5.231607989340167
+          },
+          "d6_raw_44": {
+            "cells": 96,
+            "solved": 14,
+            "mean_par2_s": 5.272466237685876
+          }
+        }
+      },
+      "family_feasible": false,
+      "family_potential_advantage": false
+    },
+    "learned_advantage": false,
+    "independently_confirmed": false,
+    "holdout_opened": false
   },
   "targeted": {
     "cells": 27648,
@@ -13760,12 +13958,24 @@ function renderOvernight(){
  renderCoverageScreen();
  renderNightRecovery();
  renderDepthScreen();
+ renderLiteralFullcost();
  const u=data.overnight,target=document.getElementById('overnight-progress');
  if(!u){target.textContent='尚无通过完整性检查的队列快照。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=age>120&&!['complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'有实验执行的运行快照',paused_resources:'资源保护：暂停新增任务',draining:'结束派发，等待当前任务收尾',complete:'已达到8小时有效运行',stopped_incomplete:'已停止，未跑满8小时',stale:'快照已陈旧，当前运行状态待下次导出确认'};
  target.innerHTML=`<b>${esc(labels[phase]||'状态未知')}</b><div class="cards"><div class="card"><b>${(u.active_s/3600).toFixed(2)} / 8 h</b><span>实际有实验执行的累计墙钟；不累加并发CPU小时</span></div><div class="card"><b>${u.counts.cpu_jobs} 批 / ${u.counts.cells.toLocaleString()} 次</b><span>已完成并核对结果摘要的全成本求解</span></div><div class="card"><b>${u.counts.training_jobs} / ${u.training_queue}</b><span>完成候选训练；${u.counts.training_steps.toLocaleString()} 个优化步</span></div></div><p>上次快照在执行：CPU ${u.running.cpu}/${u.cpu_slots} 路，GPU训练 ${u.running.train}/${u.gpu_slots} 路，数据准备 ${u.running.data} 路；失败任务 ${u.failed_jobs} 个。</p><p>CPU：四规模匹配对照、困难 n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算。GPU：8数据分片 × 2模型 × 3损失 × 3学习率 × 3种子，共432项候选；队列未派发项不算完成。</p><p>开始：${esc(new Date(u.started_at).toLocaleString())}；快照：${esc(new Date(u.observed).toLocaleString())}。服务器每15分钟导出；页面每分钟检查。资源空闲等待不计时，达到8小时后停止派发并收尾，安全中断如实标记。</p><p class="muted">新训练权重仍需后续完整成本评估。${esc(u.scope)}；本轮不改论文结论。</p><p class="foot">固定实验配置 SHA256 ${esc(u.frozen_sha256)}</p>`;
+}
+function renderLiteralFullcost(){
+ const u=data.literal_fullcost,target=document.getElementById('literal-fullcost-progress');
+ if(!u){target.textContent='尚无通过一致性校验的 A44 快照；不推断性能已通过。';return;}
+ const age=(Date.now()-Date.parse(u.observed))/1000;
+ const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
+ const labels={running:'全成本评测运行快照',complete:u.audited?'全矩阵审计完成':'求解完成，等待独立审计',failed:'已停止，须检查失败原因',stale:'快照已陈旧，当前状态待确认'};
+ const stages={starting:'启动',predictions:'完整单例预测',references:'独立求解参考',evaluation:'全成本求解',awaiting_audit:'终态核验'};
+ const names={stock:'默认',polarity:'极性',degree:'最小度数',teacher:'教师',d6_raw_42:'轻量42',d6_raw_43:'轻量43',d6_raw_44:'轻量44'};
+ const result=u.summary?`<p>三种子联合保真/速度/非劣描述门：${u.summary.family_feasible?'通过':'未通过'}；同时胜过四个对照的更强开发门：${u.summary.family_potential_advantage?'通过，仍需独立确认':'未通过'}。</p><div class="table"><table><thead><tr><th>策略</th><th>完整 PAR-2 秒↓</th><th>解出 / 288</th></tr></thead><tbody>${Object.entries(names).map(([arm,name])=>{const v=u.summary.scales.ALL[arm];return `<tr><td>${name}</td><td>${v.mean_par2_s.toFixed(6)}</td><td>${v.solved}</td></tr>`}).join('')}</tbody></table></div>`:'';
+ target.innerHTML=`<b>${esc(labels[phase])}</b><p>${esc(stages[u.stage])}</p><div class="cards"><div class="card"><b>${u.completed_predictions.toLocaleString()} / 1,152</b><span>含读图、构图、传输、前向与解码</span></div><div class="card"><b>${u.completed_cells.toLocaleString()} / 2,016</b><span>含预测、求解、完整答案核验</span></div><div class="card"><b>${u.audited?'已通过':'尚未通过'}</b><span>终态原始记录审计</span></div></div><p>A40 三组固定模型一致率约 99.73%–99.74%；A43 暴露验证上的完整推理中位数 18.02 → 10.05–11.26 ms，降低 37.5%–44.2%。这两项不是求解加速结论。</p><p>本轮 144 未用于调参的开发公式、36 生成流、两次计时重复；原始求解器、极性、度数、教师与三组模型同为 3 秒总预算。24 个不同物理核共享使用；模型预先固定，不选最佳种子。重复不是 288 个独立实例。</p>${result}<p class="alert">144 独立留出仍封存。这里只是驻留全成本开发试验，不是冷启动、工业泛化、等成本 WalkSAT 或原 CAP 预训练优势的确认。</p><p class="muted">心跳 ${esc(new Date(u.observed).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}；运行快照超过两分钟标陈旧。<a href="#action-A44">完整判据 ↗</a></p>`;
 }
 function renderDepthScreen(){
  const u=data.depth_screen,target=document.getElementById('depth-screen-progress');

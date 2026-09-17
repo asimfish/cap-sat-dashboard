@@ -6,10 +6,28 @@ import tempfile
 import unittest
 from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress, local_feedback_progress
 from unittest.mock import patch
-from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress, recovery_v3_progress, depth_screen_progress
+from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress, recovery_v3_progress, depth_screen_progress, literal_fullcost_progress
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_literal_fullcost_counts_terminal_stale_and_privacy(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/literal_fullcost_20260917_v1';root.mkdir(parents=True)
+            def save(name,value):(root/name).write_text(json.dumps(value))
+            arms=['stock','polarity','degree','teacher','d6_raw_42','d6_raw_43','d6_raw_44'];ident=dict(kind='bundle_digest',scope='literal_fullcost_inputs',value='c'*64)
+            cfg=dict(arms=arms,rows=[{}]*144,prediction_requests=1152,target_cells=2016,end_unix=1789663200)
+            state=dict(input_identity=ident,phase='running',stage='evaluation',observed_unix=1000.,elapsed_s=20.,completed_cells=7,target_cells=2016,completed_predictions=1152,target_predictions=1152,receipts=[],supervisor=dict(private='/home/PRIVATE'))
+            save('CONFIG.json',cfg);save('FROZEN.json',dict(input_identity=ident));save('STATUS.json',state)
+            with patch('build.joint_supervisor_alive',return_value=True):
+                out=literal_fullcost_progress(repo,1000);self.assertEqual(out['completed_cells'],7);self.assertFalse(out['audited']);self.assertNotIn('PRIVATE',json.dumps(out))
+                self.assertEqual(literal_fullcost_progress(repo,1121)['phase'],'stale')
+                state['completed_cells']=8;save('STATUS.json',state);self.assertIsNone(literal_fullcost_progress(repo,1000))
+                state.update(phase='complete',completed_cells=2016,receipts=[dict(arm=a,returncode=0) for a in arms[3:]]);save('STATUS.json',state);save('FINAL.json',dict(state,cleanup=dict(errors=[],unreaped=[])))
+                self.assertFalse(literal_fullcost_progress(repo,9999)['audited'])
+                raw=dict(input_identity=ident,cells=2016,end_to_end_advantage=False,independently_confirmed=False,holdout_opened=False,family_feasible=False,family_potential_advantage=False,scales={s:{a:dict(cells=288 if s=='ALL' else 96,solved=50,mean_par2_s=3.) for a in arms} for s in ('ALL','200','300','350')})
+                save('RESULTS.json',raw);save('AUDIT.json',dict(input_identity=ident,cells=2016,predictions=1152,errors=[]));self.assertTrue(literal_fullcost_progress(repo,9999)['audited'])
+                raw['scales']['350']['teacher']['mean_par2_s']=float('nan');save('RESULTS.json',raw);self.assertIsNone(literal_fullcost_progress(repo,9999))
+
     def test_depth_progress_rejects_counts_and_does_not_promote_partial(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/depth_literal_20260917_v1';root.mkdir(parents=True)
@@ -638,7 +656,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),43)
+        self.assertEqual(len(plan['actions']),45)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -654,7 +672,9 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('非同FLOPs',actions['A38']['method'])
         self.assertIn('26074',actions['A39']['cost'])
         self.assertIn('28512',actions['A39']['status'])
-        self.assertIn('已冻结启动',actions['A40']['priority'])
+        self.assertIn('保真门通过',actions['A40']['priority'])
+        self.assertIn('432',actions['A43']['status'])
+        self.assertIn('2016',actions['A44']['cost'])
         self.assertIn('98.64%',actions['A41']['stop'])
         self.assertIn('15120',actions['A42']['status'])
         self.assertIn('无family过98%',actions['A42']['stop'])

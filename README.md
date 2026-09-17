@@ -19,9 +19,18 @@ Old supervisorv2 ended at09:24:33 with zero new recovery updates; waiting is not
 compute. Approved109MiB HFmodelcache relocation and9duplicate screenshots cleanup
 completed; model bytes/original path and identical screenshot copies retained.
 A39v3 completed six remaining lanes (18432new+18432reused),28512records audited.
-Anneal agreement97.51–97.58%, no family passes98% EACHseed/EACHscale. A40 now
-frozen/launched:12depth-width models,110592updates vs retained3layer anneal controls.
-Owner+audit bounded by2026-09-17T16:40:00Z (Sep18 00:40Beijing); see depth panel.
+Anneal agreement97.51–97.58%, no family passes98% EACHseed/EACHscale. A40 completed
+12depth-width models,110592updates and28512audited records. All four families pass
+fidelity, with99.6123–99.7479% exposed-validation agreement. The preregistered
+worst-scale/seed choice is d6_raw:99.7278/99.7407/99.7391%. This is teacher-action
+imitation, not SAT accuracy or end-to-end advantage; depth AND width change.
+A43 audited432prediction requests: teacher18.0249ms versus10.0526/11.2612/11.0761ms,
+all seeds/scales pass80%latency and98%fidelity gates. Full singleton prediction
+includes read/parse/build/transfer/forward/decode, but no solver and no cold start.
+A44 now opens144previously unused development formulas, NOT144held-out formulas:
+1152new predictions and2016full-cost native cells, stock/polarity/minimal-degree/
+teacher/all3fixed students. See the full-cost panel; no performance conclusion
+before raw terminal audit. Owner+audit bounded by2026-09-17T16:40:00Z.
 New stages are not retroactively counted as the original eight-hour window.
 A41 retained-output diagnosis:98.64–99.55% of literal errors are near-zero;
 three-seed voting only+.2365/+.3783points, no full-cost inference. A42 fits one

@@ -8,6 +8,7 @@
 </style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#performance-plan">05 · 性能改进计划</a><a href="#next">06 · 论文与审计</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
 <section id="night-window"><h2>实验监护 · 资源保护与恢复</h2><div id="night-window-progress" class="panel" aria-live="polite"></div></section>
+<section id="literal-fullcost"><h2>A44 · 高保真轻量模型的端到端开发评测</h2><div id="literal-fullcost-progress" class="panel" aria-live="polite"></div></section>
 <section id="depth-screen"><h2>A40 · 近等参数量的文字传播深度对照</h2><div id="depth-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="coverage-screen"><h2>A38 · 今晚的新数据与表示验证</h2><div id="coverage-screen-progress" class="panel" aria-live="polite"></div></section>
 <section id="boundary-screen"><h2>A34 · 表示深度 × 近零边界监督</h2><div id="boundary-screen-progress" class="panel" aria-live="polite"></div></section>
@@ -161,12 +162,24 @@ function renderOvernight(){
  renderCoverageScreen();
  renderNightRecovery();
  renderDepthScreen();
+ renderLiteralFullcost();
  const u=data.overnight,target=document.getElementById('overnight-progress');
  if(!u){target.textContent='尚无通过完整性检查的队列快照。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=age>120&&!['complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'有实验执行的运行快照',paused_resources:'资源保护：暂停新增任务',draining:'结束派发，等待当前任务收尾',complete:'已达到8小时有效运行',stopped_incomplete:'已停止，未跑满8小时',stale:'快照已陈旧，当前运行状态待下次导出确认'};
  target.innerHTML=`<b>${esc(labels[phase]||'状态未知')}</b><div class="cards"><div class="card"><b>${(u.active_s/3600).toFixed(2)} / 8 h</b><span>实际有实验执行的累计墙钟；不累加并发CPU小时</span></div><div class="card"><b>${u.counts.cpu_jobs} 批 / ${u.counts.cells.toLocaleString()} 次</b><span>已完成并核对结果摘要的全成本求解</span></div><div class="card"><b>${u.counts.training_jobs} / ${u.training_queue}</b><span>完成候选训练；${u.counts.training_steps.toLocaleString()} 个优化步</span></div></div><p>上次快照在执行：CPU ${u.running.cpu}/${u.cpu_slots} 路，GPU训练 ${u.running.train}/${u.gpu_slots} 路，数据准备 ${u.running.data} 路；失败任务 ${u.failed_jobs} 个。</p><p>CPU：四规模匹配对照、困难 n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算。GPU：8数据分片 × 2模型 × 3损失 × 3学习率 × 3种子，共432项候选；队列未派发项不算完成。</p><p>开始：${esc(new Date(u.started_at).toLocaleString())}；快照：${esc(new Date(u.observed).toLocaleString())}。服务器每15分钟导出；页面每分钟检查。资源空闲等待不计时，达到8小时后停止派发并收尾，安全中断如实标记。</p><p class="muted">新训练权重仍需后续完整成本评估。${esc(u.scope)}；本轮不改论文结论。</p><p class="foot">固定实验配置 SHA256 ${esc(u.frozen_sha256)}</p>`;
+}
+function renderLiteralFullcost(){
+ const u=data.literal_fullcost,target=document.getElementById('literal-fullcost-progress');
+ if(!u){target.textContent='尚无通过一致性校验的 A44 快照；不推断性能已通过。';return;}
+ const age=(Date.now()-Date.parse(u.observed))/1000;
+ const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
+ const labels={running:'全成本评测运行快照',complete:u.audited?'全矩阵审计完成':'求解完成，等待独立审计',failed:'已停止，须检查失败原因',stale:'快照已陈旧，当前状态待确认'};
+ const stages={starting:'启动',predictions:'完整单例预测',references:'独立求解参考',evaluation:'全成本求解',awaiting_audit:'终态核验'};
+ const names={stock:'默认',polarity:'极性',degree:'最小度数',teacher:'教师',d6_raw_42:'轻量42',d6_raw_43:'轻量43',d6_raw_44:'轻量44'};
+ const result=u.summary?`<p>三种子联合保真/速度/非劣描述门：${u.summary.family_feasible?'通过':'未通过'}；同时胜过四个对照的更强开发门：${u.summary.family_potential_advantage?'通过，仍需独立确认':'未通过'}。</p><div class="table"><table><thead><tr><th>策略</th><th>完整 PAR-2 秒↓</th><th>解出 / 288</th></tr></thead><tbody>${Object.entries(names).map(([arm,name])=>{const v=u.summary.scales.ALL[arm];return `<tr><td>${name}</td><td>${v.mean_par2_s.toFixed(6)}</td><td>${v.solved}</td></tr>`}).join('')}</tbody></table></div>`:'';
+ target.innerHTML=`<b>${esc(labels[phase])}</b><p>${esc(stages[u.stage])}</p><div class="cards"><div class="card"><b>${u.completed_predictions.toLocaleString()} / 1,152</b><span>含读图、构图、传输、前向与解码</span></div><div class="card"><b>${u.completed_cells.toLocaleString()} / 2,016</b><span>含预测、求解、完整答案核验</span></div><div class="card"><b>${u.audited?'已通过':'尚未通过'}</b><span>终态原始记录审计</span></div></div><p>A40 三组固定模型一致率约 99.73%–99.74%；A43 暴露验证上的完整推理中位数 18.02 → 10.05–11.26 ms，降低 37.5%–44.2%。这两项不是求解加速结论。</p><p>本轮 144 未用于调参的开发公式、36 生成流、两次计时重复；原始求解器、极性、度数、教师与三组模型同为 3 秒总预算。24 个不同物理核共享使用；模型预先固定，不选最佳种子。重复不是 288 个独立实例。</p>${result}<p class="alert">144 独立留出仍封存。这里只是驻留全成本开发试验，不是冷启动、工业泛化、等成本 WalkSAT 或原 CAP 预训练优势的确认。</p><p class="muted">心跳 ${esc(new Date(u.observed).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}))}；运行快照超过两分钟标陈旧。<a href="#action-A44">完整判据 ↗</a></p>`;
 }
 function renderDepthScreen(){
  const u=data.depth_screen,target=document.getElementById('depth-screen-progress');

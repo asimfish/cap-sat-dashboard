@@ -1644,6 +1644,43 @@ def coverage_screen_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
 
 
+def literal_fullcost_progress(repo, now=None):
+    root=repo/'experiments/literal_fullcost_20260917_v1'
+    try:
+        state=json.loads((root/'STATUS.json').read_text());cfg=json.loads((root/'CONFIG.json').read_text());ident=json.loads((root/'FROZEN.json').read_text())['input_identity']
+        arms=['stock','polarity','degree','teacher','d6_raw_42','d6_raw_43','d6_raw_44']
+        if state['input_identity']!=ident or ident.get('kind')!='bundle_digest' or ident.get('scope')!='literal_fullcost_inputs' or not re.fullmatch('[0-9a-f]{64}',ident.get('value','')):return None
+        if cfg['arms']!=arms or len(cfg['rows'])!=144 or cfg['prediction_requests']!=1152 or cfg['target_cells']!=2016 or cfg['end_unix']!=1789663200:return None
+        phase=state['phase'];stage=state['stage'];observed=state['observed_unix'];elapsed=state['elapsed_s'];cells=state['completed_cells'];pred=state['completed_predictions']
+        if phase not in ('running','complete','failed') or stage not in ('starting','predictions','references','evaluation','awaiting_audit'):return None
+        if any(type(x) not in (int,float) or not math.isfinite(x) or x<0 for x in (observed,elapsed)):return None
+        if type(cells)is not int or not 0<=cells<=2016 or cells%7 or type(pred)is not int or not 0<=pred<=1152 or state['target_cells']!=2016 or state['target_predictions']!=1152:return None
+        audited=False;summary=None
+        if phase in ('complete','failed'):
+            final=json.loads((root/'FINAL.json').read_text())
+            if any(final[k]!=v for k,v in state.items()):return None
+            if phase=='complete':
+                if cells!=2016 or pred!=1152 or final['cleanup']!={'errors':[],'unreaped':[]}:return None
+                receipts=state['receipts']
+                if len(receipts)!=4 or {r['arm'] for r in receipts}!=set(arms[3:]) or any(r['returncode']!=0 for r in receipts):return None
+                if (root/'AUDIT.json').exists():
+                    audit=json.loads((root/'AUDIT.json').read_text());raw=json.loads((root/'RESULTS.json').read_text())
+                    if audit['input_identity']!=ident or raw['input_identity']!=ident or audit['errors']!=[] or audit['cells']!=2016 or audit['predictions']!=1152 or raw['cells']!=2016 or raw['end_to_end_advantage']is not False or raw['independently_confirmed']is not False or raw['holdout_opened']is not False:return None
+                    groups={}
+                    for scale in ('ALL','200','300','350'):
+                        if set(raw['scales'][scale])!=set(arms):return None
+                        groups[scale]={}
+                        for arm in arms:
+                            v=raw['scales'][scale][arm];limit=288 if scale=='ALL' else 96
+                            if v['cells']!=limit or type(v['solved'])is not int or not 0<=v['solved']<=limit or type(v['mean_par2_s']) not in (int,float) or not math.isfinite(v['mean_par2_s']) or not 0<v['mean_par2_s']<=6:return None
+                            groups[scale][arm]=dict(cells=limit,solved=v['solved'],mean_par2_s=v['mean_par2_s'])
+                    if type(raw['family_feasible'])is not bool or type(raw['family_potential_advantage'])is not bool:return None
+                    summary=dict(scales=groups,family_feasible=raw['family_feasible'],family_potential_advantage=raw['family_potential_advantage']);audited=True
+        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state,'run.py'):phase='stale'
+        return dict(phase=phase,stage=stage,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),elapsed_s=elapsed,completed_cells=cells,target_cells=2016,completed_predictions=pred,target_predictions=1152,audited=audited,summary=summary,learned_advantage=False,independently_confirmed=False,holdout_opened=False)
+    except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
+
+
 def depth_screen_progress(repo, now=None):
     root=repo/'experiments/depth_literal_20260917_v1'
     try:
@@ -1786,6 +1823,7 @@ def main():
     data['coverage_screen']=coverage_screen_progress(args.repo.resolve())
     data['night_recovery']=night_recovery_progress(args.repo.resolve())
     data['depth_screen']=depth_screen_progress(args.repo.resolve())
+    data['literal_fullcost']=literal_fullcost_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())
