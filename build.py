@@ -1681,6 +1681,40 @@ def literal_fullcost_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
 
 
+def strategy_headroom_progress(repo, now=None):
+    root=repo/'experiments/strategy_headroom_20260918_v1'
+    try:
+        state=json.loads((root/'STATUS.json').read_text());cfg=json.loads((root/'CONFIG.json').read_text());ident=json.loads((root/'FROZEN.json').read_text())['input_identity']
+        if state['input_identity']!=ident or ident.get('kind')!='bundle_digest' or ident.get('scope')!='strategy_headroom_inputs' or not re.fullmatch('[0-9a-f]{64}',ident.get('value','')):return None
+        if len(cfg['rows'])!=192 or cfg['cells']!=768 or cfg['predictions']!=384 or cfg['arms']!=['degree','teacher']:return None
+        phase=state['phase'];stage=state['stage'];observed=state['observed_unix'];elapsed=state['elapsed_s'];end=state['window_end_unix']
+        if phase not in ('running','complete','failed') or stage not in ('starting','predict','reference','solve','audit') or end!=1789673400 or cfg['end_unix']!=end:return None
+        if any(type(v) not in (int,float) or not math.isfinite(v) or v<0 for v in (observed,elapsed)):return None
+        progress=state['progress'];completed=0;target=0
+        if progress is not None:
+            limits={'predict':384,'reference':192,'solve_blocks':384};ps=progress['stage'];count=progress['completed']
+            if ps not in limits or progress['target']!=limits[ps] or type(count)is not int or not 0<=count<=limits[ps]:return None
+            if ps==('solve_blocks' if stage=='solve' else stage):completed=count;target=limits[ps]
+        audited=False;summary=None
+        if phase in ('complete','failed'):
+            if state!=json.loads((root/'FINAL.json').read_text()):return None
+            if phase=='complete':
+                receipts=state['receipts']
+                if state['cleanup']!={'errors':[],'unreaped':[]} or len(receipts)!=4 or {r['label'] for r in receipts}!={'predict','reference','solve','audit'} or any(r['returncode']!=0 for r in receipts):return None
+                audit=json.loads((root/'AUDIT.json').read_text());result=json.loads((root/'RESULTS.json').read_text())
+                if audit['input_identity']!=ident or audit['errors']!=[] or audit['cells']!=768 or audit['predictions']!=384 or result['input_identity']!=ident or result['cells']!=768 or result['end_to_end_advantage']is not False or result['holdout_opened']is not False or result['offline_selection_cost_excluded']is not True:return None
+                allrows={}
+                for arm in ('degree','teacher','oracle','crossfit','cross_repeat'):
+                    row=result['scales']['ALL'][arm]
+                    if row['cells']!=384 or type(row['solved'])is not int or not 0<=row['solved']<=384 or type(row['par2_s']) not in (int,float) or not math.isfinite(row['par2_s']) or not 0<=row['par2_s']<=6:return None
+                    allrows[arm]=dict(cells=384,solved=row['solved'],par2_s=row['par2_s'])
+                if type(result['oracle_space_pass'])is not bool or type(result['size_rule_pass'])is not bool:return None
+                summary=dict(scales_all=allrows,oracle_space_pass=result['oracle_space_pass'],size_rule_pass=result['size_rule_pass']);audited=True
+        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state,'owner48.py'):phase='stale'
+        return dict(phase=phase,stage=stage,completed=completed,target=target,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),elapsed_s=elapsed,audited=audited,summary=summary,target_cells=768,formulas=192,learned_advantage=False)
+    except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
+
+
 def head_refit_progress(repo, now=None):
     """A47 operational counts and explicit non-promotion; private identities stay local."""
     root=repo/'experiments/head_refit_20260918_v1'
@@ -1895,6 +1929,7 @@ def main():
     data['literal_fullcost']=literal_fullcost_progress(args.repo.resolve())
     data['weight_precision']=weight_precision_progress(args.repo.resolve())
     data['head_refit']=head_refit_progress(args.repo.resolve())
+    data['strategy_headroom']=strategy_headroom_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())

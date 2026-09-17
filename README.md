@@ -58,6 +58,14 @@ fit/GPU full-network replay and exact same-hidden phase checks are separate.
 CPU/GPU7tests each pass; target21024before/after records,0solver cells. Current
 execution follows the identity-checked heartbeat, not this static description.
 Absolute end19:30UTC (Sep18 03:30Beijing), no grid expansion, holdout or paper edit.
+A47 now complete:21024records/full-network replays audited,14process identities
+exited,181.73s. Balanced validation improves another4.63–8.42%, phase flips0;
+all50%repair gates still fail. Mechanism MIXED; no general capacity-limit claim.
+The output-row expansion stops. A48 separately freezes192TRAIN/48streams,
+384fresh teacher predictions and768paired full-cost cells to diagnose teacher/
+degree complementarity. Formula oracle and stream-crossfit scale rule are offline
+replays with selector cost excluded, not deployable end-to-end or CAP advantage.
+Only dual10%oracle-space and3%crossfit/no-harm gates permit proposing a new route.
 New stages are not retroactively counted as the original eight-hour window.
 A41 retained-output diagnosis:98.64–99.55% of literal errors are near-zero;
 three-seed voting only+.2365/+.3783points, no full-cost inference. A42 fits one

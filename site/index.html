@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-17T18:49:22.512198+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-17T19:04:33.864643+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -8,6 +8,7 @@
 </style></head><body><div class="shell"><nav><strong>CAP-SAT<span style="color:var(--accent)">.</span></strong><small>RESEARCH / REBUTTAL<br>证据驱动的实验进度</small><a href="#overview">01 · 当前结论</a><a href="#issues">02 · 缺点解决情况</a><a href="#runs">03 · 实验完成度</a><a href="#results">04 · 结果与边界</a><a href="#performance-plan">05 · 性能改进计划</a><a href="#next">06 · 论文与审计</a><a href="https://github.com/asimfish/cap-sat-dashboard">GitHub ↗</a><a href="status.json">下载聚合 JSON ↗</a></nav><main>
 <section id="overview"><div class="eyebrow">CAP-SAT / OPEN RESEARCH LOG</div><h1>实验进展，看得见。<br>结论边界，也看得见。</h1><p class="hero">跟踪 rebuttal 缺点、实验完成度和可支持的结论。计时可靠性已修复；随机 SAT 相对原生求解器的劣势与工业泛化仍待解决。</p><p id="freshness" class="muted" aria-live="polite"></p><div class="cards" id="cards"></div><div class="alert">实验完成 ≠ 缺点解决。以下缺点状态由证据审读维护；E17/E19 行数和数值由实验日志自动计算。没有进程心跳时不推断任务正在运行。</div></section>
 <section id="night-window"><h2>实验监护 · 资源保护与恢复</h2><div id="night-window-progress" class="panel" aria-live="polite"></div></section>
+<section id="strategy-headroom"><h2>A48 · 教师与廉价策略的互补空间</h2><div id="strategy-headroom-progress" class="panel" aria-live="polite"></div></section>
 <section id="head-refit"><h2>A47 · 冻结表示，精修权重输出头</h2><div id="head-refit-progress" class="panel" aria-live="polite"></div></section>
 <section id="weight-precision"><h2>A46 · 针对已定位的权重误差修复</h2><div id="weight-precision-progress" class="panel" aria-live="polite"></div></section>
 <section id="literal-fullcost"><h2>A44 · 高保真轻量模型的端到端开发评测</h2><div id="literal-fullcost-progress" class="panel" aria-live="polite"></div></section>
@@ -43,7 +44,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-17T18:49:22.512198+00:00",
+  "generated": "2026-09-17T19:04:33.864643+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3069,7 +3070,7 @@
   "performance_plan": {
     "version": 1,
     "reviewed": "2026-09-18",
-    "scope": "端到端严格优势仍未达成：A44比默认快12.9%–15.1%，但落后教师及廉价度数。A45定位权重误差；A46六模型18432更新已审计，误差降31%–39%但减半门未过。用户新授权后，A47已冻结并启动六个固定模型的输出头拟合及独立完整网络重放；真实状态见心跳，不把拟合、等待或精度改善称为求解提速。教师本身也未胜度数；独立留出仍封存。",
+    "scope": "端到端严格优势仍未达成。A47六模型及21024前后记录/完整网络重放已审计：权重误差进一步降4.63%–8.42%，相位零翻转，但新减半门全失败，停止输出头扩张。A48另行冻结训练集192公式、384次预测、768配对求解，检验教师与廉价度数互补及可事先选择性；具体运行状态见心跳。离线择优不是部署收益，独立留出仍封存。",
     "success_rule": "同时报告默认、同接口同密度极性、等成本 WalkSAT；主指标为完整单实例成本 PAR-2 与求解数。冲突和参考准确率仅作诊断。收益必须跨训练种子及生成簇核验，不能只挑正向点估计。",
     "constraints": [
       "P0 先核对历史 K% 分母、差值符号、百分比与行级来源；未核验的历史正向点估计不升级为已证实加速。",
@@ -3887,19 +3888,34 @@
       {
         "id": "A47",
         "title": "冻结表示与相位，只精修现有权重输出头",
-        "priority": "机制辨别 · 已冻结启动，按实时心跳判断",
-        "status": "六固定模型拟合及独立重放队列已启动；终态精度与求解收益未判定",
-        "cost": "六模型 × 1536训练公式拟合；144复用验证/72旧验证只诊断。目标21024前后公式记录，0新求解；六共享GPU，03:30北京时间绝对截止。",
+        "priority": "机制辨别 · 完成，修复门仍失败",
+        "status": "六模型/21024前后记录和完整网络重放全部审计；验证再降4.63%–8.42%，减半门全失败",
+        "cost": "六共享GPU完成1536训练公式等权拟合；144复用验证/72旧验证。总队列181.73秒，14进程身份均退出，0新求解。",
         "depends_on": [
           "A46"
         ],
-        "hypothesis": "区分最后一层优化不足与固定表示/线性读出限制：训练RMSE降至少20%且验证降15%支持前者，训练降不到5%支持该固定修正空间有限；混合结果保留不确定性。",
-        "method": "float64公式等权残差ridge，训练特征标准化，固定正则1e-8、不罚截距，条件数上限1e12。仅折回现有权重行/偏置；同特征相位精确不变和完整前向相位翻转分开检查。晋级误差来自折回模型完整网络，不是理想拟合值；CPU数值与GPU全网络独立重放。CPU/GPU各7项预检通过。",
-        "gate": "平衡表示三个种子每规模相对A46原损失控制的log权重RMSE至少减半，四位序列化误差不比各自来源增加，相位完整路径零翻转；折回最大误差≤1e-5/RMS≤1e-6。全部过门才另立全成本开发协议，旧A46失败不改。",
-        "stop": "尚无终态结论。只允许六个固定拟合，不扫正则或选择最好种子；未过门停止该输出头扩张。独立留出和论文不改，不把固定ridge结果称一般表示容量界，不把精度门通过称端到端优势。"
+        "hypothesis": "最后层不足预测训练降20%且验证降15%；固定线性修正空间有限预测训练降不到5%。实际三个平衡模型训练降5.35/4.66/8.12%，机制判定mixed，不能证明一般表示容量界。",
+        "method": "训练公式等权float64残差ridge，固定1e-8、仅折回原输出权重行；CPU/GPU各7项预检。所有指标来自折回后完整网络，独立CPU拟合与GPU前向重放；同特征相位精确不变，完整路径相位翻转全部0，未加部署计算。",
+        "gate": "全部种子每规模相对A46原损失控制权重RMSE至少减半、序列化误差不增加、相位零翻转才允许另立全成本。折回误差及来源/动作检查全部通过，科学减半门全失败，不回写A46。",
+        "stop": "平衡模型最终验证RMSE0.000759396/0.000744993/0.000769384，再降4.82/4.63/8.42%；相对原损失总降35.26/40.65/38.31%，未达50%。四位权重不同比例仍91.15/91.15/91.21%。停止输出头/正则扩张，不推最好种子、不打开留出。转A48教师自身上限诊断，不称已恢复搜索。"
+      },
+      {
+        "id": "A48",
+        "title": "先测教师与廉价度数的互补及事先可选择性",
+        "priority": "新机制 · 已冻结启动",
+        "status": "192训练公式的384新预测/768配对求解队列已启动，终态待审计",
+        "cost": "48训练生成流，每流4公式；教师与度数双计时重复，24物理核，共享GPU3。03:30北京时间绝对截止；无新模型训练或留出。",
+        "depends_on": [
+          "A44",
+          "A47"
+        ],
+        "hypothesis": "教师自身弱于廉价基线，继续模仿未必胜出。区分没有足够互补、只凭规模就可利用、需要实例级信息这三种解释，再决定是否值得训练选择策略。",
+        "method": "预先取原训练每规模前64公式，不按结果筛选；两策略计入预测/构造/原生求解/完整SAT核验，3秒PAR-2。实际发送payload/命令哈希审计。事后oracle对同公式两重复固定选一臂；规模规则按完整生成流四折训练与重放，不读当前折标签。平局度数。",
+        "gate": "免费公式级oracle相对最强固定策略至少10%空间，且规模规则对教师/度数至少3%整体改善、每规模均值/求解无害，双门才允许提出部署验证。两种oracle范围及每折结果分别保留；选择器开销未计入，均非端到端部署结果。",
+        "stop": "当前结果未定。没有10%互补就停止两策略路线；只有oracle过门则需新的训练数据可预测性假设，不自动扩大分类器。禁止把同一求解种子的重复当独立种子，不修改论文或声称CAP学习增量。"
       }
     ],
-    "sha256": "76222ffc1c05a0713202b4883b780da54757d4a8a777212f4318cc58c45adc56"
+    "sha256": "7800fa0841c39fb8bfbb78f4d52743b3009a2ca5c67c0a1e6aa8c18f0b592b60"
   },
   "pilot": {
     "id": "E26",
@@ -7731,7 +7747,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-18T02:05:40.820242+00:00",
+    "earliest_target_at": "2026-09-18T02:20:52.121914+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -8420,6 +8436,19 @@
     "audited": true,
     "repair_screen": false,
     "solver_cells": 0,
+    "learned_advantage": false
+  },
+  "strategy_headroom": {
+    "phase": "failed",
+    "stage": "solve",
+    "completed": 96,
+    "target": 384,
+    "observed": "2026-09-17T19:01:45.384449+00:00",
+    "elapsed_s": 255.17223866842687,
+    "audited": false,
+    "summary": null,
+    "target_cells": 768,
+    "formulas": 192,
     "learned_advantage": false
   },
   "targeted": {
@@ -14103,12 +14132,24 @@ function renderOvernight(){
  renderLiteralFullcost();
  renderWeightPrecision();
  renderHeadRefit();
+ renderStrategyHeadroom();
  const u=data.overnight,target=document.getElementById('overnight-progress');
  if(!u){target.textContent='尚无通过完整性检查的队列快照。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=age>120&&!['complete','stopped_incomplete'].includes(u.phase)?'stale':u.phase;
  const labels={starting:'启动中',running:'有实验执行的运行快照',paused_resources:'资源保护：暂停新增任务',draining:'结束派发，等待当前任务收尾',complete:'已达到8小时有效运行',stopped_incomplete:'已停止，未跑满8小时',stale:'快照已陈旧，当前运行状态待下次导出确认'};
  target.innerHTML=`<b>${esc(labels[phase]||'状态未知')}</b><div class="cards"><div class="card"><b>${(u.active_s/3600).toFixed(2)} / 8 h</b><span>实际有实验执行的累计墙钟；不累加并发CPU小时</span></div><div class="card"><b>${u.counts.cpu_jobs} 批 / ${u.counts.cells.toLocaleString()} 次</b><span>已完成并核对结果摘要的全成本求解</span></div><div class="card"><b>${u.counts.training_jobs} / ${u.training_queue}</b><span>完成候选训练；${u.counts.training_steps.toLocaleString()} 个优化步</span></div></div><p>上次快照在执行：CPU ${u.running.cpu}/${u.cpu_slots} 路，GPU训练 ${u.running.train}/${u.gpu_slots} 路，数据准备 ${u.running.data} 路；失败任务 ${u.failed_jobs} 个。</p><p>CPU：四规模匹配对照、困难 n48/64、驻留批量1/3/12/48、0.1/0.5/1ms预算。GPU：8数据分片 × 2模型 × 3损失 × 3学习率 × 3种子，共432项候选；队列未派发项不算完成。</p><p>开始：${esc(new Date(u.started_at).toLocaleString())}；快照：${esc(new Date(u.observed).toLocaleString())}。服务器每15分钟导出；页面每分钟检查。资源空闲等待不计时，达到8小时后停止派发并收尾，安全中断如实标记。</p><p class="muted">新训练权重仍需后续完整成本评估。${esc(u.scope)}；本轮不改论文结论。</p><p class="foot">固定实验配置 SHA256 ${esc(u.frozen_sha256)}</p>`;
+}
+function renderStrategyHeadroom(){
+ const u=data.strategy_headroom,target=document.getElementById('strategy-headroom-progress');
+ if(!u){target.textContent='A48 尚无通过身份检查的快照，计划不算运行。';return;}
+ const age=(Date.now()-Date.parse(u.observed))/1000;
+ const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
+ const labels={running:'配对训练数据诊断执行中',complete:u.audited?'768 单元已完成并审计':'队列完成，等待审计',failed:'已停止，存在失败检查',stale:'快照已陈旧，当前状态待确认'};
+ const stages={starting:'准备',predict:'384次计费预测',reference:'192个独立参考',solve:'384个双策略配对块',audit:'原始记录审计'};
+ const names={degree:'廉价度数',teacher:'固定教师',oracle:'事后按公式择优（不可部署）',crossfit:'按规模交叉拟合（离线重放）',cross_repeat:'跨计时重复择优（诊断）'};
+ const table=u.summary?`<div class="table"><table><thead><tr><th>策略/诊断</th><th>PAR-2 秒</th><th>解出/计时单元</th></tr></thead><tbody>${Object.entries(names).map(([arm,label])=>{const row=u.summary.scales_all[arm];return `<tr><td>${label}</td><td>${row.par2_s.toFixed(4)}</td><td>${row.solved}/384</td></tr>`}).join('')}</tbody></table></div><p>互补空间 ≥10%：${u.summary.oracle_space_pass?'通过':'未过'}；规模规则 ≥3% 且逐规模无害：${u.summary.size_rule_pass?'通过':'未过'}。</p>`:'';
+ target.innerHTML=`<b>${esc(labels[phase])}</b><p>${esc(stages[u.stage])}${u.target?`：${u.completed}/${u.target}`:''}。192 个 TRAIN 公式、48 生成流、两个计时重复；不是384个独立实例。每个真实策略计入预测、原生求解及答案核验费用。</p>${table}<p>选择策略均为离线诊断，选择器开销未计入；不代表部署收益、CAP学习增量或独立确认。事后择优只能说明这两种固定策略的互补空间。独立留出不打开。</p><a href="#action-A48">预注册、结果与停止条件 ↗</a>`;
 }
 function renderHeadRefit(){
  const u=data.head_refit,target=document.getElementById('head-refit-progress');

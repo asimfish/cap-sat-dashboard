@@ -6,10 +6,28 @@ import tempfile
 import unittest
 from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress, local_feedback_progress
 from unittest.mock import patch
-from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress, recovery_v3_progress, depth_screen_progress, literal_fullcost_progress, weight_precision_progress, head_refit_progress
+from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress, recovery_v3_progress, depth_screen_progress, literal_fullcost_progress, weight_precision_progress, head_refit_progress, strategy_headroom_progress
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_strategy_headroom_not_deployment_and_fail_closed(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/strategy_headroom_20260918_v1';root.mkdir(parents=True)
+            def save(name,value):(root/name).write_text(json.dumps(value))
+            ident=dict(kind='bundle_digest',scope='strategy_headroom_inputs',value='f'*64)
+            cfg=dict(rows=[{}]*192,cells=768,predictions=384,arms=['degree','teacher'],end_unix=1789673400)
+            state=dict(input_identity=ident,phase='running',stage='solve',observed_unix=1000.,elapsed_s=20.,window_end_unix=1789673400,progress=dict(stage='solve_blocks',completed=100,target=384),supervisor=dict(private='/home/PRIVATE'))
+            save('CONFIG.json',cfg);save('FROZEN.json',dict(input_identity=ident));save('STATUS.json',state)
+            with patch('build.joint_supervisor_alive',return_value=True):
+                result=strategy_headroom_progress(repo,1000);self.assertEqual(result['completed'],100);self.assertFalse(result['audited']);self.assertNotIn('PRIVATE',json.dumps(result))
+                self.assertEqual(strategy_headroom_progress(repo,1121)['phase'],'stale')
+                state.update(phase='complete',stage='audit',cleanup=dict(errors=[],unreaped=[]),receipts=[dict(label=s,returncode=0) for s in ('predict','reference','solve','audit')]);save('STATUS.json',state);save('FINAL.json',state)
+                self.assertIsNone(strategy_headroom_progress(repo,9999))
+                save('AUDIT.json',dict(input_identity=ident,errors=[],cells=768,predictions=384))
+                result=dict(input_identity=ident,cells=768,end_to_end_advantage=False,holdout_opened=False,offline_selection_cost_excluded=True,oracle_space_pass=True,size_rule_pass=False,scales=dict(ALL={a:dict(cells=384,solved=100,par2_s=3.) for a in ('teacher','degree','oracle','crossfit','cross_repeat')}))
+                save('RESULTS.json',result);out=strategy_headroom_progress(repo,9999);self.assertTrue(out['audited']);self.assertFalse(out['learned_advantage'])
+                result['scales']['ALL']['teacher']['par2_s']=float('nan');save('RESULTS.json',result);self.assertIsNone(strategy_headroom_progress(repo,9999))
+
     def test_head_refit_receipts_stale_counts_and_no_promotion(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/head_refit_20260918_v1';root.mkdir(parents=True)
