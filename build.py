@@ -1683,12 +1683,17 @@ def literal_fullcost_progress(repo, now=None):
 
 def strategy_headroom_progress(repo, now=None):
     root=repo/'experiments/strategy_headroom_20260918_v1'
+    recovery=(repo/'experiments/strategy_headroom_20260918_v2/STATUS.json').exists()
+    if recovery:root=repo/'experiments/strategy_headroom_20260918_v2'
     try:
         state=json.loads((root/'STATUS.json').read_text());cfg=json.loads((root/'CONFIG.json').read_text());ident=json.loads((root/'FROZEN.json').read_text())['input_identity']
-        if state['input_identity']!=ident or ident.get('kind')!='bundle_digest' or ident.get('scope')!='strategy_headroom_inputs' or not re.fullmatch('[0-9a-f]{64}',ident.get('value','')):return None
+        scope='strategy_headroom_recovery_inputs' if recovery else 'strategy_headroom_inputs'
+        if state['input_identity']!=ident or ident.get('kind')!='bundle_digest' or ident.get('scope')!=scope or not re.fullmatch('[0-9a-f]{64}',ident.get('value','')):return None
+        scientific=cfg['base_identity'] if recovery else ident
+        if recovery and (state['base_identity']!=scientific or state['reused_cells']!=194 or state['new_target_cells']!=574 or len(cfg['reused'])!=97 or len(cfg['remaining'])!=287):return None
         if len(cfg['rows'])!=192 or cfg['cells']!=768 or cfg['predictions']!=384 or cfg['arms']!=['degree','teacher']:return None
         phase=state['phase'];stage=state['stage'];observed=state['observed_unix'];elapsed=state['elapsed_s'];end=state['window_end_unix']
-        if phase not in ('running','complete','failed') or stage not in ('starting','predict','reference','solve','audit') or end!=1789673400 or cfg['end_unix']!=end:return None
+        if phase not in ('running','waiting_resources','complete','failed') or stage not in ('starting','predict','reference','solve','audit') or end!=1789673400 or cfg['end_unix']!=end:return None
         if any(type(v) not in (int,float) or not math.isfinite(v) or v<0 for v in (observed,elapsed)):return None
         progress=state['progress'];completed=0;target=0
         if progress is not None:
@@ -1702,7 +1707,10 @@ def strategy_headroom_progress(repo, now=None):
                 receipts=state['receipts']
                 if state['cleanup']!={'errors':[],'unreaped':[]} or len(receipts)!=4 or {r['label'] for r in receipts}!={'predict','reference','solve','audit'} or any(r['returncode']!=0 for r in receipts):return None
                 audit=json.loads((root/'AUDIT.json').read_text());result=json.loads((root/'RESULTS.json').read_text())
-                if audit['input_identity']!=ident or audit['errors']!=[] or audit['cells']!=768 or audit['predictions']!=384 or result['input_identity']!=ident or result['cells']!=768 or result['end_to_end_advantage']is not False or result['holdout_opened']is not False or result['offline_selection_cost_excluded']is not True:return None
+                if audit['input_identity']!=scientific or audit['errors']!=[] or audit['cells']!=768 or audit['predictions']!=384 or result['input_identity']!=scientific or result['cells']!=768 or result['end_to_end_advantage']is not False or result['holdout_opened']is not False or result['offline_selection_cost_excluded']is not True:return None
+                if recovery:
+                    proof=json.loads((root/'RECOVERY_AUDIT.json').read_text())
+                    if proof['input_identity']!=ident or proof['base_identity']!=scientific or proof['errors']!=[] or proof['reused_cells']!=194 or proof['new_cells']!=574 or proof['result_sha256']!=hashlib.sha256((root/'RESULTS.json').read_bytes()).hexdigest() or proof['audit_sha256']!=hashlib.sha256((root/'AUDIT.json').read_bytes()).hexdigest():return None
                 allrows={}
                 for arm in ('degree','teacher','oracle','crossfit','cross_repeat'):
                     row=result['scales']['ALL'][arm]
@@ -1710,8 +1718,8 @@ def strategy_headroom_progress(repo, now=None):
                     allrows[arm]=dict(cells=384,solved=row['solved'],par2_s=row['par2_s'])
                 if type(result['oracle_space_pass'])is not bool or type(result['size_rule_pass'])is not bool:return None
                 summary=dict(scales_all=allrows,oracle_space_pass=result['oracle_space_pass'],size_rule_pass=result['size_rule_pass']);audited=True
-        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state,'owner48.py'):phase='stale'
-        return dict(phase=phase,stage=stage,completed=completed,target=target,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),elapsed_s=elapsed,audited=audited,summary=summary,target_cells=768,formulas=192,learned_advantage=False)
+        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state,'owner.py' if recovery else 'owner48.py'):phase='stale'
+        return dict(phase=phase,stage=stage,completed=completed,target=target,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),elapsed_s=elapsed,audited=audited,summary=summary,target_cells=768,formulas=192,learned_advantage=False,recovery=recovery,reused_cells=194 if recovery else 0,new_target_cells=574 if recovery else 768)
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
 
 

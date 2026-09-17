@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-17T19:04:33.864643+00:00",
+  "generated": "2026-09-17T19:19:44.196041+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -7702,7 +7702,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-18T02:20:52.121914+00:00",
+    "earliest_target_at": "2026-09-18T02:36:02.479258+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -8394,17 +8394,50 @@
     "learned_advantage": false
   },
   "strategy_headroom": {
-    "phase": "failed",
-    "stage": "solve",
-    "completed": 96,
-    "target": 384,
-    "observed": "2026-09-17T19:01:45.384449+00:00",
-    "elapsed_s": 255.17223866842687,
-    "audited": false,
-    "summary": null,
+    "phase": "complete",
+    "stage": "audit",
+    "completed": 0,
+    "target": 0,
+    "observed": "2026-09-17T19:15:35.134148+00:00",
+    "elapsed_s": 71.10485705174506,
+    "audited": true,
+    "summary": {
+      "scales_all": {
+        "degree": {
+          "cells": 384,
+          "solved": 179,
+          "par2_s": 3.3723271933195065
+        },
+        "teacher": {
+          "cells": 384,
+          "solved": 177,
+          "par2_s": 3.38898610676794
+        },
+        "oracle": {
+          "cells": 384,
+          "solved": 197,
+          "par2_s": 3.090957071794643
+        },
+        "crossfit": {
+          "cells": 384,
+          "solved": 186,
+          "par2_s": 3.25871693532099
+        },
+        "cross_repeat": {
+          "cells": 384,
+          "solved": 196,
+          "par2_s": 3.1016723497353573
+        }
+      },
+      "oracle_space_pass": false,
+      "size_rule_pass": true
+    },
     "target_cells": 768,
     "formulas": 192,
-    "learned_advantage": false
+    "learned_advantage": false,
+    "recovery": true,
+    "reused_cells": 194,
+    "new_target_cells": 574
   },
   "targeted": {
     "cells": 27648,

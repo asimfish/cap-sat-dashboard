@@ -10,6 +10,22 @@ from build import compact_distill_progress, boundary_screen_progress, coverage_s
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_strategy_recovery_requires_bound_reuse_audit(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/strategy_headroom_20260918_v2';root.mkdir(parents=True)
+            def save(name,value):(root/name).write_text(json.dumps(value))
+            base=dict(kind='bundle_digest',scope='strategy_headroom_inputs',value='a'*64)
+            ident=dict(kind='bundle_digest',scope='strategy_headroom_recovery_inputs',value='b'*64)
+            cfg=dict(rows=[{}]*192,cells=768,predictions=384,arms=['degree','teacher'],end_unix=1789673400,base_identity=base,reused=[{}]*97,remaining=[{}]*287)
+            state=dict(input_identity=ident,base_identity=base,phase='complete',stage='audit',observed_unix=1000.,elapsed_s=20.,window_end_unix=1789673400,progress=dict(stage='solve_blocks',completed=384,target=384),reused_cells=194,new_target_cells=574,cleanup=dict(errors=[],unreaped=[]),receipts=[dict(label=s,returncode=0) for s in ('predict','reference','solve','audit')])
+            save('CONFIG.json',cfg);save('FROZEN.json',dict(input_identity=ident));save('STATUS.json',state);save('FINAL.json',state)
+            save('AUDIT.json',dict(input_identity=base,errors=[],cells=768,predictions=384))
+            result=dict(input_identity=base,cells=768,end_to_end_advantage=False,holdout_opened=False,offline_selection_cost_excluded=True,oracle_space_pass=True,size_rule_pass=False,scales=dict(ALL={a:dict(cells=384,solved=100,par2_s=3.) for a in ('teacher','degree','oracle','crossfit','cross_repeat')}))
+            save('RESULTS.json',result);self.assertIsNone(strategy_headroom_progress(repo,1000))
+            proof=dict(input_identity=ident,base_identity=base,errors=[],reused_cells=194,new_cells=574,result_sha256=hashlib.sha256((root/'RESULTS.json').read_bytes()).hexdigest(),audit_sha256=hashlib.sha256((root/'AUDIT.json').read_bytes()).hexdigest())
+            save('RECOVERY_AUDIT.json',proof);value=strategy_headroom_progress(repo,1000);self.assertTrue(value['audited']);self.assertEqual(value['reused_cells'],194)
+            proof['new_cells']=575;save('RECOVERY_AUDIT.json',proof);self.assertIsNone(strategy_headroom_progress(repo,1000))
+
     def test_strategy_headroom_not_deployment_and_fail_closed(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/strategy_headroom_20260918_v1';root.mkdir(parents=True)
@@ -708,7 +724,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),48)
+        self.assertEqual(len(plan['actions']),49)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -729,7 +745,8 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('2016',actions['A44']['cost'])
         self.assertIn('3168',actions['A45']['cost'])
         self.assertIn('18432',actions['A46']['cost'])
-        self.assertIn('尚未冻结或运行',actions['A47']['status'])
+        self.assertIn('减半门全失败',actions['A47']['status'])
+        self.assertIn('768',actions['A48']['cost']+actions['A48']['status'])
         self.assertIn('98.64%',actions['A41']['stop'])
         self.assertIn('15120',actions['A42']['status'])
         self.assertIn('无family过98%',actions['A42']['stop'])

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-17T19:04:33.864643+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-17T19:19:44.196041+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -44,7 +44,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-17T19:04:33.864643+00:00",
+  "generated": "2026-09-17T19:19:44.196041+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -7747,7 +7747,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-18T02:20:52.121914+00:00",
+    "earliest_target_at": "2026-09-18T02:36:02.479258+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -8439,17 +8439,50 @@
     "learned_advantage": false
   },
   "strategy_headroom": {
-    "phase": "failed",
-    "stage": "solve",
-    "completed": 96,
-    "target": 384,
-    "observed": "2026-09-17T19:01:45.384449+00:00",
-    "elapsed_s": 255.17223866842687,
-    "audited": false,
-    "summary": null,
+    "phase": "complete",
+    "stage": "audit",
+    "completed": 0,
+    "target": 0,
+    "observed": "2026-09-17T19:15:35.134148+00:00",
+    "elapsed_s": 71.10485705174506,
+    "audited": true,
+    "summary": {
+      "scales_all": {
+        "degree": {
+          "cells": 384,
+          "solved": 179,
+          "par2_s": 3.3723271933195065
+        },
+        "teacher": {
+          "cells": 384,
+          "solved": 177,
+          "par2_s": 3.38898610676794
+        },
+        "oracle": {
+          "cells": 384,
+          "solved": 197,
+          "par2_s": 3.090957071794643
+        },
+        "crossfit": {
+          "cells": 384,
+          "solved": 186,
+          "par2_s": 3.25871693532099
+        },
+        "cross_repeat": {
+          "cells": 384,
+          "solved": 196,
+          "par2_s": 3.1016723497353573
+        }
+      },
+      "oracle_space_pass": false,
+      "size_rule_pass": true
+    },
     "target_cells": 768,
     "formulas": 192,
-    "learned_advantage": false
+    "learned_advantage": false,
+    "recovery": true,
+    "reused_cells": 194,
+    "new_target_cells": 574
   },
   "targeted": {
     "cells": 27648,
@@ -14145,11 +14178,11 @@ function renderStrategyHeadroom(){
  if(!u){target.textContent='A48 尚无通过身份检查的快照，计划不算运行。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
- const labels={running:'配对训练数据诊断执行中',complete:u.audited?'768 单元已完成并审计':'队列完成，等待审计',failed:'已停止，存在失败检查',stale:'快照已陈旧，当前状态待确认'};
+ const labels={running:'配对训练数据诊断执行中',waiting_resources:'资源保护等待，不计为求解',complete:u.audited?'768 单元已完成并审计':'队列完成，等待审计',failed:'已停止，存在失败检查',stale:'快照已陈旧，当前状态待确认'};
  const stages={starting:'准备',predict:'384次计费预测',reference:'192个独立参考',solve:'384个双策略配对块',audit:'原始记录审计'};
  const names={degree:'廉价度数',teacher:'固定教师',oracle:'事后按公式择优（不可部署）',crossfit:'按规模交叉拟合（离线重放）',cross_repeat:'跨计时重复择优（诊断）'};
  const table=u.summary?`<div class="table"><table><thead><tr><th>策略/诊断</th><th>PAR-2 秒</th><th>解出/计时单元</th></tr></thead><tbody>${Object.entries(names).map(([arm,label])=>{const row=u.summary.scales_all[arm];return `<tr><td>${label}</td><td>${row.par2_s.toFixed(4)}</td><td>${row.solved}/384</td></tr>`}).join('')}</tbody></table></div><p>互补空间 ≥10%：${u.summary.oracle_space_pass?'通过':'未过'}；规模规则 ≥3% 且逐规模无害：${u.summary.size_rule_pass?'通过':'未过'}。</p>`:'';
- target.innerHTML=`<b>${esc(labels[phase])}</b><p>${esc(stages[u.stage])}${u.target?`：${u.completed}/${u.target}`:''}。192 个 TRAIN 公式、48 生成流、两个计时重复；不是384个独立实例。每个真实策略计入预测、原生求解及答案核验费用。</p>${table}<p>选择策略均为离线诊断，选择器开销未计入；不代表部署收益、CAP学习增量或独立确认。事后择优只能说明这两种固定策略的互补空间。独立留出不打开。</p><a href="#action-A48">预注册、结果与停止条件 ↗</a>`;
+ target.innerHTML=`<b>${esc(labels[phase])}</b><p>${esc(stages[u.stage])}${u.target?`：${u.completed}/${u.target}`:''}。192 个 TRAIN 公式、48 生成流、两个计时重复；不是384个独立实例。每个真实策略计入预测、原生求解及答案核验费用。</p>${u.recovery?'<p>原队列资源保护停止，保留194个完整单元，仅恢复574个缺失单元。旧失败不覆盖，截止时间与门槛不延长；不同主机时段的记录不能当独立复现。</p>':''}${table}<p>选择策略均为离线诊断，选择器开销未计入；不代表部署收益、CAP学习增量或独立确认。事后择优只能说明这两种固定策略的互补空间。独立留出不打开。</p><a href="#action-A48">预注册、结果与停止条件 ↗</a>`;
 }
 function renderHeadRefit(){
  const u=data.head_refit,target=document.getElementById('head-refit-progress');

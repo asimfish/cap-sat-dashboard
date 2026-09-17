@@ -181,11 +181,11 @@ function renderStrategyHeadroom(){
  if(!u){target.textContent='A48 尚无通过身份检查的快照，计划不算运行。';return;}
  const age=(Date.now()-Date.parse(u.observed))/1000;
  const phase=!['complete','failed'].includes(u.phase)&&(age>120||age< -5)?'stale':u.phase;
- const labels={running:'配对训练数据诊断执行中',complete:u.audited?'768 单元已完成并审计':'队列完成，等待审计',failed:'已停止，存在失败检查',stale:'快照已陈旧，当前状态待确认'};
+ const labels={running:'配对训练数据诊断执行中',waiting_resources:'资源保护等待，不计为求解',complete:u.audited?'768 单元已完成并审计':'队列完成，等待审计',failed:'已停止，存在失败检查',stale:'快照已陈旧，当前状态待确认'};
  const stages={starting:'准备',predict:'384次计费预测',reference:'192个独立参考',solve:'384个双策略配对块',audit:'原始记录审计'};
  const names={degree:'廉价度数',teacher:'固定教师',oracle:'事后按公式择优（不可部署）',crossfit:'按规模交叉拟合（离线重放）',cross_repeat:'跨计时重复择优（诊断）'};
  const table=u.summary?`<div class="table"><table><thead><tr><th>策略/诊断</th><th>PAR-2 秒</th><th>解出/计时单元</th></tr></thead><tbody>${Object.entries(names).map(([arm,label])=>{const row=u.summary.scales_all[arm];return `<tr><td>${label}</td><td>${row.par2_s.toFixed(4)}</td><td>${row.solved}/384</td></tr>`}).join('')}</tbody></table></div><p>互补空间 ≥10%：${u.summary.oracle_space_pass?'通过':'未过'}；规模规则 ≥3% 且逐规模无害：${u.summary.size_rule_pass?'通过':'未过'}。</p>`:'';
- target.innerHTML=`<b>${esc(labels[phase])}</b><p>${esc(stages[u.stage])}${u.target?`：${u.completed}/${u.target}`:''}。192 个 TRAIN 公式、48 生成流、两个计时重复；不是384个独立实例。每个真实策略计入预测、原生求解及答案核验费用。</p>${table}<p>选择策略均为离线诊断，选择器开销未计入；不代表部署收益、CAP学习增量或独立确认。事后择优只能说明这两种固定策略的互补空间。独立留出不打开。</p><a href="#action-A48">预注册、结果与停止条件 ↗</a>`;
+ target.innerHTML=`<b>${esc(labels[phase])}</b><p>${esc(stages[u.stage])}${u.target?`：${u.completed}/${u.target}`:''}。192 个 TRAIN 公式、48 生成流、两个计时重复；不是384个独立实例。每个真实策略计入预测、原生求解及答案核验费用。</p>${u.recovery?'<p>原队列资源保护停止，保留194个完整单元，仅恢复574个缺失单元。旧失败不覆盖，截止时间与门槛不延长；不同主机时段的记录不能当独立复现。</p>':''}${table}<p>选择策略均为离线诊断，选择器开销未计入；不代表部署收益、CAP学习增量或独立确认。事后择优只能说明这两种固定策略的互补空间。独立留出不打开。</p><a href="#action-A48">预注册、结果与停止条件 ↗</a>`;
 }
 function renderHeadRefit(){
  const u=data.head_refit,target=document.getElementById('head-refit-progress');
