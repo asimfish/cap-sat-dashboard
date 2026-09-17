@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-17T14:48:38.789624+00:00",
+  "generated": "2026-09-17T15:01:01.889131+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -7615,7 +7615,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-17T22:04:56.975313+00:00",
+    "earliest_target_at": "2026-09-17T22:17:20.140107+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
@@ -7966,20 +7966,40 @@
     "prior_window_ended": true
   },
   "depth_screen": {
-    "phase": "running",
-    "observed": "2026-09-17T14:48:42.049476+00:00",
+    "phase": "complete",
+    "observed": "2026-09-17T14:54:47.863539+00:00",
     "window_end": "2026-09-17T16:40:00+00:00",
-    "elapsed_s": 245.1868463056162,
+    "elapsed_s": 611.000908466056,
     "training": [
       {
         "label": "d10_mixed_42",
-        "updates": 7488,
-        "phase": "training"
+        "updates": 9216,
+        "phase": "complete"
+      },
+      {
+        "label": "d10_mixed_43",
+        "updates": 9216,
+        "phase": "complete"
+      },
+      {
+        "label": "d10_mixed_44",
+        "updates": 9216,
+        "phase": "complete"
       },
       {
         "label": "d10_raw_42",
-        "updates": 8960,
-        "phase": "training"
+        "updates": 9216,
+        "phase": "complete"
+      },
+      {
+        "label": "d10_raw_43",
+        "updates": 9216,
+        "phase": "complete"
+      },
+      {
+        "label": "d10_raw_44",
+        "updates": 9216,
+        "phase": "complete"
       },
       {
         "label": "d6_mixed_42",
@@ -7992,6 +8012,11 @@
         "phase": "complete"
       },
       {
+        "label": "d6_mixed_44",
+        "updates": 9216,
+        "phase": "complete"
+      },
+      {
         "label": "d6_raw_42",
         "updates": 9216,
         "phase": "complete"
@@ -8000,13 +8025,18 @@
         "label": "d6_raw_43",
         "updates": 9216,
         "phase": "complete"
+      },
+      {
+        "label": "d6_raw_44",
+        "updates": 9216,
+        "phase": "complete"
       }
     ],
-    "completed_updates": 53312,
+    "completed_updates": 110592,
     "target_updates": 110592,
-    "completed_lanes": 4,
+    "completed_lanes": 12,
     "target_lanes": 12,
-    "audited": false,
+    "audited": true,
     "solver_cells": 0,
     "learned_advantage": false,
     "performance_verdict": "reused_validation_only"
