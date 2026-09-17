@@ -1681,6 +1681,39 @@ def literal_fullcost_progress(repo, now=None):
     except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
 
 
+def weight_precision_progress(repo, now=None):
+    root=repo/'experiments/weight_precision_20260918_v1'
+    try:
+        state=json.loads((root/'STATUS.json').read_text());cfg=json.loads((root/'CONFIG.json').read_text());ident=json.loads((root/'FROZEN.json').read_text())['input_identity']
+        if state['input_identity']!=ident or ident.get('kind')!='bundle_digest' or ident.get('scope')!='weight_precision_inputs' or not re.fullmatch('[0-9a-f]{64}',ident.get('value','')):return None
+        labels={f'{p}_{s}' for p in ('original','balanced') for s in (42,43,44)}
+        if len(cfg['lanes'])!=6 or {l['label'] for l in cfg['lanes']}!=labels or cfg['steps']!=3072 or cfg['total_updates']!=18432:return None
+        phase=state['phase'];observed=state['observed_unix'];elapsed=state['elapsed_s'];end=state['window_end_unix']
+        if phase not in ('running','waiting_resources','complete','failed') or end!=1789665600 or cfg['end_unix']!=end:return None
+        if any(type(x) not in (int,float) or not math.isfinite(x) or x<0 for x in (observed,elapsed)):return None
+        lanes=[];seen=set()
+        for r in state['training']:
+            label=r['label'];steps=r['updates'];lp=r['phase']
+            if label not in labels or label in seen or type(steps)is not int or not 0<=steps<=3072 or steps%64 or r['target_updates']!=3072 or lp not in ('training','complete'):return None
+            if lp=='complete' and steps!=3072:return None
+            seen.add(label);lanes.append(dict(label=label,updates=steps,phase=lp))
+        count=sum(r['updates'] for r in lanes)
+        if state['completed_updates']!=count or state['target_updates']!=18432:return None
+        audited=False
+        if phase in ('complete','failed'):
+            if state!=json.loads((root/'FINAL.json').read_text()):return None
+            if phase=='complete':
+                receipts=state['receipts']
+                if count!=18432 or seen!=labels or state['cleanup']!={'errors':[],'unreaped':[]} or len(receipts)!=6 or {r['label'] for r in receipts}!=labels or any(r['returncode']!=0 for r in receipts):return None
+                if (root/'AUDIT.json').exists():
+                    audit=json.loads((root/'AUDIT.json').read_text());audited=audit['input_identity']==ident and audit['errors']==[] and audit['updates']==18432 and audit['records']==14256
+        elif not -5<=(now if now is not None else dt.datetime.now(dt.timezone.utc).timestamp())-observed<=120 or not joint_supervisor_alive(repo,root,state,'owner.py'):phase='stale'
+        return dict(phase=phase,observed=dt.datetime.fromtimestamp(observed,dt.timezone.utc).isoformat(),window_end=dt.datetime.fromtimestamp(end,dt.timezone.utc).isoformat(),elapsed_s=elapsed,
+            training=sorted(lanes,key=lambda r:r['label']),completed_updates=count,target_updates=18432,completed_lanes=sum(r['phase']=='complete' for r in lanes),target_lanes=6,audited=audited,
+            solver_cells=0,learned_advantage=False,performance_verdict='reused_validation_only')
+    except (OSError,ValueError,KeyError,TypeError,AttributeError,OverflowError):return None
+
+
 def depth_screen_progress(repo, now=None):
     root=repo/'experiments/depth_literal_20260917_v1'
     try:
@@ -1824,6 +1857,7 @@ def main():
     data['night_recovery']=night_recovery_progress(args.repo.resolve())
     data['depth_screen']=depth_screen_progress(args.repo.resolve())
     data['literal_fullcost']=literal_fullcost_progress(args.repo.resolve())
+    data['weight_precision']=weight_precision_progress(args.repo.resolve())
     data['targeted']=targeted_progress(args.repo.resolve())
     data['exact_search']=exact_search_progress(args.repo.resolve())
     data['confirmation']=confirmation_progress(args.repo.resolve())

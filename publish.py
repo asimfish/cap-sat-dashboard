@@ -49,6 +49,7 @@ def main():
         unchanged = unchanged and old.get('night_recovery') == current.get('night_recovery')
         unchanged = unchanged and old.get('depth_screen') == current.get('depth_screen')
         unchanged = unchanged and old.get('literal_fullcost') == current.get('literal_fullcost')
+        unchanged = unchanged and old.get('weight_precision') == current.get('weight_precision')
         unchanged = unchanged and old.get('targeted') == current.get('targeted')
         unchanged = unchanged and old.get('exact_search') == current.get('exact_search')
         unchanged = unchanged and old.get('confirmation') == current.get('confirmation')

@@ -37,7 +37,16 @@ code-path review, not independent historical input-receipt replay. A45 separatel
 captures these receipts while diagnosing phase versus weight errors on ALL144
 now-exposed development formulas:3168solver-only oracle-factorial cells. Equal
 zero prediction charge isolates actions; it is NOT a deployable speedup benchmark.
-Held-out144 remain sealed. Bounded end2026-09-17T16:40:00Z, no paper rewrite.
+Held-out144 remain sealed. A45 completed3168cells with actual-send hashes: oracle
+weight repair restores97.714/99.725/89.624% of the three students' excess search
+cost; phase repair restores essentially nothing. All weight-attribution gates
+pass, all phase gates fail; prediction cost excluded, not deployable speedup.
+Prior16:40UTC window ended with all A40–A45 complete. Following the user's new
+continue request, A46 is separately frozen: six paired continuations/18432steps,
+original versus train-only scale-balanced weight MSE (coefficient53.8409449).
+Same source weights/data/schedule, fixed final3072, six sharedGPUs, no teacher at
+deployment. New bounded end17:20UTC (Sep18 01:20Beijing), not an old-window extension.
+See weight-precision panel; no solver or independent-confirmation claim.
 New stages are not retroactively counted as the original eight-hour window.
 A41 retained-output diagnosis:98.64–99.55% of literal errors are near-zero;
 three-seed voting only+.2365/+.3783points, no full-cost inference. A42 fits one

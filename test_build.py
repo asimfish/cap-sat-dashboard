@@ -6,10 +6,26 @@ import tempfile
 import unittest
 from build import stability_progress, overnight_progress, targeted_progress, exact_search_progress, confirmation_progress, recognition_repair_progress, prefix_campaign_progress, joint_feedback_progress, local_feedback_progress
 from unittest.mock import patch
-from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress, recovery_v3_progress, depth_screen_progress, literal_fullcost_progress
+from build import compact_distill_progress, boundary_screen_progress, coverage_screen_progress, night_recovery_progress, recovery_v3_progress, depth_screen_progress, literal_fullcost_progress, weight_precision_progress
 from build import read_run, interval, native_progress, verify_terminal, comparison_progress, comparison_audit, load_performance_plan, pilot_progress, PILOT_ARMS, hybrid_progress, HYBRID_ARMS, utility_progress, conservative_progress, shared_gpu_progress, structured_progress, resident_progress, decoder_utility_progress
 
 class CollectorTests(unittest.TestCase):
+    def test_weight_precision_no_premature_promotion_or_private_fields(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo=Path(d);root=repo/'experiments/weight_precision_20260918_v1';root.mkdir(parents=True)
+            def save(name,value):(root/name).write_text(json.dumps(value))
+            labels=[f'{a}_{s}' for a in ('original','balanced') for s in (42,43,44)];ident=dict(kind='bundle_digest',scope='weight_precision_inputs',value='d'*64)
+            cfg=dict(lanes=[dict(label=l) for l in labels],steps=3072,total_updates=18432,end_unix=1789665600)
+            state=dict(input_identity=ident,phase='running',observed_unix=1000.,elapsed_s=20.,window_end_unix=1789665600,training=[],completed_updates=0,target_updates=18432,supervisor=dict(private='/home/PRIVATE'))
+            save('CONFIG.json',cfg);save('FROZEN.json',dict(input_identity=ident));save('STATUS.json',state)
+            with patch('build.joint_supervisor_alive',return_value=True):
+                out=weight_precision_progress(repo,1000);self.assertEqual(out['target_updates'],18432);self.assertFalse(out['audited']);self.assertNotIn('PRIVATE',json.dumps(out))
+                self.assertEqual(weight_precision_progress(repo,1121)['phase'],'stale')
+                state.update(phase='complete',completed_updates=18432,training=[dict(label=l,updates=3072,target_updates=3072,phase='complete') for l in labels],receipts=[dict(label=l,returncode=0) for l in labels],cleanup=dict(errors=[],unreaped=[]));save('STATUS.json',state);save('FINAL.json',state)
+                self.assertFalse(weight_precision_progress(repo,9999)['audited'])
+                save('AUDIT.json',dict(input_identity=ident,errors=[],updates=18432,records=14256));self.assertTrue(weight_precision_progress(repo,9999)['audited'])
+                state['completed_updates']=18431;save('STATUS.json',state);self.assertIsNone(weight_precision_progress(repo,9999))
+
     def test_literal_fullcost_counts_terminal_stale_and_privacy(self):
         with tempfile.TemporaryDirectory() as d:
             repo=Path(d);root=repo/'experiments/literal_fullcost_20260917_v1';root.mkdir(parents=True)
@@ -656,7 +672,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),46)
+        self.assertEqual(len(plan['actions']),47)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -676,6 +692,7 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('432',actions['A43']['status'])
         self.assertIn('2016',actions['A44']['cost'])
         self.assertIn('3168',actions['A45']['cost'])
+        self.assertIn('18432',actions['A46']['cost'])
         self.assertIn('98.64%',actions['A41']['stop'])
         self.assertIn('15120',actions['A42']['status'])
         self.assertIn('无family过98%',actions['A42']['stop'])
