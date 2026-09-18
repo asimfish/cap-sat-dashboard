@@ -92,6 +92,16 @@ It triggered 58/64 fallbacks and scored 5.140556s PAR-2 / 11 solves versus 4.944
 5.557305/3 vs 5.381515/4). The online fallback is about 3.98% slower, so the route is
 stopped. An independent audit matched all 122 actual payload hashes across 64 cells;
 there is no holdout or independent confirmation, and no end-to-end advantage claim.
+A52 then ran the owner-approved independent confirmation of the A48 n-only size rule
+(n=200 teacher, n=300 degree, n=350 teacher) on 384 fresh TRAIN formulas from streams
+24–55, with the header-only selection charged (about 5 µs) and all three arms executed
+as real cells: 768 new predictions, 384 references and 2,304 audited cells. Degree scored
+3.297486s PAR-2 / 369 solves, teacher 3.202948s / 385 and the rule 3.325047s / 364, i.e.
+3.81% slower than the best fixed policy and 0.84% slower than degree, failing the overall
+gate and every per-scale no-harm gate. The hard-scale winner flips between stream-disjoint
+slices (A48: degree at n=300, teacher at n=350; A49: degree at n=350; A52: teacher at
+n=300 with 89 vs 68 solves, degree at n=350), so the size-rule family is closed on three
+samples. No holdout was opened and no end-to-end or independent-confirmation claim follows.
 A41 retained-output diagnosis:98.64–99.55% of literal errors are near-zero;
 three-seed voting only+.2365/+.3783points, no full-cost inference. A42 fits one
 phase threshold per model on training ONLY:raw seeds improve+.7932/+.2870/+.1412
