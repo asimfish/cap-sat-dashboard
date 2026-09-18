@@ -74,6 +74,16 @@ excluded, this is not an end-to-end deployment or CAP advantage;
 `may_propose_scale_route=false`. Stop classifier expansion, keep the positive
 signal as a hypothesis, and keep the holdout sealed. New stages are not
 retroactively counted as the original eight-hour window.
+
+A49 then tested a different mechanism on 96 new TRAIN formulas from streams
+16–23: keep minimum-degree phases and replace only the top 10% weight
+disagreements with the geometric teacher/degree midpoint. The 576-cell
+degree/teacher/sparse-blend full-cost pilot was fully audited. Degree scored
+3.341495s PAR-2 and 90 solves; teacher 3.504405s/84; sparse blend
+3.403518s/88, i.e. 1.856% slower than degree and two fewer n=300 solves.
+Transform/serialization was only about 2.35–3.91ms median by scale, so the
+failure is not just blend arithmetic overhead. Static rank-blend expansion is
+stopped; the next frontier, if authorized, must change solver interaction.
 A41 retained-output diagnosis:98.64–99.55% of literal errors are near-zero;
 three-seed voting only+.2365/+.3783points, no full-cost inference. A42 fits one
 phase threshold per model on training ONLY:raw seeds improve+.7932/+.2870/+.1412
