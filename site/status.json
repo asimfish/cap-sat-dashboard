@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-18T14:52:07.126686+00:00",
+  "generated": "2026-09-18T15:07:27.679052+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -7702,7 +7702,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-18T22:08:25.410575+00:00",
+    "earliest_target_at": "2026-09-18T22:23:45.867114+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {
