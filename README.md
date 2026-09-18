@@ -84,6 +84,14 @@ degree/teacher/sparse-blend full-cost pilot was fully audited. Degree scored
 Transform/serialization was only about 2.35–3.91ms median by scale, so the
 failure is not just blend arithmetic overhead. Static rank-blend expansion is
 stopped; the next frontier, if authorized, must change solver interaction.
+A50 then tested that bounded online interaction on the same 64 hard-scale development
+formulas: run degree for 0.5s, restart with the cached teacher action for the remaining
+2.5s after a timeout, and charge both attempts plus prediction/serialization/SAT costs.
+It triggered 58/64 fallbacks and scored 5.140556s PAR-2 / 11 solves versus 4.944009s /
+13 for the same-formula degree control (n=300: 4.723807/8 vs 4.506502/9; n=350:
+5.557305/3 vs 5.381515/4). The online fallback is about 3.98% slower, so the route is
+stopped. An independent audit matched all 122 actual payload hashes across 64 cells;
+there is no holdout or independent confirmation, and no end-to-end advantage claim.
 A41 retained-output diagnosis:98.64–99.55% of literal errors are near-zero;
 three-seed voting only+.2365/+.3783points, no full-cost inference. A42 fits one
 phase threshold per model on training ONLY:raw seeds improve+.7932/+.2870/+.1412

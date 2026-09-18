@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-18T17:41:50.871506+00:00">
+<meta name="source" content="E17/E19 n350 solve_row records"><meta name="source-sha256" content="421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7"><meta name="generated" content="2026-09-18T17:53:15.058795+00:00">
 <style>html,body{overflow-x:hidden}</style>
 <title>CAP-SAT · Rebuttal 进度</title>
 <style>
@@ -44,7 +44,7 @@
 <section id="stability"><h2>E37 · 四组对照：找到通过稳定性验证门的候选</h2><p class="alert">成对收益小网络通过所选验证的三个种子、四个规模门槛。不是独立确认、SAT求解覆盖或完整成本加速，原生开发结果见下方 E38。</p><p class="muted">1,024 新训练图 +256 新验证图；原损失/成对损失 × 小网络/图消息传递网络，四组各三个种子、每次600步。全部12次训练保留，不挑最好种子，也不把更高总体成绩覆盖小规模退化。</p><div class="toolbar"><label for="stability-scale">E37 验证图顶点规模</label><select id="stability-scale"><option value="ALL">全部规模</option><option>24</option><option>32</option><option>48</option><option>64</option></select><a href="#action-A14">E37 设计与门槛 ↗</a><a href="#action-A15">原生部署下一步 ↗</a></div><div id="stability-progress"></div></section>
 <section id="native-first"><h2>E38 · 原生部署与完整成本：模型未净胜廉价对照</h2><p class="alert">E37 模型的原生特征、前向和完成计算中位数降低 99.53%，但 128 个全新图的冷启动与驻留完整成本学习门均未通过。廉价多首步策略更快，却在 n24 有退化。</p><div id="native-first-progress"></div></section>
 </main></div><script id="snapshot" type="application/json">{
-  "generated": "2026-09-18T17:41:50.871506+00:00",
+  "generated": "2026-09-18T17:53:15.058795+00:00",
   "source_sha256": "421e0c105c51962540886fd67a4ad96875b35a15f44041173199c8ba82b61fa7",
   "source": "E17/E19 n350 solve_row records",
   "runs": [
@@ -3928,9 +3928,23 @@
         "method": "冻结 degree phase；按 |log teacher weight−log degree weight| 取 top ceil(0.1n)，只替换这些权重的几何中点，平局按变量编号。使用 A48 未用的 TRAIN 流 16–23；实际发送 payload 哈希、三秒 PAR-2、完整 SAT/UNSAT 检查和预测/序列化费用均保留。无 holdout、无事后选择。",
         "gate": "稀疏纠偏整体必须至少比 degree 快 3%，各规模 PAR-2 不增、解出数不降，且变换费用低于教师预测费用；否则停止同一静态 rank-blend 家族。该切片仍是开发机制证据，不是独立确认。",
         "stop": "度数 3.341495s/90 解，教师 3.504405s/84 解，稀疏纠偏 3.403518s/88 解（各 192 单元）。相对最佳度数反而慢 1.856%，n200 为 0.156935s/64 对度数 0.137247s/64，n300 为 4.652342s/16 对 4.506495s/18，n350 为 5.401277s/8 对 5.380742s/8；全 576 实际发送哈希和 SAT 检查无误。预检显示变换/序列化约 2.35–3.91ms、中位数低于教师约 23ms 预测费，因此失败不是简单算术开销；停止静态权重插值，不开留出、不改论文、不称端到端优势。下一条可行路线必须改变求解器交互（有界在线回退/重启），而不是继续插值同一组权重。"
+      },
+      {
+        "id": "A50",
+        "title": "受限在线度数→教师回退",
+        "priority": "新机制 · 完成，回退门失败",
+        "status": "64 个硬规模开发单元审计通过；58 次回退、122 个实际 payload 哈希；在线回退较度数变慢",
+        "cost": "A49 同一 64 个 n=300/350 开发公式、一次重复；首段 0.5s 度数，超时后剩余 2.5s 教师，实际重启、预测、序列化、求解和 SAT 检查均计费。教师预测复用 A49，不是新教师确认。",
+        "depends_on": [
+          "A49"
+        ],
+        "hypothesis": "用运行时进度先尝试廉价度数，只有超时才支付教师动作和重启成本，可能在不牺牲长尾的情况下取得端到端收益。",
+        "method": "冻结 A49 的 64 个 n=300/350 TRAIN 公式；固定首段 0.5s 度数，未完成即重启教师并计入剩余 2.5s。保存两次实际发送 payload 哈希、输入 identity、退出状态和完整 SAT/UNSAT 检查；不打开 holdout。",
+        "gate": "相对同公式度数至少快 3%，且 n=300/n=350 均不增 PAR-2、解出数不降；否则停止重启式在线回退，不把开发复用结果写成独立确认。",
+        "stop": "A50 PAR-2 5.140556s/11 解，对照度数 4.944009s/13 解，慢约 3.98% 且少 2 解；n300 为 4.723807/8 对 4.506502/9，n350 为 5.557305/3 对 5.381515/4。58/64 单元触发回退；独立审计 64 个唯一单元、122 个 payload、输入 identity 和状态一致性均无误，但 gate_pass=false、end_to_end_advantage=false、independently_confirmed=false。停止在线回退家族，任何后续路线必须改变求解器交互并新冻开发协议。"
       }
     ],
-    "sha256": "5c8c925d6c016b44c9723a686f8bbf3b02455e9dd9143f31a84941abca55d1cf"
+    "sha256": "9b89ff5a54a0ff193f104166ae54fd6a2f8b3352203e4209ce2004e0935dde48"
   },
   "pilot": {
     "id": "E26",
@@ -7762,7 +7776,7 @@
     "frozen_sha256": "fef41532de616eedc4f9f7efaf7fe78b986aeb822cc83d02785f6a00460aba2f",
     "duration_target_met": false,
     "heartbeat_fresh_at_build": false,
-    "earliest_target_at": "2026-09-19T00:58:09.047584+00:00",
+    "earliest_target_at": "2026-09-19T01:09:33.202471+00:00",
     "scope": "探索实验吞吐与运行时长；不表示学习策略或端到端优势已成立"
   },
   "prefix_campaign": {

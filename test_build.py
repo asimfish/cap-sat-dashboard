@@ -724,7 +724,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),50)
+        self.assertEqual(len(plan['actions']),51)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -750,6 +750,9 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('576',actions['A49']['cost']+actions['A49']['status'])
         self.assertIn('1.856%',actions['A49']['stop'])
         self.assertIn('停止静态权重插值',actions['A49']['stop'])
+        self.assertIn('122',actions['A50']['cost']+actions['A50']['status'])
+        self.assertIn('3.98%',actions['A50']['stop'])
+        self.assertIn('停止在线回退家族',actions['A50']['stop'])
         self.assertIn('98.64%',actions['A41']['stop'])
         self.assertIn('15120',actions['A42']['status'])
         self.assertIn('无family过98%',actions['A42']['stop'])
