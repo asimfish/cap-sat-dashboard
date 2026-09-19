@@ -724,7 +724,7 @@ class CollectorTests(unittest.TestCase):
     def test_performance_plan_coverage_and_no_false_running(self):
         plan=load_performance_plan()
         self.assertEqual(len(plan['gaps']),7)
-        self.assertEqual(len(plan['actions']),54)
+        self.assertEqual(len(plan['actions']),55)
         self.assertEqual(sum(g['state']=='部分改善' for g in plan['gaps']),4)
         self.assertEqual(sum(g['state']=='未解决' for g in plan['gaps']),3)
         actions={a['id']:a for a in plan['actions']}
@@ -772,6 +772,9 @@ class CollectorTests(unittest.TestCase):
         self.assertIn('−126.6 [−154.8, −99.9]',actions['A53']['stop'])
         self.assertIn('−0.8 [−8.0, +6.6]',actions['A53']['stop'])
         self.assertIn('接口效应而非学习先验',plan['scope'])
+        self.assertIn('202609200000',actions['A54']['status'])
+        self.assertEqual(actions['A54']['depends_on'],['A53'])
+        self.assertIn('C-force-pol-nl',actions['A54']['gate'])
         self.assertIn('98.64%',actions['A41']['stop'])
         self.assertIn('15120',actions['A42']['status'])
         self.assertIn('无family过98%',actions['A42']['stop'])
